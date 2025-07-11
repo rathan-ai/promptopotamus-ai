@@ -7,13 +7,20 @@ const navItems = [
     { href: '#introduction', label: 'Introduction' },
     { href: '#basic-techniques', label: 'Basic Techniques' },
     { href: '#advanced-techniques', label: 'Advanced Techniques' },
+    { href: '#prompt-recipes', label: 'Prompt Recipes' },
   ]},
   { title: 'Advanced Topics', links: [
-    { href: '#exploring-models', label: 'Exploring Models' },
+    { href: '#visual-prompting', label: 'Visual Prompting' },
+  ]},
+  { title: 'Industry Guides', links: [
+    { href: '#industry-education', label: 'Education' },
+    { href: '#industry-engineering', label: 'Engineering' },
+    { href: '#industry-finance', label: 'Finance & Stock Market' },
   ]},
   { title: 'Best Practices', links: [
       { href: '#best-practices', label: 'Best Practices' },
       { href: '#further-reading', label: 'Further Reading' },
+      { href: '#risks-caution', label: 'Risks & Caution' },
   ]},
 ];
 
