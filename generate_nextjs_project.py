@@ -164,9 +164,8 @@ def create_page_and_components():
         import Introduction from '../components/Introduction';
         import BasicTechniques from '../components/BasicTechniques';
         import AdvancedTechniques from '../components/AdvancedTechniques';
-        import IndustryGuides from '../components/IndustryGuides';
+        import ExploringModels from '../components/ExploringModels';
         import BestPractices from '../components/BestPractices';
-        import RisksCaution from '../components/RisksCaution';
         import FurtherReading from '../components/FurtherReading';
 
         export default function HomePage() {
@@ -182,11 +181,9 @@ def create_page_and_components():
               <hr className="my-12 border-t-2 border-gray-200 dark:border-gray-700" />
               <AdvancedTechniques />
               <hr className="my-12 border-t-2 border-gray-200 dark:border-gray-700" />
-              <IndustryGuides />
+              <ExploringModels />
               <hr className="my-12 border-t-2 border-gray-200 dark:border-gray-700" />
               <BestPractices />
-              <hr className="my-12 border-t-2 border-gray-200 dark:border-gray-700" />
-              <RisksCaution />
               <hr className="my-12 border-t-2 border-gray-200 dark:border-gray-700" />
               <FurtherReading />
                <footer className="text-center text-gray-500 dark:text-gray-400 text-sm mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
@@ -204,9 +201,8 @@ def create_page_and_components():
         "Introduction": { "id": "introduction", "title": "Introduction", "content": """<p className="text-gray-700 dark:text-gray-300 mb-4">A prompt is the input you provide to a Large Language Model (LLM) to get a specific output. Crafting an effective prompt involves model choice, wording, structure, and context—it’s a creative and iterative process.</p><blockquote className="border-l-4 border-primary-500 dark:border-indigo-400 pl-4 italic text-gray-600 dark:text-gray-400">Prompt engineering is the process of designing high-quality prompts that guide LLMs to produce accurate and relevant outputs.</blockquote>""" },
         "BasicTechniques": { "id": "basic-techniques", "title": "Basic Prompting Techniques", "content": """<div className="grid md:grid-cols-2 gap-6"><article className="p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow"><h4 className="font-medium mb-2">Zero-Shot Prompting</h4><p className="text-gray-600 dark:text-gray-400 mb-4">The simplest prompt type: description only, no examples.</p><pre className="bg-white dark:bg-gray-800 p-4 rounded overflow-x-auto text-sm"><code>Classify the following movie review as POSITIVE, NEUTRAL, or NEGATIVE.\\n\\nReview: "Her" is a disturbing masterpiece. I wish there were more movies like this.\\nSentiment:</code></pre></article><article className="p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow"><h4 className="font-medium mb-2">One-Shot & Few-Shot Prompting</h4><p className="text-gray-600 dark:text-gray-400 mb-4">Provide one (one-shot) or multiple (few-shot) examples to teach the model a pattern.</p><pre className="bg-white dark:bg-gray-800 p-4 rounded overflow-x-auto text-sm"><code>Parse the pizza order into JSON.\\n\\nEXAMPLE:\\nI want a small pizza with cheese and pepperoni.\\nJSON: {"size": "small", "ingredients": ["cheese", "pepperoni"]}\\n\\nNow, I would like a medium pizza with mushrooms.\\nJSON:</code></pre></article></div>""" },
         "AdvancedTechniques": { "id": "advanced-techniques", "title": "Advanced Prompting Techniques", "content": """<article className="p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow"><h4 className="font-medium mb-2">Chain-of-Thought (CoT) Prompting</h4><p className="text-gray-600 dark:text-gray-400 mb-4">Encourage the model to think step-by-step for complex reasoning tasks.</p><pre className="bg-white dark:bg-gray-800 p-4 rounded overflow-x-auto text-sm"><code>When I was 3 years old, my partner was 3 times my age. Now, I am 20 years old. How old is my partner? Let's think step by step.</code></pre></article>""" },
-        "IndustryGuides": { "id": "industry-guides", "title": "Industry-Specific Guides", "content": """<div id="industry-education"><h3 className="text-2xl font-semibold mb-6">Education</h3><article className="p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow mb-4"><h4 className="font-medium mb-2">Simple: Create a Quiz</h4><pre className="bg-white dark:bg-gray-800 p-4 rounded overflow-x-auto text-sm"><code>Create a 5-question multiple-choice quiz about the water cycle for a 5th-grade science class. Include an answer key.</code></pre></article></div><div id="industry-engineering" className="mt-8"><h3 className="text-2xl font-semibold mb-6">Engineering</h3><article className="p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow mb-4"><h4 className="font-medium mb-2">Simple: Explain a Technical Concept</h4><pre className="bg-white dark:bg-gray-800 p-4 rounded overflow-x-auto text-sm"><code>Explain the concept of 'technical debt' to a non-technical project manager using a home maintenance analogy.</code></pre></article></div><div id="industry-finance" className="mt-8"><h3 className="text-2xl font-semibold mb-6">Finance & Stock Market</h3><p className="text-red-600 dark:text-red-400 mb-4 text-sm">Disclaimer: AI-generated content is informational and not financial advice.</p><article className="p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow mb-4"><h4 className="font-medium mb-2">Simple: Summarize Market News</h4><pre className="bg-white dark:bg-gray-800 p-4 rounded overflow-x-auto text-sm"><code>Summarize key financial news and analyst ratings for Apple (AAPL) over the past week in three bullet points, focusing on product announcements and earnings.</code></pre></article></div>""" },
+        "ExploringModels": { "id": "exploring-models", "title": "Exploring Different Models", "content": """<p className="text-lg text-gray-600 dark:text-gray-300 mb-6">While this guide focuses on Gemini, the world of AI is vast. Platforms like Hugging Face and open-source models like Llama offer exciting alternatives.</p><div className="space-y-6"><div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow"><h4 className="font-medium mb-2">Hugging Face</h4><p className="text-gray-600 dark:text-gray-400 mb-4">Hugging Face is a community hub where you can find, test, and use thousands of pre-trained models for various tasks. It's a great place to explore the latest advancements in AI.</p></div><div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-xl shadow"><h4 className="font-medium mb-2">Llama</h4><p className="text-gray-600 dark:text-gray-400 mb-4">Llama is a family of powerful, open-source large language models released by Meta. Because they are open-source, developers can download and run them on their own hardware, allowing for more customization and control.</p><pre className="bg-white dark:bg-gray-800 p-4 rounded overflow-x-auto text-sm"><code>I want you to act as a Llama 3 model. Briefly describe your key features.</code></pre></div></div>""" },
         "BestPractices": { "id": "best-practices", "title": "Best Practices", "content": """<ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300"><li><strong>Provide Examples:</strong> Use few-shot prompts to guide formatting.</li><li><strong>Design with Simplicity:</strong> Keep prompts clear and concise.</li><li><strong>Be Specific About the Output:</strong> Define structure and style.</li><li><strong>Use Instructions over Constraints:</strong> Tell the model what to do.</li><li><strong>Experiment:</strong> Vary wording, order, and examples.</li><li><strong>Document Your Attempts:</strong> Track results for iterative improvement.</li></ul>""" },
-        "RisksCaution": { "id": "risks-caution", "title": "Risks & Caution", "content": """<p className="text-gray-700 dark:text-gray-300 mb-4">Be mindful of common pitfalls:</p><ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300"><li><strong>Ambiguity Risk:</strong> Vague prompts yield irrelevant outputs. Be specific.</li><li><strong>Bias Caution:</strong> Avoid language that reinforces stereotypes.</li><li><strong>Overfitting Concern:</strong> Too many examples can rigidify responses.</li><li><strong>Privacy Risk:</strong> Never include sensitive data.</li><li><strong>Misinterpretation:</strong> Models may misunderstand—test thoroughly.</li></ul>""" },
         "FurtherReading": { "id": "further-reading", "title": "Further Reading & Sources", "content": """<p className="text-lg text-gray-600 dark:text-gray-300 mb-6">This guide was built upon the work of many researchers and practitioners. For a deeper dive, we recommend exploring the original sources.</p><ul className="list-disc list-inside space-y-3 text-gray-700 dark:text-gray-300"><li><a href="https://cloud.google.com/vertex-ai/docs/generative-ai/learn/prompts/introduction-prompt-design" target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-indigo-400 hover:underline">Google Cloud - Introduction to Prompting</a></li><li><a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-indigo-400 hover:underline">Chain-of-Thought Prompting Elicits Reasoning in Large Language Models</a></li></ul>""" }
     }
     
@@ -218,11 +214,11 @@ def create_page_and_components():
 import React from 'react';
 
 export default function {name}() {{
-  const contentHtml = `{js_safe_content}`.replace(/\\\\n/g, '<br />');
+  const contentHtml = `{js_safe_content}`;
   return (
     <section id="{data['id']}" className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
       <h2 className="text-3xl font-semibold mb-6">{data['title']}</h2>
-      <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{{{ __html: contentHtml }}}} />
+      <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{{{ __html: contentHtml.replace(/\\\\n/g, '<br />') }}}} />
     </section>
   );
 }}
@@ -244,15 +240,12 @@ export default function {name}() {{
                 { href: '#basic-techniques', label: 'Basic Techniques' },
                 { href: '#advanced-techniques', label: 'Advanced Techniques' },
               ]},
-              { title: 'Industry Guides', links: [
-                { href: '#industry-education', label: 'Education' },
-                { href: '#industry-engineering', label: 'Engineering' },
-                { href: '#industry-finance', label: 'Finance & Stock Market' },
+              { title: 'Advanced Topics', links: [
+                { href: '#exploring-models', label: 'Exploring Models' },
               ]},
               { title: 'Best Practices', links: [
                   { href: '#best-practices', label: 'Best Practices' },
                   { href: '#further-reading', label: 'Further Reading' },
-                  { href: '#risks-caution', label: 'Risks & Caution' },
               ]},
             ];
 
@@ -296,6 +289,8 @@ export default function {name}() {{
         "components/PromptBuilder.tsx": """
             'use client';
             import { useState } from 'react';
+
+            const Loader = () => <span className="loader"></span>;
 
             export default function PromptBuilder() {
                 const [generatedPrompt, setGeneratedPrompt] = useState('');
@@ -349,7 +344,7 @@ export default function {name}() {{
                             </div>
                             <div className="md:col-span-2 flex justify-end">
                                 <button type="button" onClick={handleGenerate} disabled={isLoading} className="px-6 py-3 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition disabled:opacity-50">
-                                    {isLoading ? '<span className="loader"></span>' : '✨ Generate Response'}
+                                    {isLoading ? <Loader /> : '✨ Generate Response'}
                                 </button>
                             </div>
                         </div>
@@ -372,6 +367,8 @@ export default function {name}() {{
         "components/PromptAnalyzer.tsx": """
             'use client';
             import { useState } from 'react';
+            
+            const Loader = () => <span className="loader"></span>;
 
             export default function PromptAnalyzer() {
                 const [analysis, setAnalysis] = useState('');
@@ -402,7 +399,7 @@ export default function {name}() {{
                             </div>
                             <div className="flex justify-end">
                                 <button type="button" onClick={handleAnalyze} disabled={isLoading} className="px-6 py-3 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition disabled:opacity-50">
-                                    {isLoading ? '<span className="loader"></span>' : '🔬 Analyze Prompt'}
+                                    {isLoading ? <Loader /> : '🔬 Analyze Prompt'}
                                 </button>
                             </div>
                         </div>

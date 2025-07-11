@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 
+const Loader = () => <span className="loader"></span>;
+
 export default function PromptBuilder() {
     const [generatedPrompt, setGeneratedPrompt] = useState('');
     const [aiResponse, setAiResponse] = useState('');
@@ -53,7 +55,7 @@ export default function PromptBuilder() {
                 </div>
                 <div className="md:col-span-2 flex justify-end">
                     <button type="button" onClick={handleGenerate} disabled={isLoading} className="px-6 py-3 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition disabled:opacity-50">
-                        {isLoading ? '<span className="loader"></span>' : '✨ Generate Response'}
+                        {isLoading ? <Loader /> : '✨ Generate Response'}
                     </button>
                 </div>
             </div>

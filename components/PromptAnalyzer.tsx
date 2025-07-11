@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 
+const Loader = () => <span className="loader"></span>;
+
 export default function PromptAnalyzer() {
     const [analysis, setAnalysis] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +32,7 @@ export default function PromptAnalyzer() {
                 </div>
                 <div className="flex justify-end">
                     <button type="button" onClick={handleAnalyze} disabled={isLoading} className="px-6 py-3 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition disabled:opacity-50">
-                        {isLoading ? '<span className="loader"></span>' : '🔬 Analyze Prompt'}
+                        {isLoading ? <Loader /> : '🔬 Analyze Prompt'}
                     </button>
                 </div>
             </div>
