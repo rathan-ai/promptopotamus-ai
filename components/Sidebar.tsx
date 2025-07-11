@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 const navItems = [
-  { title: 'Tools', links: [{ href: '#generator', label: 'Prompt Builder' }] },
+  { title: 'Tools', links: [{ href: '#generator', label: 'Prompt Builder' }, { href: '#analyzer', label: 'Prompt Analyzer' }] },
   { title: 'Fundamentals', links: [
     { href: '#introduction', label: 'Introduction' },
     { href: '#basic-techniques', label: 'Basic Techniques' },
@@ -15,6 +15,7 @@ const navItems = [
   ]},
   { title: 'Best Practices', links: [
       { href: '#best-practices', label: 'Best Practices' },
+      { href: '#further-reading', label: 'Further Reading' },
       { href: '#risks-caution', label: 'Risks & Caution' },
   ]},
 ];
