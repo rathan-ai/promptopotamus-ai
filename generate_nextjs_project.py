@@ -42,7 +42,9 @@ def create_package_json():
         "eslint-config-next": "14.2.4",
         "@tailwindcss/forms": "^0.5.7",
         "@tailwindcss/typography": "^0.5.10",
-        "autoprefixer": "^10.0.1"
+        "autoprefixer": "^10.0.1",
+        "@types/react": "^18",
+        "@types/node": "^20"
       }
     }
     try:
