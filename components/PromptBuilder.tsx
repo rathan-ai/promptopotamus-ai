@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-const Loader = () => <span className="loader"></span>;
+const Loader = () => <div className="loader" style={{width: '20px', height: '20px', border: '3px solid #fff', borderBottomColor: 'transparent'}}></div>;
 
 export default function PromptBuilder() {
     const [generatedPrompt, setGeneratedPrompt] = useState('');
@@ -54,7 +54,7 @@ export default function PromptBuilder() {
                     <input id="generic-format" type="text" className="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-primary-500 focus:ring-primary-500/50 bg-gray-50 dark:bg-gray-700" placeholder="e.g., Three bullet points" />
                 </div>
                 <div className="md:col-span-2 flex justify-end">
-                    <button type="button" onClick={handleGenerate} disabled={isLoading} className="px-6 py-3 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition disabled:opacity-50">
+                    <button type="button" onClick={handleGenerate} disabled={isLoading} className="px-6 py-3 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition disabled:opacity-50 flex items-center justify-center w-48">
                         {isLoading ? <Loader /> : '✨ Generate Response'}
                     </button>
                 </div>

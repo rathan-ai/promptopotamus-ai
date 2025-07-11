@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import Sidebar from "../components/Sidebar";
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Sidebar />
             <main className="flex-1 overflow-y-auto py-8 px-4 md:px-10 lg:px-16">{children}</main>
         </div>
+        <Analytics />
       </body>
     </html>
   );

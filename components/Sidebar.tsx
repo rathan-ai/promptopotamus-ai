@@ -11,6 +11,7 @@ const navItems = [
   ]},
   { title: 'Advanced Topics', links: [
     { href: '#visual-prompting', label: 'Visual Prompting' },
+    { href: '#exploring-models', label: 'Exploring Models' },
   ]},
   { title: 'Industry Guides', links: [
     { href: '#industry-education', label: 'Education' },
