@@ -2,16 +2,31 @@
 import { useState, useEffect } from 'react';
 
 const navItems = [
-  { title: 'Tools', links: [{ href: '#generator', label: 'Prompt Builder' }] },
+  { title: 'Tools', links: [{ href: '#generator', label: 'Prompt Builder' }, { href: '#analyzer', label: 'Prompt Analyzer' }] },
   { title: 'Fundamentals', links: [
     { href: '#introduction', label: 'Introduction' },
+    { href: '#basic-techniques', label: 'Basic Techniques' },
+    { href: '#advanced-techniques', label: 'Advanced Techniques' },
+    { href: '#prompt-recipes', label: 'Prompt Recipes' },
+  ]},
+  { title: 'Advanced Topics', links: [
+    { href: '#exploring-models', label: 'Exploring Models' },
+  ]},
+  { title: 'Industry Guides', links: [
+    { href: '#industry-education', label: 'Education' },
+    { href: '#industry-engineering', label: 'Engineering' },
+    { href: '#industry-finance', label: 'Finance & Stock Market' },
+  ]},
+  { title: 'Best Practices', links: [
+      { href: '#best-practices', label: 'Best Practices' },
+      { href: '#further-reading', label: 'Further Reading' },
+      { href: '#risks-caution', label: 'Risks & Caution' },
   ]},
 ];
 
 export default function Sidebar() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeLink, setActiveLink] = useState('');
-
     useEffect(() => {
         const handleScroll = () => {
             let current = '';
@@ -26,9 +41,7 @@ export default function Sidebar() {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-
     const toggleTheme = () => document.documentElement.classList.toggle('dark');
-
     return (
         <>
             <button
@@ -39,7 +52,7 @@ export default function Sidebar() {
             </button>
 
             <aside
-                className={`fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-6 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${
+                className={`fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-6 transform transition-transform duration-300 ease-in-out md:sticky md:translate-x-0 ${
                     isOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
