@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle, Clock, Loader2, CreditCard, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import type { User } from '@supabase/supabase-js';
 
 type QuizStatus = {
     canTakeQuiz: boolean;
@@ -32,7 +33,7 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
     const supabase = createClient();
     const [status, setStatus] = useState<QuizStatus | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState<any>(null); // Using 'any' type to resolve build error for now
+    const [user, setUser] = useState<User | null>(null);
 
     const checkStatus = async () => {
         setIsLoading(true);

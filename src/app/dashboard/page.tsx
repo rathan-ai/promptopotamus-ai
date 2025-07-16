@@ -7,7 +7,6 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { certificates as certDetails } from '@/lib/data';
 
-// ... interfaces ...
 interface Profile { id: string; first_name: string; last_name: string; region: string; gender: string; age: number; education: string; purchased_attempts: Record<string, number>; }
 interface QuizAttempt { id: number; quiz_level: string; attempted_at: string; score: number; passed: boolean; }
 interface SavedPrompt { id: number; title: string; prompt_text: string; created_at: string; }
@@ -20,8 +19,9 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async () => {
+    setLoading(true);
+    try {
       const res = await fetch('/api/dashboard');
       if (res.ok) {
         const dashboardData = await res.json();
@@ -30,28 +30,30 @@ export default function DashboardPage() {
       } else {
         toast.error('Could not load your dashboard data.');
       }
+    } catch (err) {
+      toast.error('An error occurred while fetching data.');
+    } finally {
       setLoading(false);
-    };
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    const res = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile)
-    });
+    const res = await fetch('/api/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile) });
     const result = await res.json();
-    if(res.ok) {
-        toast.success(result.message);
+    if (res.ok) {
+      toast.success(result.message);
     } else {
-        toast.error(result.error);
+      toast.error(result.error);
     }
     setIsSaving(false);
   };
-  
+
   const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setProfile(prev => prev ? { ...prev, [name]: value } : null);
@@ -97,60 +99,25 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Certificates */}
+      {/* Other Dashboard Sections... */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><Award className="mr-2" /> My Certificates</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><FileText className="mr-2" /> Saved Prompts</h2>
         <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
-          {data?.certificates && data.certificates.length > 0 ? (
+          {data?.prompts && data.prompts.length > 0 ? (
             <ul className="space-y-4">
-              {data.certificates.map((cert) => (
-                <li key={cert.id} className="flex items-center justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-md">
-                  <div>
-                    <p className="font-semibold">{certDetails[cert.certificate_slug]?.badgeName || 'Certificate'}</p>
-                    <p className="text-sm text-neutral-500">Earned on: {new Date(cert.earned_at).toLocaleDateString()}</p>
+              {data.prompts.map((prompt) => (
+                <li key={prompt.id} className="p-4 bg-neutral-100 dark:bg-neutral-800 rounded-md">
+                  <div className="flex justify-between items-start">
+                    <div>
+                        <p className="font-semibold">{prompt.title || 'Untitled Prompt'}</p>
+                        <p className="text-sm text-neutral-500 mt-2 whitespace-pre-wrap font-mono">{prompt.prompt_text}</p>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => copyPrompt(prompt.prompt_text)}>Copy</Button>
                   </div>
-                  <Link href={`/certificates/view/${cert.credential_id}`} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-9 px-3 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-600">
-                    <Eye className="mr-2 h-4 w-4" /> View
-                  </Link>
                 </li>
               ))}
             </ul>
-          ) : ( <p className="text-neutral-500">You haven&apos;t earned any certificates yet.</p> )}
-        </div>
-      </section>
-
-      {/* Exam History */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><History className="mr-2" /> Exam History</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-neutral-800/50 p-4 rounded-lg">
-                <h3 className="font-semibold mb-3 flex items-center text-green-600"><CheckCircle className="mr-2" /> Passed Exams</h3>
-                {passedAttempts.length > 0 ? (
-                    <ul className="space-y-2">{passedAttempts.map(a => <li key={a.id} className="text-sm p-2 bg-neutral-100 dark:bg-neutral-800 rounded capitalize">{a.quiz_level} Exam ({a.score.toFixed(0)}%)</li>)}</ul>
-                ) : <p className="text-sm text-neutral-500">No passed exams yet.</p>}
-            </div>
-            <div className="bg-white dark:bg-neutral-800/50 p-4 rounded-lg">
-                <h3 className="font-semibold mb-3 flex items-center text-red-600"><XCircle className="mr-2" /> Failed Attempts</h3>
-                {failedAttempts.length > 0 ? (
-                    <ul className="space-y-2">{failedAttempts.map(a => <li key={a.id} className="text-sm p-2 bg-neutral-100 dark:bg-neutral-800 rounded capitalize">{a.quiz_level} Exam ({a.score.toFixed(0)}%)</li>)}</ul>
-                ) : <p className="text-sm text-neutral-500">No failed attempts. Great job!</p>}
-            </div>
-        </div>
-      </section>
-
-      {/* Purchase History */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><ShoppingCart className="mr-2" /> Purchase History</h2>
-        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
-          {purchaseHistory.length > 0 ? (
-            <ul className="space-y-2">
-              {purchaseHistory.map(([level, count]) => (
-                <li key={level} className="text-sm p-2 bg-neutral-100 dark:bg-neutral-800 rounded capitalize">
-                  {level}: {count} purchase(s) for {count * 3} extra attempts.
-                </li>
-              ))}
-            </ul>
-          ) : ( <p className="text-neutral-500">You have not purchased any extra attempts.</p> )}
+          ) : ( <p className="text-neutral-500">You haven&apos;t saved any prompts yet. Use the Prompt Builder to create and save one!</p> )}
         </div>
       </section>
     </div>
