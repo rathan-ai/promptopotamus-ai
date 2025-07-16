@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { Award, Share2, Download, Linkedin, AlertTriangle } from 'lucide-react';
+import { Award, Share2, Download, Linkedin } from 'lucide-react';
 import { Button } from './ui/Button';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -15,16 +15,61 @@ interface CertificateDisplayProps {
   expiryDate?: string;
 }
 
-const levelStyles = { /* ... styles remain the same ... */ };
+const levelStyles = {
+  Beginner: { name: 'Bronze', gradient: 'from-amber-200 via-yellow-600 to-amber-900', textColor: 'text-amber-950', iconColor: 'text-amber-800' },
+  Intermediate: { name: 'Silver', gradient: 'from-slate-300 via-slate-400 to-slate-500', textColor: 'text-slate-900', iconColor: 'text-slate-700' },
+  Master: { name: 'Gold', gradient: 'from-yellow-300 via-amber-400 to-yellow-500', textColor: 'text-yellow-900', iconColor: 'text-yellow-700' },
+};
 
 export default function CertificateDisplay({ level, badgeName, userName, credentialId, issueDate, expiryDate }: CertificateDisplayProps) {
   const styles = levelStyles[level];
   const certificateRef = useRef<HTMLDivElement>(null);
   const isExpired = expiryDate ? new Date(expiryDate) < new Date() : false;
   
-  const handleShare = () => { /* ... function remains the same ... */ };
-  const handleDownload = () => { /* ... function remains the same ... */ };
-  const handleAddToLinkedIn = () => { /* ... function remains the same ... */ };
+  const handleShare = () => {
+    if (!credentialId) return;
+    const shareUrl = `${window.location.origin}/certificates/view/${credentialId}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast.success('Public certificate link copied to clipboard!');
+  };
+
+  const handleDownload = () => {
+    if (certificateRef.current) {
+      html2canvas(certificateRef.current, { scale: 2, backgroundColor: null }).then((canvas) => {
+        const link = document.createElement('a');
+        link.download = `Promptopotamus_Certificate_${userName.replace(/\s/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+  };
+
+  const handleAddToLinkedIn = () => {
+    if (!issueDate || !expiryDate || !credentialId) {
+      toast.error("Certificate data is missing for LinkedIn share.");
+      return;
+    }
+    
+    const certUrl = `${window.location.origin}/certificates/view/${credentialId}`;
+    const issueMonth = new Date(issueDate).getMonth() + 1;
+    const issueYear = new Date(issueDate).getFullYear();
+    const expirationMonth = new Date(expiryDate).getMonth() + 1;
+    const expirationYear = new Date(expiryDate).getFullYear();
+    const organizationName = 'Innorag';
+    
+    const linkedInUrl = new URL('https://www.linkedin.com/profile/add');
+    linkedInUrl.searchParams.append('startTask', 'CERTIFICATION_NAME');
+    linkedInUrl.searchParams.append('name', badgeName);
+    linkedInUrl.searchParams.append('organizationName', organizationName);
+    linkedInUrl.searchParams.append('issueYear', String(issueYear));
+    linkedInUrl.searchParams.append('issueMonth', String(issueMonth));
+    linkedInUrl.searchParams.append('expirationYear', String(expirationYear));
+    linkedInUrl.searchParams.append('expirationMonth', String(expirationMonth));
+    linkedInUrl.searchParams.append('certUrl', certUrl);
+    linkedInUrl.searchParams.append('certId', credentialId);
+
+    window.open(linkedInUrl.toString(), '_blank');
+  };
 
   return (
     <div className="w-full">
@@ -52,7 +97,17 @@ export default function CertificateDisplay({ level, badgeName, userName, credent
         </div>
       </div>
       <div className="mt-8 flex flex-wrap justify-center gap-4">
-        {/* ... Buttons remain the same ... */}
+        <Button onClick={handleAddToLinkedIn} className="bg-[#0077B5] hover:bg-[#006097] text-white">
+            <Linkedin className="mr-2 h-4 w-4" /> Add to LinkedIn
+        </Button>
+        {credentialId && (
+            <Button onClick={handleShare} variant="secondary">
+                <Share2 className="mr-2 h-4 w-4" /> Share
+            </Button>
+        )}
+        <Button onClick={handleDownload} variant="secondary">
+            <Download className="mr-2 h-4 w-4" /> Download
+        </Button>
       </div>
     </div>
   );
