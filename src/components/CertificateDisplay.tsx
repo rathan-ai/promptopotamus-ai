@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { Award, Share2, Download, Linkedin } from 'lucide-react';
+import { Award, Share2, Download, Linkedin, AlertTriangle } from 'lucide-react'; // Added AlertTriangle here
 import { Button } from './ui/Button';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -25,7 +25,7 @@ export default function CertificateDisplay({ level, badgeName, userName, credent
   const styles = levelStyles[level];
   const certificateRef = useRef<HTMLDivElement>(null);
   const isExpired = expiryDate ? new Date(expiryDate) < new Date() : false;
-  
+
   const handleShare = () => {
     if (!credentialId) return;
     const shareUrl = `${window.location.origin}/certificates/view/${credentialId}`;
@@ -35,7 +35,10 @@ export default function CertificateDisplay({ level, badgeName, userName, credent
 
   const handleDownload = () => {
     if (certificateRef.current) {
-      html2canvas(certificateRef.current, { scale: 2, backgroundColor: null }).then((canvas) => {
+      html2canvas(certificateRef.current, { 
+        scale: 2,
+        backgroundColor: null,
+      }).then((canvas) => {
         const link = document.createElement('a');
         link.download = `Promptopotamus_Certificate_${userName.replace(/\s/g, '_')}.png`;
         link.href = canvas.toDataURL('image/png');
@@ -43,12 +46,12 @@ export default function CertificateDisplay({ level, badgeName, userName, credent
       });
     }
   };
-
+  
   const handleAddToLinkedIn = () => {
     if (!issueDate || !expiryDate || !credentialId) {
-      toast.error("Certificate data is missing for LinkedIn share.");
-      return;
-    }
+        toast.error("Certificate data is missing for LinkedIn share.");
+        return;
+    };
     
     const certUrl = `${window.location.origin}/certificates/view/${credentialId}`;
     const issueMonth = new Date(issueDate).getMonth() + 1;
