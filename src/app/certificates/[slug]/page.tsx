@@ -32,7 +32,7 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
     const supabase = createClient();
     const [status, setStatus] = useState<QuizStatus | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState<any>(null); // Using 'any' to resolve build error for now
+    const [user, setUser] = useState<any>(null); // Using 'any' type to resolve build error for now
 
     const checkStatus = async () => {
         setIsLoading(true);
