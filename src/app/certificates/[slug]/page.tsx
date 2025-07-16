@@ -32,7 +32,7 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
     const supabase = createClient();
     const [status, setStatus] = useState<QuizStatus | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<any>(null); // Use 'any' type to avoid ts-ignore
 
     const checkStatus = async () => {
         setIsLoading(true);
@@ -56,7 +56,6 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
     useEffect(() => {
         const checkUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            // @ts-ignore
             setUser(user);
             if (user) {
                 checkStatus();
@@ -154,12 +153,10 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
 
     return (
         <div className="max-w-4xl mx-auto">
-            {/* This is the new "Back" link */}
             <Link href="/certificates" className="inline-flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline mb-6">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to All Exams
             </Link>
-
             <div className="bg-white dark:bg-neutral-800/50 p-8 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700">
                 <h1 className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{cert.badgeName}</h1>
                 <p className="mt-4 text-lg text-neutral-700 dark:text-neutral-300">{cert.description}</p>
