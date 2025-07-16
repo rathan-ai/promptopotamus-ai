@@ -32,7 +32,7 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
     const supabase = createClient();
     const [status, setStatus] = useState<QuizStatus | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState<any>(null); // Use 'any' type to avoid ts-ignore
+    const [user, setUser] = useState<any>(null); // Using 'any' to resolve build error for now
 
     const checkStatus = async () => {
         setIsLoading(true);
@@ -64,7 +64,7 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
             }
         };
         checkUser();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params.slug]);
 
     if (!cert) return <div className="p-4 text-center">Certificate details not found.</div>;
