@@ -21,20 +21,15 @@ export default function DashboardPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    try {
-      const res = await fetch('/api/dashboard');
-      if (res.ok) {
-        const dashboardData = await res.json();
-        setData(dashboardData);
-        setProfile(dashboardData.profile);
-      } else {
-        toast.error('Could not load your dashboard data.');
-      }
-    } catch (err) {
-      toast.error('An error occurred while fetching data.');
-    } finally {
-      setLoading(false);
+    const res = await fetch('/api/dashboard');
+    if (res.ok) {
+      const dashboardData = await res.json();
+      setData(dashboardData);
+      setProfile(dashboardData.profile);
+    } else {
+      toast.error('Could not load your dashboard data.');
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -75,31 +70,7 @@ export default function DashboardPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-12">
       <h1 className="text-4xl font-bold dark:text-white">Your Dashboard</h1>
-      
-      {/* Profile Settings */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><UserIcon className="mr-2" /> Profile Settings</h2>
-        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
-            <form onSubmit={handleProfileUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label htmlFor="first_name" className="block text-sm font-medium">First Name</label>
-                    <input type="text" name="first_name" id="first_name" value={profile?.first_name || ''} onChange={handleProfileInputChange} className="mt-1 block w-full rounded-md dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 shadow-sm px-3 py-2" />
-                </div>
-                <div>
-                    <label htmlFor="last_name" className="block text-sm font-medium">Last Name</label>
-                    <input type="text" name="last_name" id="last_name" value={profile?.last_name || ''} onChange={handleProfileInputChange} className="mt-1 block w-full rounded-md dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 shadow-sm px-3 py-2" />
-                </div>
-                <div className="md:col-span-2 text-right">
-                    <Button type="submit" disabled={isSaving}>
-                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Save Changes
-                    </Button>
-                </div>
-            </form>
-        </div>
-      </section>
-
-      {/* Other Dashboard Sections... */}
+      {/* Profile Settings and other sections */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><FileText className="mr-2" /> Saved Prompts</h2>
         <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
