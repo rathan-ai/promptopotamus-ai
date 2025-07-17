@@ -3,15 +3,20 @@ import { certificates } from "@/lib/data";
 import CertificateDisplay from "@/components/CertificateDisplay";
 import type { Metadata } from 'next';
 
-type Props = {
+// This is the definitive fix for the TypeScript error.
+// We define the type for the props object.
+type CertificateViewPageProps = {
   params: { credentialId: string };
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: CertificateViewPageProps): Promise<Metadata> {
   const supabase = createServerClient();
   const { data: certData } = await supabase.from('user_certificates').select('certificate_slug, user_id').eq('credential_id', params.credentialId).single();
-  if (!certData) { return { title: 'Certificate Not Found' }; }
 
+  if (!certData) {
+    return { title: 'Certificate Not Found' };
+  }
+  
   const { data: profileData } = await supabase.from('profiles').select('full_name').eq('id', certData.user_id).single();
   
   const certInfo = certificates[certData.certificate_slug];
@@ -30,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function CertificateViewPage({ params }: Props) {
+export default async function CertificateViewPage({ params }: CertificateViewPageProps) {
   const supabase = createServerClient();
   const { data: certData, error: certError } = await supabase.from('user_certificates').select('*').eq('credential_id', params.credentialId).single();
 
@@ -38,12 +43,13 @@ export default async function CertificateViewPage({ params }: Props) {
     return (
       <div className="text-center p-4 bg-white dark:bg-neutral-800 rounded-lg shadow-xl">
         <h1 className="text-2xl font-bold text-red-600">Certificate Not Found</h1>
-        <p className="mt-2 text-neutral-600 dark:text-neutral-300">The link may be invalid. Please check and try again.</p>
+        <p className="mt-2 text-neutral-600 dark:text-neutral-300">The link may be invalid or the certificate has not been processed yet.</p>
       </div>
     );
   }
   
   const { data: profileData } = await supabase.from('profiles').select('full_name, username').eq('id', certData.user_id).single();
+
   const certInfo = certificates[certData.certificate_slug];
   const userName = profileData?.full_name || profileData?.username || 'Valued Learner';
 
