@@ -71,6 +71,7 @@ export default function DashboardPage() {
     <div className="max-w-5xl mx-auto space-y-12">
       <h1 className="text-4xl font-bold dark:text-white">Your Dashboard</h1>
       
+      {/* Profile Settings */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><UserIcon className="mr-2" /> Profile Settings</h2>
         <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
@@ -93,6 +94,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* Certificates */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><Award className="mr-2" /> My Certificates</h2>
         <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
@@ -114,6 +116,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* Exam History */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><History className="mr-2" /> Exam History</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -132,6 +135,7 @@ export default function DashboardPage() {
         </div>
       </section>
       
+      {/* Purchase History */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><ShoppingCart className="mr-2" /> Purchase History</h2>
         <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">

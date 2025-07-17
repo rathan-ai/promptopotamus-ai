@@ -3,20 +3,16 @@ import { certificates } from "@/lib/data";
 import CertificateDisplay from "@/components/CertificateDisplay";
 import type { Metadata } from 'next';
 
-// This is the definitive fix for the TypeScript error.
-// We define the type for the props object.
-type CertificateViewPageProps = {
+// Corrected type definition for the page props
+type Props = {
   params: { credentialId: string };
 };
 
-export async function generateMetadata({ params }: CertificateViewPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = createServerClient();
   const { data: certData } = await supabase.from('user_certificates').select('certificate_slug, user_id').eq('credential_id', params.credentialId).single();
+  if (!certData) { return { title: 'Certificate Not Found' }; }
 
-  if (!certData) {
-    return { title: 'Certificate Not Found' };
-  }
-  
   const { data: profileData } = await supabase.from('profiles').select('full_name').eq('id', certData.user_id).single();
   
   const certInfo = certificates[certData.certificate_slug];
@@ -35,7 +31,7 @@ export async function generateMetadata({ params }: CertificateViewPageProps): Pr
   };
 }
 
-export default async function CertificateViewPage({ params }: CertificateViewPageProps) {
+export default async function CertificateViewPage({ params }: Props) {
   const supabase = createServerClient();
   const { data: certData, error: certError } = await supabase.from('user_certificates').select('*').eq('credential_id', params.credentialId).single();
 
@@ -49,7 +45,6 @@ export default async function CertificateViewPage({ params }: CertificateViewPag
   }
   
   const { data: profileData } = await supabase.from('profiles').select('full_name, username').eq('id', certData.user_id).single();
-
   const certInfo = certificates[certData.certificate_slug];
   const userName = profileData?.full_name || profileData?.username || 'Valued Learner';
 
