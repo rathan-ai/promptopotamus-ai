@@ -1,5 +1,3 @@
-// src/app/api/quiz/[level]/route.ts
-
 import { createServerClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import type { QuizLevel } from '@/lib/data';
@@ -9,9 +7,9 @@ const TIME_LIMIT_IN_MINUTES = 25;
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { level: string } }   // ← must be string for Next.js
+  { params }: { params: Record<string, string> }  // <-- loose typing lets Next.js’s real type flow through
 ) {
-  // Cast to your QuizLevel type
+  // Cast to your QuizLevel
   const level = params.level as QuizLevel;
 
   const supabase = createServerClient();
@@ -24,7 +22,6 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Fetch all questions for this difficulty
   const { data: allQuestions, error } = await supabase
     .from('quizzes')
     .select('id, question, options')
@@ -46,7 +43,6 @@ export async function GET(
     );
   }
 
-  // Shuffle & pick
   const shuffled = allQuestions.sort(() => 0.5 - Math.random());
   const selectedQuestions = shuffled.slice(0, QUIZ_LENGTH);
 
