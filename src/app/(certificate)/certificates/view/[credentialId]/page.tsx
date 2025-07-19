@@ -3,35 +3,26 @@ import { certificates } from "@/lib/data";
 import CertificateDisplay from "@/components/CertificateDisplay";
 import type { Metadata } from 'next';
 
-// Corrected type definition for the page props
-type Props = {
-  params: { credentialId: string };
+// Step 1: Define the params as a Promise
+type PageProps = {
+  params: Promise<{ credentialId: string }>;
 };
 
-// This function generates the special meta tags for sharing
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+// Step 2: Update generateMetadata to await the params
+export async function generateMetadata({ params: paramsPromise }: PageProps): Promise<Metadata> {
+  const params = await paramsPromise; // Await the promise to get the object
   const supabase = createServerClient();
   
-  // Query 1: Get the certificate data first.
-  const { data: certData } = await supabase
-    .from('user_certificates')
-    .select('certificate_slug, user_id')
-    .eq('credential_id', params.credentialId)
-    .single();
+  const { data } = await supabase.from('user_certificates').select('certificate_slug, user_id').eq('credential_id', params.credentialId).single();
 
-  if (!certData) {
-    return { title: 'Certificate Not Found' };
+  if (!data) {
+    return { title: 'Certificate' };
   }
+
+  const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', data.user_id).single();
   
-  // Query 2: Get the profile data separately.
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', certData.user_id)
-    .single();
-  
-  const certInfo = certificates[certData.certificate_slug];
-  const userName = profileData?.full_name || 'Valued Learner';
+  const certInfo = certificates[data.certificate_slug];
+  const userName = profile?.full_name || 'Valued Learner';
   const pageTitle = `${userName} - ${certInfo.badgeName}`;
   const ogImageUrl = `/api/og/${params.credentialId}`;
 
@@ -52,8 +43,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// The main page component
-export default async function CertificateViewPage({ params }: Props) {
+// Step 3: Update the Page component to await the params
+export default async function CertificateViewPage({ params: paramsPromise }: PageProps) {
+  const params = await paramsPromise; // Await the promise to get the object
   const supabase = createServerClient();
   
   const { data: certData, error: certError } = await supabase
@@ -64,9 +56,9 @@ export default async function CertificateViewPage({ params }: Props) {
 
   if (certError || !certData) {
     return (
-      <div className="text-center p-4 bg-white dark:bg-neutral-800 rounded-lg shadow-xl">
-        <h1 className="text-2xl font-bold text-red-600">Certificate Not Found</h1>
-        <p className="mt-2 text-neutral-600 dark:text-neutral-300">The link may be invalid or the certificate has not been processed yet.</p>
+      <div className="text-center p-8">
+        <h1 className="text-2xl font-bold mb-4">Certificate Not Found</h1>
+        <p>The link may be invalid or the certificate has not been processed yet.</p>
       </div>
     );
   }
@@ -81,14 +73,13 @@ export default async function CertificateViewPage({ params }: Props) {
   const userName = profileData?.full_name || profileData?.username || 'Valued Learner';
 
   return (
-    <div className="max-w-4xl mx-auto w-full">
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-center text-2xl font-bold mb-8">Certificate of Achievement</h1>
       <CertificateDisplay 
         level={certInfo.level} 
         badgeName={certInfo.badgeName} 
         userName={userName} 
-        credentialId={certData.credential_id}
-        issueDate={certData.earned_at}
-        expiryDate={certData.expires_at}
+        credentialId={certData.credential_id} 
       />
     </div>
   );
