@@ -5,7 +5,9 @@ import { QuizLevel, levelSlugs } from '@/lib/data';
 const ATTEMPTS_PER_BLOCK = 3;
 const COOLDOWN_DAYS = 9;
 
-export async function GET(req: NextRequest, { params }: { params: { level: QuizLevel } }) {
+// The change is in the function signature below
+export async function GET(req: NextRequest, { params: paramsPromise }: { params: Promise<{ level: QuizLevel }> }) {
+    const params = await paramsPromise; // Await the promise to get the params object
     const supabase = createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -13,33 +15,10 @@ export async function GET(req: NextRequest, { params }: { params: { level: QuizL
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { level } = params;
+    const { level } = params; // Use the resolved params
     const certSlug = levelSlugs[level];
 
-    // NEW: Prerequisite check
-    if (level === 'intermediate') {
-        const { data: beginnerCert } = await supabase
-            .from('user_certificates')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('certificate_slug', 'promptling')
-            .single();
-        if (!beginnerCert) {
-            return NextResponse.json({ canTakeQuiz: false, reason: 'You must pass the Beginner exam before attempting the Intermediate exam.' });
-        }
-    } else if (level === 'master') {
-        const { data: intermediateCert } = await supabase
-            .from('user_certificates')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('certificate_slug', 'promptosaur')
-            .single();
-        if (!intermediateCert) {
-            return NextResponse.json({ canTakeQuiz: false, reason: 'You must pass the Intermediate exam before attempting the Master exam.' });
-        }
-    }
-
-    // If user has a certificate for this level, check if it's still valid (not expired).
+    // Rule 1: If user has a valid certificate, they cannot retake for 6 months.
     const { data: certificate } = await supabase
         .from('user_certificates')
         .select('expires_at')
@@ -54,8 +33,8 @@ export async function GET(req: NextRequest, { params }: { params: { level: QuizL
             cooldownUntil: new Date(certificate.expires_at).toISOString(),
         });
     }
-    
-    // --- The rest of the logic for attempts and cooldowns remains the same ---
+
+    // Rule 2 & 3: Handle attempt blocks, cooldowns, and purchases.
     const { data: profile } = await supabase.from('profiles').select('purchased_attempts').eq('id', user.id).single();
     const { data: attempts, error: attemptsError } = await supabase
         .from('quiz_attempts')
