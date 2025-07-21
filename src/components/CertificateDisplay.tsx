@@ -15,16 +15,62 @@ interface CertificateDisplayProps {
   expiryDate?: string;
 }
 
-const levelStyles = { /* ... styles remain the same ... */ };
+const levelStyles = {
+  'Beginner': {
+    name: 'Bronze',
+    gradient: 'from-orange-600 to-amber-700',
+    textColor: 'text-amber-100',
+    iconColor: 'text-amber-200',
+  },
+  'Intermediate': {
+    name: 'Silver',
+    gradient: 'from-slate-400 to-slate-600',
+    textColor: 'text-slate-100',
+    iconColor: 'text-slate-200',
+  },
+  'Master': {
+    name: 'Gold',
+    gradient: 'from-yellow-500 to-yellow-600',
+    textColor: 'text-yellow-100',
+    iconColor: 'text-yellow-200',
+  },
+};
 
 export default function CertificateDisplay({ level, badgeName, userName, credentialId, issueDate, expiryDate }: CertificateDisplayProps) {
   const styles = levelStyles[level];
   const certificateRef = useRef<HTMLDivElement>(null);
   const isExpired = expiryDate ? new Date(expiryDate) < new Date() : false;
   
-  const handleShare = () => { /* ... function remains the same ... */ };
-  const handleDownload = () => { /* ... function remains the same ... */ };
-  const handleAddToLinkedIn = () => { /* ... function remains the same ... */ };
+  const handleShare = () => {
+    if (credentialId) {
+      const url = `${window.location.origin}/certificates/view/${credentialId}`;
+      navigator.clipboard.writeText(url);
+      toast.success('Certificate URL copied to clipboard!');
+    }
+  };
+
+  const handleDownload = () => {
+    if (certificateRef.current) {
+      html2canvas(certificateRef.current, { 
+        scale: 2,
+        backgroundColor: null,
+      }).then((canvas) => {
+        const link = document.createElement('a');
+        link.download = `Promptopotamus_Certificate_${userName.replace(/\s/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+  };
+
+  const handleAddToLinkedIn = () => {
+    if (!credentialId) return;
+    
+    const certUrl = `${window.location.origin}/certificates/view/${credentialId}`;
+    const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(badgeName)}&organizationName=Promptopotamus&issueYear=${new Date().getFullYear()}&issueMonth=${new Date().getMonth() + 1}&certUrl=${encodeURIComponent(certUrl)}`;
+    
+    window.open(linkedInUrl, '_blank');
+  };
 
   return (
     <div className="w-full">
@@ -52,7 +98,19 @@ export default function CertificateDisplay({ level, badgeName, userName, credent
         </div>
       </div>
       <div className="mt-8 flex flex-wrap justify-center gap-4">
-        {/* ... Buttons remain the same ... */}
+        {credentialId && (
+          <Button onClick={handleShare} className="flex items-center gap-2">
+            <Share2 className="h-4 w-4" /> Share Certificate
+          </Button>
+        )}
+        <Button onClick={handleDownload} className="flex items-center gap-2">
+          <Download className="h-4 w-4" /> Download PNG
+        </Button>
+        {credentialId && (
+          <Button onClick={handleAddToLinkedIn} className="flex items-center gap-2">
+            <Linkedin className="h-4 w-4" /> Add to LinkedIn
+          </Button>
+        )}
       </div>
     </div>
   );

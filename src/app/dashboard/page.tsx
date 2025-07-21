@@ -161,7 +161,7 @@ export default function DashboardPage() {
                 </li>
               ))}
             </ul>
-          ) : ( <p className="text-neutral-500">You haven't earned any certificates yet.</p> )}
+          ) : ( <p className="text-neutral-500">You haven&apos;t earned any certificates yet.</p> )}
         </div>
       </section>
 
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                 </li>
               ))}
             </ul>
-          ) : ( <p className="text-neutral-500">You haven't saved any prompts yet. Use the Prompt Builder to create and save one!</p> )}
+          ) : ( <p className="text-neutral-500">You haven&apos;t saved any prompts yet. Use the Prompt Builder to create and save one!</p> )}
         </div>
       </section>
     </div>

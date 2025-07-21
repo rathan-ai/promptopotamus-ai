@@ -19,14 +19,14 @@ export function createServerClient() {
         set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options });
-          } catch (error) {
+          } catch {
             // This can be ignored if you have middleware refreshing user sessions.
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options });
-          } catch (error) {
+          } catch {
             // This can be ignored if you have middleware refreshing user sessions.
           }
         },

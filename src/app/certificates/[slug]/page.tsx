@@ -3,7 +3,7 @@
 import { certificates } from '@/lib/data';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle, Clock, Loader2, CreditCard, ArrowLeft } from 'lucide-react';
@@ -34,7 +34,7 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState(null);
 
-    const checkStatus = async () => {
+    const checkStatus = useCallback(async () => {
         setIsLoading(true);
         const level = quizLevelMap[params.slug];
         if (!level) {
@@ -51,7 +51,7 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
         const data = await res.json();
         setStatus(data);
         setIsLoading(false);
-    };
+    }, [params.slug]);
 
     useEffect(() => {
         const checkUser = async () => {
@@ -64,7 +64,7 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
             }
         };
         checkUser();
-    }, [params.slug]);
+    }, [params.slug, supabase.auth, checkStatus]);
 
     if (!cert) return <div className="p-4 text-center">Certificate details not found.</div>;
     const quizLevel = quizLevelMap[cert.slug];
