@@ -12,7 +12,9 @@ import { Button } from '@/components/ui/Button';
 import { X, CreditCard, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null;
 
 interface StripePaymentModalProps {
   isOpen: boolean;
@@ -274,16 +276,33 @@ export default function StripePaymentModal({
               </Button>
             </div>
           ) : clientSecret ? (
-            <Elements stripe={stripePromise}>
-              <PaymentForm
-                clientSecret={clientSecret}
-                amount={amount}
-                promptTitle={promptTitle}
-                sellerName={sellerName}
-                onSuccess={handleSuccess}
-                onError={handleError}
-              />
-            </Elements>
+            stripePromise ? (
+              <Elements stripe={stripePromise}>
+                <PaymentForm
+                  clientSecret={clientSecret}
+                  amount={amount}
+                  promptTitle={promptTitle}
+                  sellerName={sellerName}
+                  onSuccess={handleSuccess}
+                  onError={handleError}
+                />
+              </Elements>
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <X className="w-8 h-8 text-red-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">
+                  Payment Unavailable
+                </h3>
+                <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                  Payment processing is currently not configured. Please contact support.
+                </p>
+                <Button onClick={handleClose} variant="outline">
+                  Close
+                </Button>
+              </div>
+            )
           ) : null}
         </div>
       </div>

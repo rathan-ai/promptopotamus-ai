@@ -2,9 +2,11 @@ import { createServerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia',
-});
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-11-20.acacia',
+    })
+  : null;
 
 export async function POST(req: Request) {
   const supabase = await createServerClient();
@@ -88,6 +90,12 @@ export async function POST(req: Request) {
     }
 
     // For paid prompts, create Stripe payment intent
+    if (!stripe) {
+      return NextResponse.json({ 
+        error: 'Payment processing is not configured. Please contact support.' 
+      }, { status: 500 });
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(prompt.price * 100), // Convert to cents
       currency: 'usd',
@@ -124,6 +132,12 @@ export async function PUT(req: Request) {
 
     if (status === 'succeeded') {
       // Get payment intent details from Stripe
+      if (!stripe) {
+        return NextResponse.json({ 
+          error: 'Payment processing is not configured' 
+        }, { status: 500 });
+      }
+
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
       const metadata = paymentIntent.metadata;
 
