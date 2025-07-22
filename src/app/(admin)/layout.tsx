@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 // This layout protects all pages inside the (admin) group
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

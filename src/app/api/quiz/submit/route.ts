@@ -7,7 +7,7 @@ const PASSING_SCORE_PERCENTAGE = 75;
 type UserAnswers = { [key: number]: string };
 
 export async function POST(req: NextRequest) {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

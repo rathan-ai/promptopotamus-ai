@@ -10,7 +10,7 @@ async function isAdmin(supabase: SupabaseClient) {
 }
 
 export async function GET() {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     if (!(await isAdmin(supabase))) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }

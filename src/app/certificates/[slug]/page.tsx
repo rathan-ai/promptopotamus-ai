@@ -1,10 +1,11 @@
 'use client';
 
-import { certificates } from '@/lib/data';
+import { certificates, Certificate } from '@/lib/data';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle, Clock, Loader2, CreditCard, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -26,17 +27,19 @@ const quizLevelMap: Record<string, 'beginner' | 'intermediate' | 'master'> = {
     'promptopotamus': 'master' 
 };
 
-export default function CertificateDetailPage({ params }: { params: { slug: string } }) {
-    const cert = certificates[params.slug];
+export default function CertificateDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const router = useRouter();
     const supabase = createClient();
     const [status, setStatus] = useState<QuizStatus | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [slug, setSlug] = useState<string | null>(null);
+    const [cert, setCert] = useState<Certificate | null>(null);
 
     const checkStatus = useCallback(async () => {
+        if (!slug) return;
         setIsLoading(true);
-        const level = quizLevelMap[params.slug];
+        const level = quizLevelMap[slug];
         if (!level) {
             setIsLoading(false);
             return;
@@ -51,7 +54,16 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
         const data = await res.json();
         setStatus(data);
         setIsLoading(false);
-    }, [params.slug]);
+    }, [slug]);
+
+    useEffect(() => {
+        const loadParams = async () => {
+            const resolvedParams = await params;
+            setSlug(resolvedParams.slug);
+            setCert(certificates[resolvedParams.slug]);
+        };
+        loadParams();
+    }, [params]);
 
     useEffect(() => {
         const checkUser = async () => {
@@ -63,11 +75,13 @@ export default function CertificateDetailPage({ params }: { params: { slug: stri
                 setIsLoading(false);
             }
         };
-        checkUser();
-    }, [params.slug, supabase.auth, checkStatus]);
+        if (slug) {
+            checkUser();
+        }
+    }, [slug, supabase.auth, checkStatus]);
 
-    if (!cert) return <div className="p-4 text-center">Certificate details not found.</div>;
-    const quizLevel = quizLevelMap[cert.slug];
+    if (!cert || !slug) return <div className="p-4 text-center">Loading...</div>;
+    const quizLevel = quizLevelMap[slug];
 
     const handlePurchase = async () => {
         setIsLoading(true);

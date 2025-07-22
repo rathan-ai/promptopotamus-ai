@@ -5,18 +5,20 @@ import { QuizLevel } from '@/lib/data';
 const QUIZ_LENGTH = 25;
 const TIME_LIMIT_IN_MINUTES = 25;
 
-export async function GET(req: NextRequest, { params }: { params: { level: QuizLevel } }) {
-    const supabase = createServerClient();
+export async function GET(req: NextRequest, { params }: { params: Promise<{ level: QuizLevel }> }) {
+    const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
+    const { level } = await params;
+    
     const { data: allQuestions, error } = await supabase
         .from('quizzes')
         .select('id, question, options')
-        .eq('difficulty', params.level);
+        .eq('difficulty', level);
 
     if (error || !allQuestions || allQuestions.length === 0) {
         return NextResponse.json({ error: 'Could not fetch exam questions for this level.' }, { status: 500 });

@@ -7,18 +7,20 @@ const levelTitleMap: Record<string, string> = {
     'master': 'Promptopotamus: Master Certification Exam'
 };
 
-export async function generateMetadata({ params }: { params: { level: string } }): Promise<Metadata> {
-    const title = levelTitleMap[params.level] || 'Certification Exam';
+export async function generateMetadata({ params }: { params: Promise<{ level: string }> }): Promise<Metadata> {
+    const { level } = await params;
+    const title = levelTitleMap[level] || 'Certification Exam';
     return {
         title: title,
-        description: `Take the ${params.level} certification exam on AI prompt engineering.`,
+        description: `Take the ${level} certification exam on AI prompt engineering.`,
     };
 }
 
-export default function ExamPage({ params }: { params: { level: string } }) {
+export default async function ExamPage({ params }: { params: Promise<{ level: string }> }) {
+  const { level } = await params;
   return (
     <div className="max-w-4xl mx-auto">
-        <Quiz level={params.level} />
+        <Quiz level={level} />
     </div>
   );
 }

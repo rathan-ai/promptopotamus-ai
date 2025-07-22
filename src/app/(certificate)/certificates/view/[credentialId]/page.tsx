@@ -11,7 +11,7 @@ type PageProps = {
 // Step 2: Update generateMetadata to await the params
 export async function generateMetadata({ params: paramsPromise }: PageProps): Promise<Metadata> {
   const params = await paramsPromise; // Await the promise to get the object
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   
   const { data } = await supabase.from('user_certificates').select('certificate_slug, user_id').eq('credential_id', params.credentialId).single();
 
@@ -46,7 +46,7 @@ export async function generateMetadata({ params: paramsPromise }: PageProps): Pr
 // Step 3: Update the Page component to await the params
 export default async function CertificateViewPage({ params: paramsPromise }: PageProps) {
   const params = await paramsPromise; // Await the promise to get the object
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   
   const { data: certData, error: certError } = await supabase
     .from('user_certificates')

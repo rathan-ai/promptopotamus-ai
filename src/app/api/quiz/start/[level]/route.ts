@@ -8,7 +8,7 @@ const TIME_LIMIT_IN_MINUTES = 25;
 // The change is in the function signature below
 export async function GET(req: NextRequest, { params: paramsPromise }: { params: Promise<{ level: QuizLevel }> }) {
     const params = await paramsPromise; // Await the promise to get the params object
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

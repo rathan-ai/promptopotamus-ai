@@ -4,8 +4,8 @@ import {
 } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-export function createServerClient() {
-  const cookieStore = cookies();
+export async function createServerClient() {
+  const cookieStore = await cookies();
   
   // Now we call the renamed import, resolving the conflict
   return createSupabaseServerClient(
