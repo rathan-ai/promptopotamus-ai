@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { 
   ArrowLeft, 
   Star, 
@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 import StripePaymentModal from '@/components/StripePaymentModal';
+import ReviewsList from '@/components/ReviewsList';
 
 interface SmartPromptDetail {
   id: number;
@@ -74,6 +75,7 @@ const difficultyColors = {
 export default function SmartPromptDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [prompt, setPrompt] = useState<SmartPromptDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [variableValues, setVariableValues] = useState<Record<string, string | number>>({});
@@ -82,6 +84,7 @@ export default function SmartPromptDetailPage() {
   const [hasAccess, setHasAccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'preview' | 'variables' | 'examples' | 'reviews'>('preview');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPrompt = async () => {
@@ -106,6 +109,9 @@ export default function SmartPromptDetailPage() {
             
             // Set access based on API response
             setHasAccess(foundPrompt.has_access);
+            
+            // Set current user ID for review system
+            setCurrentUserId(foundPrompt.current_user_id);
           } else {
             toast.error('Smart prompt not found');
             router.push('/smart-prompts');
@@ -124,6 +130,14 @@ export default function SmartPromptDetailPage() {
 
     fetchPrompt();
   }, [params.id, router]);
+
+  // Handle tab parameter
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['preview', 'variables', 'examples', 'reviews'].includes(tab)) {
+      setActiveTab(tab as 'preview' | 'variables' | 'examples' | 'reviews');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (prompt && hasAccess) {
@@ -522,14 +536,23 @@ export default function SmartPromptDetailPage() {
               {activeTab === 'reviews' && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold dark:text-white">Reviews & Ratings</h3>
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Star className="w-8 h-8 text-neutral-400" />
-                    </div>
-                    <p className="text-neutral-500 dark:text-neutral-400">
-                      Reviews coming soon! Purchase this prompt to be the first to review.
-                    </p>
-                  </div>
+                  <ReviewsList
+                    promptId={prompt.id}
+                    promptTitle={prompt.title}
+                    canReview={hasAccess}
+                    currentUserId={currentUserId || undefined}
+                    onReviewsChange={(reviews) => {
+                      // Update prompt rating when reviews change
+                      if (reviews.length > 0) {
+                        const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+                        setPrompt(prev => prev ? {
+                          ...prev,
+                          rating_average: Number(avgRating.toFixed(2)),
+                          rating_count: reviews.length
+                        } : null);
+                      }
+                    }}
+                  />
                 </div>
               )}
             </div>

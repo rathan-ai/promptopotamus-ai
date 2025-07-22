@@ -223,3 +223,60 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function PATCH(req: Request) {
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { id, ...updateData } = await req.json();
+
+    if (!id) {
+      return NextResponse.json({ error: 'Smart prompt ID is required' }, { status: 400 });
+    }
+
+    // If updating to marketplace status, check certification
+    if (updateData.is_marketplace) {
+      const { data: userCertificates } = await supabase
+        .from('user_certificates')
+        .select('certificate_slug, expires_at')
+        .eq('user_id', user.id);
+
+      if (!hasAnyValidCertificate(userCertificates || [])) {
+        return NextResponse.json({ 
+          error: 'You must have a valid certification to publish prompts in the marketplace.',
+          requiresCertification: true 
+        }, { status: 403 });
+      }
+    }
+
+    // Update smart prompt (RLS will ensure user owns it)
+    const { error: updateError } = await supabase
+      .from('saved_prompts')
+      .update({ 
+        ...updateData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id);
+
+    if (updateError) {
+      console.error('Error updating smart prompt status:', updateError);
+      return NextResponse.json({ error: `Failed to update smart prompt: ${updateError.message}` }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: updateData.is_marketplace 
+        ? 'Smart prompt published to marketplace successfully!' 
+        : 'Smart prompt unpublished from marketplace successfully!'
+    });
+  } catch (error) {
+    console.error('Unexpected error updating smart prompt status:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

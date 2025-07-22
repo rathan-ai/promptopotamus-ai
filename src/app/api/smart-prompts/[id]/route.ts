@@ -48,7 +48,8 @@ export async function GET(
         ...prompt,
         has_access: hasAccess,
         has_purchased: hasPurchased,
-        is_owner: prompt.user_id === user?.id
+        is_owner: prompt.user_id === user?.id,
+        current_user_id: user?.id || null
       }
     });
 
