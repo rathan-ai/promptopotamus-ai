@@ -5,6 +5,7 @@ import { Provider } from 'jotai';
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { Analytics } from "@vercel/analytics/react";
+import IssueReportWidget from "@/components/IssueReportWidget";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
@@ -35,6 +36,9 @@ export default function RootLayout({
               </main>
             </div>
           </div>
+          
+          {/* Global Issue Report Widget */}
+          <IssueReportWidget />
         </Provider>
         <Analytics />
       </body>
