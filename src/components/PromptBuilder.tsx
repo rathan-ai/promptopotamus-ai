@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown } from 'lucide-react';
+import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown, Calendar, Bell, BookOpen } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import UpgradeModal from './UpgradeModal';
 
@@ -371,6 +371,111 @@ export default function PromptBuilder() {
                         <p className="text-xs text-green-600 dark:text-green-400 mt-2">
                             💡 All platforms have free tiers perfect for testing your prompts!
                         </p>
+                    </div>
+
+                    {/* Engagement CTAs */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        {/* Save & Return Strategy */}
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                            <div className="flex items-center gap-2 mb-2">
+                                <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                <h4 className="font-semibold text-blue-800 dark:text-blue-200">
+                                    Save Your Work
+                                </h4>
+                            </div>
+                            <p className="text-blue-700 dark:text-blue-300 text-sm mb-3">
+                                Save this prompt to your library and create variations for different use cases.
+                            </p>
+                            <Button
+                                size="sm"
+                                onClick={handleSave}
+                                disabled={!user}
+                                className="w-full bg-blue-600 hover:bg-blue-700"
+                            >
+                                <Save className="w-4 h-4 mr-2" />
+                                {user ? 'Save to My Prompts' : 'Login to Save'}
+                            </Button>
+                        </div>
+
+                        {/* Daily Return Hook */}
+                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                <h4 className="font-semibold text-purple-800 dark:text-purple-200">
+                                    Daily Prompt Challenge
+                                </h4>
+                            </div>
+                            <p className="text-purple-700 dark:text-purple-300 text-sm mb-3">
+                                Join our daily challenge! Get a new prompt idea delivered to your inbox every morning.
+                            </p>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full border-purple-300 text-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                                onClick={() => {
+                                    // Track newsletter signup interest
+                                    track('newsletter_signup_intent', { source: 'prompt_builder' });
+                                    toast.success('Feature coming soon! We\'ll notify you when it\'s ready.');
+                                }}
+                            >
+                                <Bell className="w-4 h-4 mr-2" />
+                                Subscribe to Daily Tips
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Usage Limit Reached - Engagement Strategy */}
+            {usageCount === 0 && (
+                <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                    <div className="flex items-start gap-3">
+                        <Crown className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-1" />
+                        <div className="flex-1">
+                            <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
+                                You've used all your free AI enhancements today!
+                            </h3>
+                            <p className="text-amber-700 dark:text-amber-300 text-sm mb-4">
+                                Don't let your creativity stop here. Choose your next step:
+                            </p>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <Button
+                                    size="sm"
+                                    onClick={() => setShowUpgradeModal(true)}
+                                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                                >
+                                    <Crown className="w-4 h-4 mr-2" />
+                                    Upgrade Now
+                                </Button>
+                                
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        track('browse_templates_from_builder');
+                                        window.location.href = '/templates';
+                                    }}
+                                    className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                                >
+                                    <Sparkles className="w-4 h-4 mr-2" />
+                                    Browse Templates
+                                </Button>
+                                
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        track('tomorrow_reminder_set');
+                                        toast.success('Come back tomorrow for 3 more free enhancements!');
+                                    }}
+                                    className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                                >
+                                    <Calendar className="w-4 h-4 mr-2" />
+                                    Remind Tomorrow
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

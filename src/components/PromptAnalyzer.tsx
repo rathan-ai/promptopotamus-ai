@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Loader2, CheckCircle, AlertTriangle, Info, ExternalLink, Crown, Lightbulb } from 'lucide-react';
+import { Loader2, CheckCircle, AlertTriangle, Info, ExternalLink, Crown, Lightbulb, BookOpen, TrendingUp, Users, Calendar } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import UpgradeModal from './UpgradeModal';
 
@@ -339,6 +339,113 @@ export default function PromptAnalyzer() {
                         <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
                             💡 All platforms have free tiers - perfect for testing!
                         </p>
+                    </div>
+
+                    {/* Engagement CTAs */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        {/* Learn More Strategy */}
+                        <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg border border-indigo-200 dark:border-indigo-700">
+                            <div className="flex items-center gap-2 mb-2">
+                                <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                <h4 className="font-semibold text-indigo-800 dark:text-indigo-200">
+                                    Learn Advanced Techniques
+                                </h4>
+                            </div>
+                            <p className="text-indigo-700 dark:text-indigo-300 text-sm mb-3">
+                                Discover expert prompting strategies to consistently score 90+ on all your prompts.
+                            </p>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full border-indigo-300 text-indigo-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
+                                onClick={() => {
+                                    track('learn_more_from_analyzer');
+                                    document.getElementById('advanced-techniques')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                            >
+                                <TrendingUp className="w-4 h-4 mr-2" />
+                                Explore Advanced Guides
+                            </Button>
+                        </div>
+
+                        {/* Community Strategy */}
+                        <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg border border-emerald-200 dark:border-emerald-700">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Users className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                <h4 className="font-semibold text-emerald-800 dark:text-emerald-200">
+                                    Join Our Community
+                                </h4>
+                            </div>
+                            <p className="text-emerald-700 dark:text-emerald-300 text-sm mb-3">
+                                Share your prompts, get feedback, and learn from other prompt engineers.
+                            </p>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+                                onClick={() => {
+                                    track('community_interest_analyzer');
+                                    toast.success('Community features coming soon! We\'ll notify you when ready.');
+                                }}
+                            >
+                                <Users className="w-4 h-4 mr-2" />
+                                Connect with Others
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Usage Limit Reached - Engagement Strategy */}
+            {usageCount === 0 && !analysis && (
+                <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-700 rounded-lg">
+                    <div className="flex items-start gap-3">
+                        <Crown className="w-6 h-6 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-1" />
+                        <div className="flex-1">
+                            <h3 className="font-semibold text-rose-800 dark:text-rose-200 mb-2">
+                                You've reached your daily analysis limit!
+                            </h3>
+                            <p className="text-rose-700 dark:text-rose-300 text-sm mb-4">
+                                Keep improving your prompts with these options:
+                            </p>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <Button
+                                    size="sm"
+                                    onClick={() => setShowUpgradeModal(true)}
+                                    className="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700"
+                                >
+                                    <Crown className="w-4 h-4 mr-2" />
+                                    Get Unlimited
+                                </Button>
+                                
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        track('manual_analysis_from_analyzer');
+                                        document.getElementById('basic-techniques')?.scrollIntoView({ behavior: 'smooth' });
+                                    }}
+                                    className="border-rose-300 text-rose-700 hover:bg-rose-100 dark:hover:bg-rose-900/30"
+                                >
+                                    <Lightbulb className="w-4 h-4 mr-2" />
+                                    Learn Manual Analysis
+                                </Button>
+                                
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        track('tomorrow_reminder_analyzer');
+                                        toast.success('Come back tomorrow for 5 more free analyses!');
+                                    }}
+                                    className="border-rose-300 text-rose-700 hover:bg-rose-100 dark:hover:bg-rose-900/30"
+                                >
+                                    <Calendar className="w-4 h-4 mr-2" />
+                                    Reminder Set
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
