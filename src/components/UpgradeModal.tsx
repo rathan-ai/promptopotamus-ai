@@ -81,7 +81,7 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
       // Show contact options
       const plan = plans.find(p => p.id === planId);
       const message = `Hi! I'm interested in upgrading to the ${plan?.name} plan (${plan?.price}${plan?.period}). Please send me payment instructions.`;
-      const mailtoLink = `mailto:support@promptopotamus.com?subject=Upgrade to ${plan?.name} Plan&body=${encodeURIComponent(message)}`;
+      const mailtoLink = `mailto:payment@innorag.com?subject=Upgrade to ${plan?.name} Plan&body=${encodeURIComponent(message)}`;
       
       window.open(mailtoLink, '_blank');
       
@@ -192,11 +192,11 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
             <p className="text-sm text-neutral-600 dark:text-neutral-400">
               Questions? Contact us at{' '}
               <a 
-                href="mailto:support@promptopotamus.com" 
+                href="mailto:payment@innorag.com" 
                 className="text-indigo-600 dark:text-indigo-400 hover:underline"
                 onClick={() => track('upgrade_contact_email_clicked', { source })}
               >
-                support@promptopotamus.com
+                payment@innorag.com
               </a>
             </p>
           </div>
