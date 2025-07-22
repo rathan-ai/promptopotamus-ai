@@ -1,6 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { QuizLevel, levelSlugs } from '@/lib/data';
+import { canTakeLevel, countConsecutiveFailures, getRecommendedLevelAfterFailure } from '@/lib/certification';
 
 const ATTEMPTS_PER_BLOCK = 3;
 const COOLDOWN_DAYS = 9;
@@ -18,20 +19,50 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
     const { level } = params; // Use the resolved params
     const certSlug = levelSlugs[level];
 
-    // Rule 1: If user has a valid certificate, they cannot retake for 6 months.
-    const { data: certificate } = await supabase
+    // Get all user certificates and attempts for prerequisite checking
+    const { data: userCertificates } = await supabase
         .from('user_certificates')
-        .select('expires_at')
+        .select('certificate_slug, expires_at')
+        .eq('user_id', user.id);
+
+    const { data: allAttempts } = await supabase
+        .from('quiz_attempts')
+        .select('quiz_level, passed, attempted_at')
         .eq('user_id', user.id)
-        .eq('certificate_slug', certSlug)
-        .single();
-    
+        .order('attempted_at', { ascending: false });
+
+    // Rule 0: Check level prerequisites (L1 → L2 → L3)
+    const levelAccess = canTakeLevel(level, userCertificates || []);
+    if (!levelAccess.canTake) {
+        return NextResponse.json({
+            canTakeQuiz: false,
+            reason: levelAccess.reason,
+            prerequisiteMissing: levelAccess.prerequisiteMissing,
+        });
+    }
+
+    // Rule 1: If user has a valid certificate, they cannot retake for 6 months.
+    const certificate = userCertificates?.find(cert => cert.certificate_slug === certSlug);
     if (certificate && new Date(certificate.expires_at) > new Date()) {
         return NextResponse.json({
             canTakeQuiz: false,
             reason: 'You have already passed this certificate. You can retake it after it expires.',
             cooldownUntil: new Date(certificate.expires_at).toISOString(),
         });
+    }
+
+    // Rule -1: Check failure cascade - if 3+ consecutive failures, recommend level drop
+    const consecutiveFailures = countConsecutiveFailures(allAttempts || [], level);
+    if (consecutiveFailures >= 3) {
+        const recommendation = getRecommendedLevelAfterFailure(level, consecutiveFailures, userCertificates || []);
+        if (recommendation.recommendedLevel !== level) {
+            return NextResponse.json({
+                canTakeQuiz: false,
+                reason: recommendation.reason,
+                recommendedLevel: recommendation.recommendedLevel,
+                consecutiveFailures,
+            });
+        }
     }
 
     // Rule 2 & 3: Handle attempt blocks, cooldowns, and purchases.
@@ -76,5 +107,7 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
         totalAllowed: ATTEMPTS_PER_BLOCK,
         attemptType: completedBlocks < freeBlocks ? 'free' : 'purchased',
         purchaseCount: purchaseCount,
+        consecutiveFailures: consecutiveFailures,
+        hasValidCertificates: (userCertificates || []).some(cert => new Date(cert.expires_at) > new Date()),
     });
 }
