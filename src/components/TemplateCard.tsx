@@ -1,10 +1,12 @@
 'use client';
 
 import { Copy, Crown, Star, Users, Lock } from 'lucide-react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Button } from './ui/Button';
 import type { AITemplate } from '@/lib/data';
 import { track } from '@vercel/analytics';
+import UpgradeModal from './UpgradeModal';
 
 interface TemplateCardProps {
   template: AITemplate;
@@ -12,6 +14,7 @@ interface TemplateCardProps {
 
 export default function TemplateCard({ template }: TemplateCardProps) {
   const { title, prompt, tier, tags, usageCount, rating } = template;
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const handleCopy = () => {
     if (tier === 'premium' || tier === 'pro') {
       // Track premium template access attempt
@@ -47,8 +50,7 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       template_category: template.category
     });
     
-    toast.success('Redirecting to upgrade options...');
-    // TODO: Add actual upgrade logic
+    setShowUpgradeModal(true);
   };
 
   const getTierConfig = (tier: string) => {
@@ -154,6 +156,12 @@ export default function TemplateCard({ template }: TemplateCardProps) {
           </Button>
         )}
       </div>
+      
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        source={`template_${template.id}`}
+      />
     </div>
   );
 }

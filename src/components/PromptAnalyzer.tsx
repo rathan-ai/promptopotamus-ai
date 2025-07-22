@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Loader2, CheckCircle, AlertTriangle, Info, ExternalLink, Crown, Lightbulb } from 'lucide-react';
 import { track } from '@vercel/analytics';
+import UpgradeModal from './UpgradeModal';
 
 interface AnalysisResult {
     score: number;
@@ -25,6 +26,7 @@ export default function PromptAnalyzer() {
     const [isLoading, setIsLoading] = useState(false);
     const [usageCount, setUsageCount] = useState(5);
     const [currentPrompt, setCurrentPrompt] = useState('');
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     const analyzePrompt = (prompt: string): AnalysisResult => {
         let score = 0;
@@ -73,8 +75,10 @@ export default function PromptAnalyzer() {
         }
         
         if (usageCount <= 0) {
-            track('prompt_analysis_limit_reached');
-            alert('Free analysis limit reached! Upgrade for unlimited analysis.');
+            track('prompt_analysis_limit_reached', {
+                source: 'prompt_analyzer'
+            });
+            setShowUpgradeModal(true);
             return;
         }
         
@@ -164,10 +168,13 @@ export default function PromptAnalyzer() {
                         Free analyses: {usageCount}/5
                     </div>
                     {usageCount <= 1 && (
-                        <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                        <button 
+                            onClick={() => setShowUpgradeModal(true)}
+                            className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer"
+                        >
                             <Crown className="w-3 h-3 inline mr-1" />
                             Upgrade for unlimited
-                        </div>
+                        </button>
                     )}
                 </div>
             </div>
@@ -209,14 +216,19 @@ export default function PromptAnalyzer() {
                         💡 Tip: Better prompts include persona, task, context, and format
                     </div>
                     <Button 
-                        onClick={handleAnalyze} 
-                        disabled={isLoading || usageCount <= 0}
+                        onClick={usageCount <= 0 ? () => setShowUpgradeModal(true) : handleAnalyze} 
+                        disabled={isLoading}
                         className="px-6"
                     >
                         {isLoading ? (
                             <>
                                 <Loader2 className="animate-spin mr-2 h-4 w-4" />
                                 Analyzing...
+                            </>
+                        ) : usageCount <= 0 ? (
+                            <>
+                                <Crown className="mr-2 h-4 w-4" />
+                                Upgrade to Analyze
                             </>
                         ) : (
                             <>
@@ -330,6 +342,12 @@ export default function PromptAnalyzer() {
                     </div>
                 </div>
             )}
+            
+            <UpgradeModal
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+                source="prompt_analyzer"
+            />
         </section>
     );
 }

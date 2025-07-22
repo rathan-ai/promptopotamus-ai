@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { aiTemplates, type AITemplate } from '@/lib/data';
 import TemplateCard from '@/components/TemplateCard';
+import UpgradeModal from '@/components/UpgradeModal';
 import { Filter, Search, Crown, Star } from 'lucide-react';
 import { track } from '@vercel/analytics';
 
@@ -9,6 +10,7 @@ export default function TemplatesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState<'all' | 'free' | 'pro' | 'premium'>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Get unique categories
   const categories = Array.from(new Set(aiTemplates.map(template => template.category)));
@@ -65,6 +67,7 @@ export default function TemplatesPage() {
                   price: '$9/mo',
                   location: 'templates_page'
                 });
+                setShowUpgradeModal(true);
               }}
               className="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-purple-50 transition-colors"
             >
@@ -77,6 +80,7 @@ export default function TemplatesPage() {
                   price: '$19/mo',
                   location: 'templates_page'
                 });
+                setShowUpgradeModal(true);
               }}
               className="bg-purple-700 px-6 py-2 rounded-lg font-semibold hover:bg-purple-800 transition-colors"
             >
@@ -190,6 +194,12 @@ export default function TemplatesPage() {
           ))}
         </div>
       )}
+      
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        source="templates_page_banner"
+      />
     </div>
   );
 }

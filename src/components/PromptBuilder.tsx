@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown } from 'lucide-react';
 import { track } from '@vercel/analytics';
+import UpgradeModal from './UpgradeModal';
 
 const promptSuggestions = [
     { persona: "Marketing Expert", task: "Create a compelling email campaign", context: "For a new product launch targeting millennials", format: "Subject line and 3-paragraph email" },
@@ -29,6 +30,7 @@ export default function PromptBuilder() {
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [usageCount, setUsageCount] = useState(3); // Free tier limit
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -78,8 +80,10 @@ export default function PromptBuilder() {
 
     const handleEnhancePrompt = async () => {
         if (usageCount <= 0) {
-            track('prompt_enhancement_limit_reached');
-            toast.error('Free usage limit reached! Upgrade for unlimited enhancements.');
+            track('prompt_enhancement_limit_reached', {
+                source: 'prompt_builder'
+            });
+            setShowUpgradeModal(true);
             return;
         }
 
@@ -199,10 +203,13 @@ export default function PromptBuilder() {
                         Free AI enhancements: {usageCount}/3
                     </div>
                     {usageCount <= 1 && (
-                        <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                        <button 
+                            onClick={() => setShowUpgradeModal(true)}
+                            className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer"
+                        >
                             <Crown className="w-3 h-3 inline mr-1" />
                             Upgrade for unlimited
-                        </div>
+                        </button>
                     )}
                 </div>
             </div>
@@ -269,13 +276,15 @@ export default function PromptBuilder() {
                     Generate Prompt
                 </Button>
                 <Button
-                    onClick={handleEnhancePrompt}
+                    onClick={usageCount <= 0 ? () => setShowUpgradeModal(true) : handleEnhancePrompt}
                     variant="secondary"
-                    disabled={isEnhancing || usageCount <= 0}
+                    disabled={isEnhancing}
                     className="flex-1 min-w-fit"
                 >
                     {isEnhancing ? (
                         <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    ) : usageCount <= 0 ? (
+                        <Crown className="mr-2 h-4 w-4" />
                     ) : (
                         <Wand2 className="mr-2 h-4 w-4" />
                     )}
@@ -365,6 +374,12 @@ export default function PromptBuilder() {
                     </div>
                 </div>
             )}
+            
+            <UpgradeModal
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+                source="prompt_builder"
+            />
         </section>
     );
 }
