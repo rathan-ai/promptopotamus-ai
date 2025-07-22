@@ -80,6 +80,18 @@ export default function AdminDashboardPage() {
     <div className="max-w-7xl mx-auto p-4 md:p-8">
       <h1 className="text-3xl font-bold mb-8 dark:text-white">Admin Dashboard</h1>
       
+      {/* Statistics Cards - Always Visible */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><Users className="mr-2" /> Total Users</h3>
+          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.totalUsers}</p>
+        </div>
+        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><BarChart className="mr-2" /> Certificates Issued</h3>
+          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.totalCertificates}</p>
+        </div>
+      </div>
+
       {/* Tab Navigation */}
       <div className="mb-8">
         <div className="border-b border-neutral-200 dark:border-neutral-700">
@@ -107,15 +119,9 @@ export default function AdminDashboardPage() {
 
       {/* Tab Content */}
       {activeTab === 'dashboard' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><Users className="mr-2" /> Total Users</h3>
-          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.totalUsers}</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><BarChart className="mr-2" /> Certificates Issued</h3>
-          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.totalCertificates}</p>
-        </div>
+          <h3 className="text-xl font-semibold mb-4 dark:text-white">Dashboard Overview</h3>
+          <p className="text-neutral-600 dark:text-neutral-400">Welcome to the admin dashboard. Use the tabs above to manage users and affiliates.</p>
         </div>
       )}
       
