@@ -21,7 +21,7 @@ export async function GET() {
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
 
-        // First, get all users from auth
+        // Get all users from auth
         const { data: { users }, error: authError } = await supabaseAdmin.auth.admin.listUsers({
             page: 1, perPage: 1000,
         });
@@ -71,6 +71,8 @@ export async function GET() {
             certificatesByUser.get(cert.user_id).push(cert);
         });
 
+        // Combine auth users with profiles and certificates
+        console.log('Using auth users with profiles as data source');
         const combinedData = users.map(user => {
             const profile = profilesMap.get(user.id);
             const certificates = certificatesByUser.get(user.id) || [];
