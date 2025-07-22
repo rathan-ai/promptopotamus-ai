@@ -47,13 +47,36 @@ export default function AdminDashboardPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [statsRes, usersRes] = await Promise.all([
-      fetch('/api/admin/stats'),
-      fetch('/api/admin/users')
-    ]);
-    if (statsRes.ok) setStats(await statsRes.json());
-    if (usersRes.ok) setUsers(await usersRes.json());
-    setLoading(false);
+    try {
+      const [statsRes, usersRes] = await Promise.all([
+        fetch('/api/admin/stats'),
+        fetch('/api/admin/users')
+      ]);
+      
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData);
+      } else {
+        const statsError = await statsRes.text();
+        console.error('Stats fetch error:', statsError);
+        toast.error('Failed to load stats');
+      }
+      
+      if (usersRes.ok) {
+        const usersData = await usersRes.json();
+        console.log('Users data received:', usersData);
+        setUsers(usersData);
+      } else {
+        const usersError = await usersRes.text();
+        console.error('Users fetch error:', usersError);
+        toast.error('Failed to load users');
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -179,7 +202,7 @@ export default function AdminDashboardPage() {
               {loading ? (
                 <tr><td colSpan={6} className="text-center p-8">Loading users...</td></tr>
               ) : users.length === 0 ? (
-                <tr><td colSpan={6} className="text-center p-8 text-neutral-500">No users found.</td></tr>
+                <tr><td colSpan={6} className="text-center p-8 text-neutral-500">No users found. Check console for details.</td></tr>
               ) : (
                 users.map(user => (
                   <tr key={user.id} className="border-b dark:border-neutral-700">

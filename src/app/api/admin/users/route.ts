@@ -15,52 +15,86 @@ export async function GET() {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    try {
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
 
-    const { data: { users }, error: authError } = await supabaseAdmin.auth.admin.listUsers({
-        page: 1, perPage: 1000,
-    });
+        // First, get all users from auth
+        const { data: { users }, error: authError } = await supabaseAdmin.auth.admin.listUsers({
+            page: 1, perPage: 1000,
+        });
 
-    if (authError) {
-        return NextResponse.json({ error: `Failed to fetch auth users: ${authError.message}` }, { status: 500 });
+        if (authError) {
+            console.error('Auth users fetch error:', authError);
+            return NextResponse.json({ error: `Failed to fetch auth users: ${authError.message}` }, { status: 500 });
+        }
+
+        console.log(`Found ${users.length} auth users`);
+
+        // Get all profiles with certificates using admin client for better permissions
+        const { data: profiles, error: profilesError } = await supabaseAdmin.from('profiles').select(`
+            id, 
+            full_name, 
+            role, 
+            subscription_tier,
+            subscription_status,
+            subscription_start_date,
+            subscription_end_date
+        `);
+
+        if (profilesError) {
+            console.error('Profiles fetch error:', profilesError);
+            return NextResponse.json({ error: `Failed to fetch profiles: ${profilesError.message}` }, { status: 500 });
+        }
+
+        console.log(`Found ${profiles?.length || 0} profiles`);
+
+        // Get user certificates separately
+        const { data: userCertificates, error: certsError } = await supabaseAdmin.from('user_certificates').select('*');
+
+        if (certsError) {
+            console.error('Certificates fetch error:', certsError);
+        }
+
+        console.log(`Found ${userCertificates?.length || 0} certificates`);
+        
+        const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
+        
+        // Group certificates by user
+        const certificatesByUser = new Map();
+        userCertificates?.forEach(cert => {
+            if (!certificatesByUser.has(cert.user_id)) {
+                certificatesByUser.set(cert.user_id, []);
+            }
+            certificatesByUser.get(cert.user_id).push(cert);
+        });
+
+        const combinedData = users.map(user => {
+            const profile = profilesMap.get(user.id);
+            const certificates = certificatesByUser.get(user.id) || [];
+            
+            return {
+                id: user.id,
+                email: user.email,
+                created_at: user.created_at,
+                last_sign_in_at: user.last_sign_in_at,
+                full_name: profile?.full_name || 'N/A',
+                role: profile?.role || 'user',
+                subscription_tier: profile?.subscription_tier || 'free',
+                subscription_status: profile?.subscription_status || 'inactive',
+                subscription_start_date: profile?.subscription_start_date,
+                subscription_end_date: profile?.subscription_end_date,
+                user_certificates: certificates,
+            };
+        }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        console.log(`Returning ${combinedData.length} combined user records`);
+        return NextResponse.json(combinedData);
+        
+    } catch (error) {
+        console.error('Unexpected error in /api/admin/users:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
-
-    const { data: profiles, error: profilesError } = await supabase.from('profiles').select(`
-        id, 
-        full_name, 
-        role, 
-        subscription_tier,
-        subscription_status,
-        subscription_start_date,
-        subscription_end_date,
-        user_certificates(*)
-    `);
-
-    if (profilesError) {
-        return NextResponse.json({ error: `Failed to fetch profiles: ${profilesError.message}` }, { status: 500 });
-    }
-    
-    const profilesMap = new Map(profiles.map(p => [p.id, p]));
-
-    const combinedData = users.map(user => {
-        const profile = profilesMap.get(user.id);
-        return {
-            id: user.id,
-            email: user.email,
-            created_at: user.created_at,
-            last_sign_in_at: user.last_sign_in_at,
-            full_name: profile?.full_name || 'N/A',
-            role: profile?.role || 'user',
-            subscription_tier: profile?.subscription_tier || 'free',
-            subscription_status: profile?.subscription_status || 'inactive',
-            subscription_start_date: profile?.subscription_start_date,
-            subscription_end_date: profile?.subscription_end_date,
-            user_certificates: profile?.user_certificates || [],
-        };
-    }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-    return NextResponse.json(combinedData);
 }
