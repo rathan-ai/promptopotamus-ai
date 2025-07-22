@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from './ui/Button';
 import { 
   Plus, 
@@ -743,7 +744,7 @@ export default function SmartPromptsBuilder({
                           />
                         </div>
                         <p className="text-sm text-neutral-500 mt-1">
-                          Set to $0.00 for free prompts. You'll earn {formData.price > 25 ? '85%' : '80%'} of paid sales.
+                          Set to $0.00 for free prompts. You&apos;ll earn {formData.price > 25 ? '85%' : '80%'} of paid sales.
                         </p>
                       </div>
 
@@ -776,7 +777,7 @@ export default function SmartPromptsBuilder({
                             rows={4}
                             className="w-full p-3 border border-neutral-300 dark:border-neutral-600 rounded-lg dark:bg-neutral-700 dark:text-white"
                           />
-                          <p className="text-sm text-neutral-500 mt-1">Separate multiple examples with "---"</p>
+                          <p className="text-sm text-neutral-500 mt-1">Separate multiple examples with &quot;---&quot;</p>
                         </div>
                       </div>
 
@@ -829,9 +830,9 @@ export default function SmartPromptsBuilder({
                     You need to complete at least one certification level to create marketplace prompts. 
                     This ensures quality and builds trust with buyers.
                   </p>
-                  <Button asChild variant="outline">
-                    <a href="/certificates">Take Certification Exam</a>
-                  </Button>
+                  <Link href="/certificates">
+                    <Button variant="outline">Take Certification Exam</Button>
+                  </Link>
                 </div>
               )}
             </div>

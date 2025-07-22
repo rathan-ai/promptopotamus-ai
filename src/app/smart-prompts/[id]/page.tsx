@@ -477,7 +477,7 @@ export default function SmartPromptDetailPage() {
                     </div>
                   ) : (
                     <p className="text-neutral-500 dark:text-neutral-400">
-                      This prompt doesn't use variables.
+                      This prompt doesn&apos;t use variables.
                     </p>
                   )}
                 </div>

@@ -116,7 +116,7 @@ const EnhancedCertificateCard = ({
       {/* Skills & Benefits */}
       <div className="mb-6">
         <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
-          Skills You'll Validate:
+          Skills You&apos;ll Validate:
         </h4>
         <ul className="text-sm text-neutral-600 dark:text-neutral-400 space-y-1">
           {cert.skills.slice(0, 2).map((skill, index) => (

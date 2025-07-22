@@ -9,7 +9,7 @@ import {
   useElements
 } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/Button';
-import { X, CreditCard, Lock, CheckCircle } from 'lucide-react';
+import { X, CreditCard, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);

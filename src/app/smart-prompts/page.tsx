@@ -40,7 +40,7 @@ interface SmartPrompt {
 
 interface UserCertificationStatus {
   hasValidCertificate: boolean;
-  certificates: any[];
+  certificates: Array<Record<string, unknown>>;
 }
 
 const categories = [
@@ -126,7 +126,7 @@ export default function SmartPromptsPage() {
   }, [selectedCategory, selectedComplexity, selectedDifficulty, priceRange]);
 
   useEffect(() => {
-    let filtered = prompts.filter(prompt => {
+    const filtered = prompts.filter(prompt => {
       const matchesSearch = searchQuery === '' || 
         prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         prompt.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
