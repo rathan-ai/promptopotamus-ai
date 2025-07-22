@@ -9,7 +9,7 @@ import { clsx } from 'clsx';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/Button';
-import { X, Moon, LogIn, LogOut, LayoutDashboard, Shield } from 'lucide-react';
+import { X, Moon, LogIn, LogOut, LayoutDashboard, Shield, Award } from 'lucide-react';
 import { track } from '@vercel/analytics';
 
 const navItems = [
@@ -31,7 +31,6 @@ const navItems = [
       { href: '/#best-practices', label: 'Best Practices' },
       { href: '/#risks-caution', label: 'Risks & Caution' },
     ]},
-    { title: 'Certification', links: [{ href: '/certificates', label: 'Certification Exams' }]},
     { title: 'More', links: [{ href: '/#further-reading', label: 'Further Reading' }]},
 ];
 
@@ -122,6 +121,19 @@ export default function Sidebar() {
                         >
                           <LayoutDashboard className="mr-2 h-4 w-4" />
                           View Dashboard
+                        </Link>
+                        <Link 
+                            href="/certificates" 
+                            onClick={() => {
+                                track('certificates_access', {
+                                    user_email: user.email || 'unknown',
+                                    source: 'sidebar_profile'
+                                });
+                            }}
+                            className="flex items-center text-sm font-semibold text-green-600 dark:text-green-400 hover:underline"
+                        >
+                          <Award className="mr-2 h-4 w-4" />
+                          Certification Exams
                         </Link>
                         {profile?.role === 'admin' && (
                           <Link 
