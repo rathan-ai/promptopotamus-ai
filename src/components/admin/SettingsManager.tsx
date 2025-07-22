@@ -85,6 +85,7 @@ export default function SettingsManager() {
   const [settings, setSettings] = useState<AdminSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null); // Track which setting is being saved
+  const [usingFallback, setUsingFallback] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     subscription: false,
     limits: false,
@@ -97,17 +98,30 @@ export default function SettingsManager() {
 
   const fetchSettings = async () => {
     setLoading(true);
+    setUsingFallback(false);
     try {
       const response = await fetch('/api/admin/settings');
       if (response.ok) {
         const data = await response.json();
         setSettings(data.settings);
+        setUsingFallback(false);
       } else {
-        throw new Error('Failed to fetch settings');
+        // Fallback to public settings if admin settings table doesn't exist
+        console.warn('Admin settings not available, falling back to public settings');
+        const publicResponse = await fetch('/api/public/settings');
+        if (publicResponse.ok) {
+          const publicData = await publicResponse.json();
+          setSettings(publicData.settings);
+          setUsingFallback(true);
+          toast.error('Admin settings table not found. Please run the database migration first.');
+        } else {
+          throw new Error('Failed to fetch settings');
+        }
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
-      toast.error('Failed to load settings');
+      setUsingFallback(true);
+      toast.error('Failed to load settings. Please ensure the database migration has been applied.');
     } finally {
       setLoading(false);
     }
@@ -177,7 +191,7 @@ export default function SettingsManager() {
               }
             }
           }}
-          disabled={saving === `${category}.${key}`}
+          disabled={saving === `${category}.${key}` || usingFallback}
           className="ml-2"
         >
           {saving === `${category}.${key}` ? (
@@ -216,7 +230,7 @@ export default function SettingsManager() {
               updateSetting(category, key, input.value);
             }
           }}
-          disabled={saving === `${category}.${key}`}
+          disabled={saving === `${category}.${key}` || usingFallback}
           className="ml-2"
         >
           {saving === `${category}.${key}` ? (
@@ -253,7 +267,7 @@ export default function SettingsManager() {
               updateSetting(category, key, select.value);
             }
           }}
-          disabled={saving === `${category}.${key}`}
+          disabled={saving === `${category}.${key}` || usingFallback}
           className="ml-2"
         >
           {saving === `${category}.${key}` ? (
@@ -294,7 +308,7 @@ export default function SettingsManager() {
               updateSetting(category, key, input.value);
             }
           }}
-          disabled={saving === `${category}.${key}`}
+          disabled={saving === `${category}.${key}` || usingFallback}
           className="ml-2"
         >
           {saving === `${category}.${key}` ? (
@@ -419,6 +433,24 @@ export default function SettingsManager() {
           Refresh
         </Button>
       </div>
+
+      {/* Migration Warning Banner - Show when using fallback settings */}
+      {usingFallback && settings && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+            <div>
+              <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">Database Migration Required</h3>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                The admin_settings table is not yet created. Settings are read-only until you run the database migration.
+              </p>
+              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
+                Please apply the SQL from <code className="bg-yellow-100 dark:bg-yellow-800 px-1 rounded">manual-migration.sql</code> in your Supabase SQL Editor.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         {sections.map((section) => {

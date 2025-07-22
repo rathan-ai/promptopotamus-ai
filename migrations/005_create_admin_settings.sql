@@ -24,9 +24,9 @@ ALTER TABLE admin_settings ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admin users can manage settings" ON admin_settings
 FOR ALL USING (
     EXISTS (
-        SELECT 1 FROM auth.users 
-        WHERE auth.users.id = auth.uid() 
-        AND auth.users.raw_user_meta_data->>'is_admin' = 'true'
+        SELECT 1 FROM profiles 
+        WHERE profiles.id = auth.uid() 
+        AND profiles.role = 'admin'
     )
 );
 
@@ -107,8 +107,8 @@ ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Super admins can manage admin users" ON admin_users
 FOR ALL USING (
     EXISTS (
-        SELECT 1 FROM auth.users 
-        WHERE auth.users.id = auth.uid() 
+        SELECT 1 FROM profiles 
+        WHERE profiles.id = auth.uid() 
         AND auth.users.raw_user_meta_data->>'role' = 'super_admin'
     )
 );
@@ -116,11 +116,11 @@ FOR ALL USING (
 CREATE POLICY "Admins can view admin users" ON admin_users
 FOR SELECT USING (
     EXISTS (
-        SELECT 1 FROM auth.users 
-        WHERE auth.users.id = auth.uid() 
+        SELECT 1 FROM profiles 
+        WHERE profiles.id = auth.uid() 
         AND (
-            auth.users.raw_user_meta_data->>'role' = 'super_admin' OR
-            auth.users.raw_user_meta_data->>'is_admin' = 'true'
+            profiles.role = 'super_admin' OR
+            profiles.role = 'admin'
         )
     )
 );
@@ -177,9 +177,9 @@ RETURNS BOOLEAN AS $$
 BEGIN
     -- Check if user is admin
     IF NOT EXISTS (
-        SELECT 1 FROM auth.users 
-        WHERE auth.users.id = auth.uid() 
-        AND auth.users.raw_user_meta_data->>'is_admin' = 'true'
+        SELECT 1 FROM profiles 
+        WHERE profiles.id = auth.uid() 
+        AND profiles.role = 'admin'
     ) THEN
         RAISE EXCEPTION 'Access denied: Admin privileges required';
     END IF;
