@@ -11,7 +11,8 @@ import {
   Users, 
   CreditCard,
   Mail,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
@@ -101,27 +102,40 @@ export default function SettingsManager() {
     setUsingFallback(false);
     try {
       const response = await fetch('/api/admin/settings');
+      console.log('Admin settings API response:', response.status, response.statusText);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Admin settings data:', data);
         setSettings(data.settings);
         setUsingFallback(false);
+        toast.success('Admin settings loaded successfully');
       } else {
-        // Fallback to public settings if admin settings table doesn't exist
-        console.warn('Admin settings not available, falling back to public settings');
-        const publicResponse = await fetch('/api/public/settings');
-        if (publicResponse.ok) {
-          const publicData = await publicResponse.json();
-          setSettings(publicData.settings);
+        // Get the error details
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Admin API error:', response.status, errorData);
+        
+        if (response.status === 401 || response.status === 403) {
+          toast.error(`Admin access denied: ${errorData.error || 'Please ensure you have admin role'}`);
           setUsingFallback(true);
-          toast.error('Admin settings table not found. Please run the database migration first.');
         } else {
-          throw new Error('Failed to fetch settings');
+          // Fallback to public settings for other errors (like table not existing)
+          console.warn('Admin settings not available, falling back to public settings');
+          const publicResponse = await fetch('/api/public/settings');
+          if (publicResponse.ok) {
+            const publicData = await publicResponse.json();
+            setSettings(publicData.settings);
+            setUsingFallback(true);
+            toast.error(`Admin API error (${response.status}): ${errorData.error || 'Unknown error'}`);
+          } else {
+            throw new Error('Failed to fetch settings from both admin and public APIs');
+          }
         }
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
       setUsingFallback(true);
-      toast.error('Failed to load settings. Please ensure the database migration has been applied.');
+      toast.error('Failed to load settings. Please check console for details.');
     } finally {
       setLoading(false);
     }
@@ -434,18 +448,38 @@ export default function SettingsManager() {
         </Button>
       </div>
 
-      {/* Migration Warning Banner - Show when using fallback settings */}
+      {/* Warning Banner - Show when using fallback settings */}
       {usingFallback && settings && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
             <div>
-              <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">Database Migration Required</h3>
+              <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">Admin Access Issue</h3>
               <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                The admin_settings table is not yet created. Settings are read-only until you run the database migration.
+                Unable to load admin settings. Settings are read-only. Check browser console for details.
               </p>
-              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
-                Please apply the SQL from <code className="bg-yellow-100 dark:bg-yellow-800 px-1 rounded">manual-migration.sql</code> in your Supabase SQL Editor.
+              <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-2 space-y-1">
+                <p>Possible issues:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>Admin role not properly set in profiles table</li>
+                  <li>Database policies need update: run <code className="bg-yellow-100 dark:bg-yellow-800 px-1 rounded">update-admin-policies.sql</code></li>
+                  <li>Authentication session issue (try refresh/re-login)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Success Banner - Show when admin settings loaded */}
+      {!usingFallback && settings && (
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <div>
+              <h3 className="font-semibold text-green-800 dark:text-green-200">Admin Settings Active</h3>
+              <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                You have admin access and can modify platform settings. Changes are saved to the database.
               </p>
             </div>
           </div>
