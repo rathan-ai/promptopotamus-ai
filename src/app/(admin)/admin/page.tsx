@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart, Users, Zap, Calendar, Clock, Link2 } from 'lucide-react';
+import { BarChart, Users, Zap, Calendar, Clock, Link2, Settings } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { certificates as certDetails } from '@/lib/data';
 import AffiliateManager from '@/components/admin/AffiliateManager';
+import UserSubscriptionManager from '@/components/admin/UserSubscriptionManager';
 
 interface Stat {
   totalUsers: number;
@@ -19,13 +20,19 @@ interface User {
   created_at: string;
   last_sign_in_at?: string;
   user_certificates: { id: number; certificate_slug: string; earned_at: string }[];
+  subscription_tier?: string;
+  subscription_status?: string;
+  subscription_start_date?: string;
+  subscription_end_date?: string;
 }
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stat | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'affiliates'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'affiliates'>('dashboard');
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -65,6 +72,7 @@ export default function AdminDashboardPage() {
 
   const tabs = [
     { id: 'dashboard', name: 'Dashboard', icon: BarChart },
+    { id: 'users', name: 'User Management', icon: Users },
     { id: 'affiliates', name: 'Affiliate Manager', icon: Link2 },
   ];
 
@@ -81,7 +89,7 @@ export default function AdminDashboardPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as 'dashboard' | 'affiliates')}
+                  onClick={() => setActiveTab(tab.id as 'dashboard' | 'users' | 'affiliates')}
                   className={`flex items-center px-1 py-4 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
                       ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
@@ -99,8 +107,7 @@ export default function AdminDashboardPage() {
 
       {/* Tab Content */}
       {activeTab === 'dashboard' && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><Users className="mr-2" /> Total Users</h3>
           <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.totalUsers}</p>
@@ -109,9 +116,11 @@ export default function AdminDashboardPage() {
           <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><BarChart className="mr-2" /> Certificates Issued</h3>
           <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.totalCertificates}</p>
         </div>
-      </div>
-
-      <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+        </div>
+      )}
+      
+      {activeTab === 'users' && (
+        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
         <h3 className="text-xl font-semibold mb-4 dark:text-white">User Management</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -119,6 +128,7 @@ export default function AdminDashboardPage() {
               <tr className="border-b dark:border-neutral-700">
                 <th className="p-3 font-semibold">User</th>
                 <th className="p-3 font-semibold">Role</th>
+                <th className="p-3 font-semibold">Subscription</th>
                 <th className="p-3 font-semibold">Details</th>
                 <th className="p-3 font-semibold">Certificates</th>
                 <th className="p-3 font-semibold">Actions</th>
@@ -126,9 +136,9 @@ export default function AdminDashboardPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={5} className="text-center p-8">Loading users...</td></tr>
+                <tr><td colSpan={6} className="text-center p-8">Loading users...</td></tr>
               ) : users.length === 0 ? (
-                <tr><td colSpan={5} className="text-center p-8 text-neutral-500">No users found.</td></tr>
+                <tr><td colSpan={6} className="text-center p-8 text-neutral-500">No users found.</td></tr>
               ) : (
                 users.map(user => (
                   <tr key={user.id} className="border-b dark:border-neutral-700">
@@ -140,6 +150,25 @@ export default function AdminDashboardPage() {
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'}`}>
                         {user.role}
                       </span>
+                    </td>
+                    <td className="p-3 align-top">
+                      <div className="flex flex-col gap-1">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full w-fit ${
+                          user.subscription_tier === 'premium' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300' :
+                          user.subscription_tier === 'pro' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' :
+                          'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300'
+                        }`}>
+                          {user.subscription_tier || 'free'}
+                        </span>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full w-fit ${
+                          user.subscription_status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
+                          user.subscription_status === 'cancelled' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' :
+                          user.subscription_status === 'expired' ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' :
+                          'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300'
+                        }`}>
+                          {user.subscription_status || 'inactive'}
+                        </span>
+                      </div>
                     </td>
                     <td className="p-3 align-top text-sm text-neutral-600 dark:text-neutral-400">
                       <div className="flex items-center"><Calendar className="mr-2 h-4 w-4" /> Registered: {formatDate(user.created_at)}</div>
@@ -157,15 +186,26 @@ export default function AdminDashboardPage() {
                       ) : <span className="text-sm text-neutral-500">None</span>}
                     </td>
                     <td className="p-3 align-top">
-                      {user.user_certificates.map(cert => (
-                        <button 
-                          key={cert.id}
-                          onClick={() => handleReset(user.id, cert.certificate_slug)}
-                          className="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center"
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowSubscriptionModal(true);
+                          }}
+                          className="text-xs text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 flex items-center"
                         >
-                          <Zap className="mr-1 h-3 w-3" /> Reset {certDetails[cert.certificate_slug]?.level}
+                          <Settings className="mr-1 h-3 w-3" /> Manage Subscription
                         </button>
-                      ))}
+                        {user.user_certificates.map(cert => (
+                          <button 
+                            key={cert.id}
+                            onClick={() => handleReset(user.id, cert.certificate_slug)}
+                            className="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center"
+                          >
+                            <Zap className="mr-1 h-3 w-3" /> Reset {certDetails[cert.certificate_slug]?.level}
+                          </button>
+                        ))}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -173,12 +213,25 @@ export default function AdminDashboardPage() {
             </tbody>
           </table>
         </div>
-      </div>
-        </>
+        </div>
       )}
       
       {activeTab === 'affiliates' && (
         <AffiliateManager />
+      )}
+      
+      {selectedUser && (
+        <UserSubscriptionManager
+          user={selectedUser}
+          isOpen={showSubscriptionModal}
+          onClose={() => {
+            setShowSubscriptionModal(false);
+            setSelectedUser(null);
+          }}
+          onUpdate={() => {
+            fetchData(); // Refresh the user data
+          }}
+        />
       )}
     </div>
   );

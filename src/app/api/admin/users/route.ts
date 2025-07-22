@@ -28,7 +28,16 @@ export async function GET() {
         return NextResponse.json({ error: `Failed to fetch auth users: ${authError.message}` }, { status: 500 });
     }
 
-    const { data: profiles, error: profilesError } = await supabase.from('profiles').select(`id, full_name, role, user_certificates(*)`);
+    const { data: profiles, error: profilesError } = await supabase.from('profiles').select(`
+        id, 
+        full_name, 
+        role, 
+        subscription_tier,
+        subscription_status,
+        subscription_start_date,
+        subscription_end_date,
+        user_certificates(*)
+    `);
 
     if (profilesError) {
         return NextResponse.json({ error: `Failed to fetch profiles: ${profilesError.message}` }, { status: 500 });
@@ -45,6 +54,10 @@ export async function GET() {
             last_sign_in_at: user.last_sign_in_at,
             full_name: profile?.full_name || 'N/A',
             role: profile?.role || 'user',
+            subscription_tier: profile?.subscription_tier || 'free',
+            subscription_status: profile?.subscription_status || 'inactive',
+            subscription_start_date: profile?.subscription_start_date,
+            subscription_end_date: profile?.subscription_end_date,
             user_certificates: profile?.user_certificates || [],
         };
     }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
