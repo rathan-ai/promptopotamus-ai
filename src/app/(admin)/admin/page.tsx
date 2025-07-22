@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart, Users, Zap, Calendar, Clock } from 'lucide-react';
+import { BarChart, Users, Zap, Calendar, Clock, Link2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { certificates as certDetails } from '@/lib/data';
+import AffiliateManager from '@/components/admin/AffiliateManager';
 
 interface Stat {
   totalUsers: number;
@@ -24,6 +25,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stat | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'affiliates'>('dashboard');
 
   const fetchData = async () => {
     setLoading(true);
@@ -61,11 +63,44 @@ export default function AdminDashboardPage() {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
   const formatDateTime = (dateString?: string) => dateString ? new Date(dateString).toLocaleString() : 'Never';
 
+  const tabs = [
+    { id: 'dashboard', name: 'Dashboard', icon: BarChart },
+    { id: 'affiliates', name: 'Affiliate Manager', icon: Link2 },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8">
       <h1 className="text-3xl font-bold mb-8 dark:text-white">Admin Dashboard</h1>
+      
+      {/* Tab Navigation */}
+      <div className="mb-8">
+        <div className="border-b border-neutral-200 dark:border-neutral-700">
+          <nav className="-mb-px flex space-x-8">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as 'dashboard' | 'affiliates')}
+                  className={`flex items-center px-1 py-4 border-b-2 font-medium text-sm ${
+                    activeTab === tab.id
+                      ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                      : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
+                  }`}
+                >
+                  <Icon className="w-5 h-5 mr-2" />
+                  {tab.name}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      {/* Tab Content */}
+      {activeTab === 'dashboard' && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><Users className="mr-2" /> Total Users</h3>
           <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.totalUsers}</p>
@@ -139,6 +174,12 @@ export default function AdminDashboardPage() {
           </table>
         </div>
       </div>
+        </>
+      )}
+      
+      {activeTab === 'affiliates' && (
+        <AffiliateManager />
+      )}
     </div>
   );
 }

@@ -1,96 +1,28 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ExternalLink, Star, Zap, Brain, Sparkles, TrendingUp, Users, Award } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { track } from '@vercel/analytics';
 
-const affiliateResources = [
-  {
-    id: 1,
-    name: 'ChatGPT Plus',
-    provider: 'OpenAI',
-    description: 'The most popular AI assistant with GPT-4, perfect for advanced prompt engineering practice.',
-    price: '$20/month',
-    features: ['GPT-4 Access', 'Faster Response Times', 'Priority Access', 'Custom Instructions'],
-    rating: 4.8,
-    category: 'AI Assistant',
-    badge: 'Most Popular',
-    color: 'bg-green-500',
-    link: 'https://chat.openai.com/auth/login?ref=promptopotamus',
-    icon: '🤖'
-  },
-  {
-    id: 2,
-    name: 'Claude Pro',
-    provider: 'Anthropic',
-    description: 'Advanced AI with superior reasoning capabilities and longer context windows.',
-    price: '$20/month', 
-    features: ['Claude 3.5 Sonnet', '200K Context Window', 'Priority Bandwidth', 'Advanced Reasoning'],
-    rating: 4.7,
-    category: 'AI Assistant',
-    badge: 'Editor\'s Choice',
-    color: 'bg-purple-500',
-    link: 'https://claude.ai/login?ref=promptopotamus',
-    icon: '🧠'
-  },
-  {
-    id: 3,
-    name: 'Gemini Advanced',
-    provider: 'Google',
-    description: 'Google\'s most capable AI model with integrated Google Workspace features.',
-    price: '$19.99/month',
-    features: ['Gemini Ultra Access', 'Google Integration', 'Multimodal Capabilities', '2TB Storage'],
-    rating: 4.6,
-    category: 'AI Assistant', 
-    badge: 'Best Integration',
-    color: 'bg-blue-500',
-    link: 'https://gemini.google.com/advanced?ref=promptopotamus',
-    icon: '💎'
-  },
-  {
-    id: 4,
-    name: 'Grok Premium',
-    provider: 'xAI',
-    description: 'Witty AI with real-time information and uncensored responses.',
-    price: '$16/month',
-    features: ['Real-time Data', 'Less Restricted', 'Twitter Integration', 'Humor & Wit'],
-    rating: 4.3,
-    category: 'AI Assistant',
-    badge: 'Most Fun',
-    color: 'bg-orange-500',
-    link: 'https://grok.x.ai?ref=promptopotamus',
-    icon: '🚀'
-  },
-  {
-    id: 5,
-    name: 'Notion AI',
-    provider: 'Notion',
-    description: 'AI-powered productivity within your favorite workspace and note-taking app.',
-    price: '$10/month',
-    features: ['Writing Assistant', 'Content Generation', 'Notion Integration', 'Team Collaboration'],
-    rating: 4.4,
-    category: 'Productivity',
-    badge: 'Best Value',
-    color: 'bg-gray-500',
-    link: 'https://notion.so/ai?ref=promptopotamus',
-    icon: '📝'
-  },
-  {
-    id: 6,
-    name: 'Midjourney',
-    provider: 'Midjourney Inc.',
-    description: 'Premium AI image generation for creative prompt engineering practice.',
-    price: '$10/month',
-    features: ['High-Quality Images', 'Commercial Usage', 'Fast Generation', 'Style Variety'],
-    rating: 4.9,
-    category: 'Image Generation',
-    badge: 'Creative Pro',
-    color: 'bg-pink-500',
-    link: 'https://midjourney.com/account/?ref=promptopotamus',
-    icon: '🎨'
-  }
-];
+interface AffiliateResource {
+  id: number;
+  name: string;
+  provider: string;
+  description: string;
+  price: string;
+  category: string;
+  badge: string;
+  color: string;
+  icon: string;
+  affiliate_link: string;
+  features: string[];
+  rating: number;
+  is_active: boolean;
+  display_order: number;
+}
+
 
 const stats = [
   { label: 'Active Users', value: '50K+', icon: Users },
@@ -99,6 +31,39 @@ const stats = [
 ];
 
 export default function ResourcesPage() {
+  const [affiliateResources, setAffiliateResources] = useState<AffiliateResource[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAffiliateResources = async () => {
+      try {
+        const response = await fetch('/api/affiliates');
+        if (response.ok) {
+          const data = await response.json();
+          setAffiliateResources(data);
+        } else {
+          console.error('Failed to fetch affiliate resources');
+        }
+      } catch (error) {
+        console.error('Error fetching affiliate resources:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAffiliateResources();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="text-center py-12">
+          <div className="text-lg text-neutral-600 dark:text-neutral-400">Loading affiliate resources...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
@@ -218,7 +183,7 @@ export default function ResourcesPage() {
                   {resource.price}
                 </div>
                 <Link 
-                  href={resource.link} 
+                  href={resource.affiliate_link} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   onClick={() => {
