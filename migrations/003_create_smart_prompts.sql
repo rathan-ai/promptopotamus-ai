@@ -73,16 +73,23 @@ CREATE INDEX IF NOT EXISTS idx_smart_prompt_purchases_seller ON smart_prompt_pur
 -- Add RLS policies for marketplace functionality
 ALTER TABLE saved_prompts ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist to avoid conflicts
+DROP POLICY IF EXISTS "Users can see their own prompts" ON saved_prompts;
+DROP POLICY IF EXISTS "Users can see public marketplace prompts" ON saved_prompts;
+DROP POLICY IF EXISTS "Users can see purchased prompts" ON saved_prompts;
+DROP POLICY IF EXISTS "Only certified users can create marketplace prompts" ON saved_prompts;
+DROP POLICY IF EXISTS "Only certified users can set marketplace status" ON saved_prompts;
+
 -- Policy: Users can always see their own prompts
-CREATE POLICY IF NOT EXISTS "Users can see their own prompts" ON saved_prompts
+CREATE POLICY "Users can see their own prompts" ON saved_prompts
     FOR ALL USING (auth.uid() = user_id);
 
 -- Policy: Users can see public marketplace prompts
-CREATE POLICY IF NOT EXISTS "Users can see public marketplace prompts" ON saved_prompts
+CREATE POLICY "Users can see public marketplace prompts" ON saved_prompts
     FOR SELECT USING (is_marketplace = true AND is_public = true);
 
 -- Policy: Users can see prompts they've purchased
-CREATE POLICY IF NOT EXISTS "Users can see purchased prompts" ON saved_prompts
+CREATE POLICY "Users can see purchased prompts" ON saved_prompts
     FOR SELECT USING (
         is_marketplace = true AND 
         id IN (
@@ -92,7 +99,7 @@ CREATE POLICY IF NOT EXISTS "Users can see purchased prompts" ON saved_prompts
     );
 
 -- Policy: Only certified users can create marketplace prompts
-CREATE POLICY IF NOT EXISTS "Only certified users can create marketplace prompts" ON saved_prompts
+CREATE POLICY "Only certified users can create marketplace prompts" ON saved_prompts
     FOR INSERT WITH CHECK (
         user_id = auth.uid() AND (
             is_marketplace = false OR 
@@ -105,7 +112,7 @@ CREATE POLICY IF NOT EXISTS "Only certified users can create marketplace prompts
     );
 
 -- Policy: Only certified users can update prompts to marketplace
-CREATE POLICY IF NOT EXISTS "Only certified users can set marketplace status" ON saved_prompts
+CREATE POLICY "Only certified users can set marketplace status" ON saved_prompts
     FOR UPDATE USING (user_id = auth.uid())
     WITH CHECK (
         user_id = auth.uid() AND (
@@ -121,19 +128,25 @@ CREATE POLICY IF NOT EXISTS "Only certified users can set marketplace status" ON
 -- Purchases table policies
 ALTER TABLE smart_prompt_purchases ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Users can see their purchases" ON smart_prompt_purchases
+DROP POLICY IF EXISTS "Users can see their purchases" ON smart_prompt_purchases;
+DROP POLICY IF EXISTS "Users can create purchases" ON smart_prompt_purchases;
+
+CREATE POLICY "Users can see their purchases" ON smart_prompt_purchases
     FOR SELECT USING (buyer_id = auth.uid() OR seller_id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "Users can create purchases" ON smart_prompt_purchases
+CREATE POLICY "Users can create purchases" ON smart_prompt_purchases
     FOR INSERT WITH CHECK (buyer_id = auth.uid());
 
 -- Reviews table policies
 ALTER TABLE smart_prompt_reviews ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Anyone can see reviews" ON smart_prompt_reviews
+DROP POLICY IF EXISTS "Anyone can see reviews" ON smart_prompt_reviews;
+DROP POLICY IF EXISTS "Users can create reviews for purchased prompts" ON smart_prompt_reviews;
+
+CREATE POLICY "Anyone can see reviews" ON smart_prompt_reviews
     FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "Users can create reviews for purchased prompts" ON smart_prompt_reviews
+CREATE POLICY "Users can create reviews for purchased prompts" ON smart_prompt_reviews
     FOR INSERT WITH CHECK (
         reviewer_id = auth.uid() AND
         EXISTS (
@@ -146,7 +159,9 @@ CREATE POLICY IF NOT EXISTS "Users can create reviews for purchased prompts" ON 
 -- Collections table policies
 ALTER TABLE user_prompt_collections ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Users can manage their collections" ON user_prompt_collections
+DROP POLICY IF EXISTS "Users can manage their collections" ON user_prompt_collections;
+
+CREATE POLICY "Users can manage their collections" ON user_prompt_collections
     FOR ALL USING (user_id = auth.uid());
 
 -- Update function to automatically set updated_at
