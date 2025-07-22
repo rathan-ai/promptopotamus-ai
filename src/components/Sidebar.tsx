@@ -9,7 +9,7 @@ import { clsx } from 'clsx';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/Button';
-import { X, Moon, LogIn, LogOut, LayoutDashboard, Shield, Award } from 'lucide-react';
+import { X, Moon, LogIn, LogOut, LayoutDashboard, Shield, Award, Brain } from 'lucide-react';
 import { track } from '@vercel/analytics';
 
 const navItems = [
@@ -134,6 +134,19 @@ export default function Sidebar() {
                         >
                           <Award className="mr-2 h-4 w-4" />
                           Certification Exams
+                        </Link>
+                        <Link 
+                            href="/smart-prompts" 
+                            onClick={() => {
+                                track('smart_prompts_access', {
+                                    user_email: user.email || 'unknown',
+                                    source: 'sidebar_profile'
+                                });
+                            }}
+                            className="flex items-center text-sm font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                        >
+                          <Brain className="mr-2 h-4 w-4" />
+                          Smart Prompts
                         </Link>
                         {profile?.role === 'admin' && (
                           <Link 

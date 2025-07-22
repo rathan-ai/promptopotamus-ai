@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, CheckCircle, XCircle, History, FileText, Award, Eye, User as UserIcon, ShoppingCart } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, History, FileText, Award, Eye, User as UserIcon, ShoppingCart, Brain, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -219,6 +219,60 @@ export default function DashboardPage() {
               ))}
             </ul>
           ) : ( <p className="text-neutral-500">You haven&apos;t saved any prompts yet. Use the Prompt Builder to create and save one!</p> )}
+        </div>
+      </section>
+
+      {/* Smart Prompts Section */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white">
+          <Brain className="mr-2" /> Smart Prompts
+        </h2>
+        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/50 dark:to-blue-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Brain className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h3 className="text-lg font-semibold dark:text-white mb-2">
+              Intelligent Prompt Templates & Recipes
+            </h3>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-6 max-w-md mx-auto">
+              Create reusable prompt templates with variables, or build complex multi-step recipes. 
+              {data?.certificates && data.certificates.length > 0 
+                ? ' Certified users can sell their prompts in the marketplace!' 
+                : ' Get certified to unlock marketplace features!'
+              }
+            </p>
+            <div className="flex gap-3 justify-center flex-wrap">
+              <Link href="/smart-prompts">
+                <Button className="flex items-center">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Smart Prompt
+                </Button>
+              </Link>
+              <Link href="/smart-prompts">
+                <Button variant="outline" className="flex items-center">
+                  <Brain className="w-4 h-4 mr-2" />
+                  Browse Marketplace
+                </Button>
+              </Link>
+              {(!data?.certificates || data.certificates.length === 0) && (
+                <Link href="/certificates">
+                  <Button variant="outline" className="flex items-center">
+                    <Award className="w-4 h-4 mr-2" />
+                    Get Certified
+                  </Button>
+                </Link>
+              )}
+            </div>
+            {data?.certificates && data.certificates.length > 0 && (
+              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                <p className="text-green-700 dark:text-green-300 text-sm flex items-center justify-center">
+                  <Award className="w-4 h-4 mr-2" />
+                  ✨ Certified user - Marketplace features unlocked!
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </div>
