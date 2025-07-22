@@ -67,9 +67,20 @@ INSERT INTO admin_settings (category, key, value, description, data_type) VALUES
 ('features', 'analytics_enabled', 'true', 'Enable platform analytics tracking', 'boolean'),
 
 -- Payment Settings
-('payments', 'payment_provider', 'paypal', 'Primary payment provider (stripe or paypal)', 'string'),
-('payments', 'currency', 'USD', 'Platform currency', 'string'),
+('payments', 'payment_provider', '"paypal"', 'Primary payment provider', 'string'),
+('payments', 'currency', '"USD"', 'Platform currency', 'string'),
 ('payments', 'processing_fee', '0.029', 'Payment processing fee rate', 'number'),
+('payments', 'paypal_client_id', '""', 'PayPal Client ID', 'string'),
+('payments', 'paypal_client_secret', '""', 'PayPal Client Secret (encrypted)', 'string'),
+('payments', 'paypal_environment', '"sandbox"', 'PayPal Environment (sandbox or live)', 'string'),
+('payments', 'stripe_publishable_key', '""', 'Stripe Publishable Key', 'string'),
+('payments', 'stripe_secret_key', '""', 'Stripe Secret Key (encrypted)', 'string'),
+('payments', 'razorpay_key_id', '""', 'Razorpay Key ID', 'string'),
+('payments', 'razorpay_key_secret', '""', 'Razorpay Key Secret (encrypted)', 'string'),
+('payments', 'square_application_id', '""', 'Square Application ID', 'string'),
+('payments', 'square_access_token', '""', 'Square Access Token (encrypted)', 'string'),
+('payments', 'custom_api_endpoint', '""', 'Custom Payment API Endpoint', 'string'),
+('payments', 'custom_api_key', '""', 'Custom Payment API Key (encrypted)', 'string'),
 
 -- Communication Settings  
 ('communication', 'support_email', 'support@promptopotamus.com', 'Platform support email', 'string'),

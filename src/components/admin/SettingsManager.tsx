@@ -55,6 +55,22 @@ interface AdminSettings {
     payment_provider: string;
     currency: string;
     processing_fee: number;
+    // PayPal credentials
+    paypal_client_id: string;
+    paypal_client_secret: string;
+    paypal_environment: string;
+    // Stripe credentials
+    stripe_publishable_key: string;
+    stripe_secret_key: string;
+    // Razorpay credentials
+    razorpay_key_id: string;
+    razorpay_key_secret: string;
+    // Square credentials
+    square_application_id: string;
+    square_access_token: string;
+    // Custom API credentials
+    custom_api_endpoint: string;
+    custom_api_key: string;
   };
   communication: {
     support_email: string;
@@ -180,6 +196,84 @@ export default function SettingsManager() {
         defaultValue={value}
         className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
       />
+    </div>
+  );
+
+  const renderPasswordInput = (category: string, key: string, value: string, description: string) => (
+    <div className="border border-neutral-200 dark:border-neutral-600 rounded-lg p-4">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <label className="block text-sm font-medium dark:text-white">
+            {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+          </label>
+          <p className="text-xs text-neutral-500 mt-1">{description}</p>
+        </div>
+        <Button
+          size="sm"
+          onClick={() => {
+            const input = document.getElementById(`${category}-${key}`) as HTMLInputElement;
+            if (input) {
+              updateSetting(category, key, input.value);
+            }
+          }}
+          disabled={saving === `${category}.${key}`}
+          className="ml-2"
+        >
+          {saving === `${category}.${key}` ? (
+            <RefreshCw className="w-3 h-3 animate-spin" />
+          ) : (
+            <Save className="w-3 h-3" />
+          )}
+        </Button>
+      </div>
+      <input
+        id={`${category}-${key}`}
+        type="password"
+        defaultValue={value}
+        placeholder={`Enter ${key.replace(/_/g, ' ')}`}
+        className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
+      />
+    </div>
+  );
+
+  const renderSelectInput = (category: string, key: string, value: string, description: string, options: { value: string; label: string }[]) => (
+    <div className="border border-neutral-200 dark:border-neutral-600 rounded-lg p-4">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <label className="block text-sm font-medium dark:text-white">
+            {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+          </label>
+          <p className="text-xs text-neutral-500 mt-1">{description}</p>
+        </div>
+        <Button
+          size="sm"
+          onClick={() => {
+            const select = document.getElementById(`${category}-${key}`) as HTMLSelectElement;
+            if (select) {
+              updateSetting(category, key, select.value);
+            }
+          }}
+          disabled={saving === `${category}.${key}`}
+          className="ml-2"
+        >
+          {saving === `${category}.${key}` ? (
+            <RefreshCw className="w-3 h-3 animate-spin" />
+          ) : (
+            <Save className="w-3 h-3" />
+          )}
+        </Button>
+      </div>
+      <select
+        id={`${category}-${key}`}
+        defaultValue={value}
+        className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 
@@ -404,9 +498,59 @@ export default function SettingsManager() {
 
                     {section.key === 'payments' && (
                       <>
-                        {renderTextInput('payments', 'payment_provider', settings.payments.payment_provider, 'Primary payment provider (stripe or paypal)')}
+                        {renderSelectInput('payments', 'payment_provider', settings.payments.payment_provider, 'Primary payment provider for the platform', [
+                          { value: 'stripe', label: 'Stripe' },
+                          { value: 'paypal', label: 'PayPal' },
+                          { value: 'razorpay', label: 'Razorpay' },
+                          { value: 'square', label: 'Square' },
+                          { value: 'custom', label: 'Custom API' }
+                        ])}
                         {renderTextInput('payments', 'currency', settings.payments.currency, 'Platform currency (USD, EUR, etc.)')}
                         {renderNumberInput('payments', 'processing_fee', settings.payments.processing_fee, 'Payment processing fee rate (0.029 = 2.9%)', 0.001, 0, 1)}
+                        
+                        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-3">PayPal Configuration</h4>
+                          <div className="space-y-4">
+                            {renderTextInput('payments', 'paypal_client_id', settings.payments.paypal_client_id, 'PayPal Client ID from developer dashboard')}
+                            {renderPasswordInput('payments', 'paypal_client_secret', settings.payments.paypal_client_secret, 'PayPal Client Secret (keep secure)')}
+                            {renderSelectInput('payments', 'paypal_environment', settings.payments.paypal_environment, 'PayPal environment for transactions', [
+                              { value: 'sandbox', label: 'Sandbox (Testing)' },
+                              { value: 'live', label: 'Live (Production)' }
+                            ])}
+                          </div>
+                        </div>
+
+                        <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                          <h4 className="font-semibold text-green-900 dark:text-green-100 mb-3">Stripe Configuration</h4>
+                          <div className="space-y-4">
+                            {renderTextInput('payments', 'stripe_publishable_key', settings.payments.stripe_publishable_key, 'Stripe Publishable Key (starts with pk_)')}
+                            {renderPasswordInput('payments', 'stripe_secret_key', settings.payments.stripe_secret_key, 'Stripe Secret Key (starts with sk_) - keep secure')}
+                          </div>
+                        </div>
+
+                        <div className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-3">Razorpay Configuration</h4>
+                          <div className="space-y-4">
+                            {renderTextInput('payments', 'razorpay_key_id', settings.payments.razorpay_key_id, 'Razorpay Key ID from dashboard')}
+                            {renderPasswordInput('payments', 'razorpay_key_secret', settings.payments.razorpay_key_secret, 'Razorpay Key Secret - keep secure')}
+                          </div>
+                        </div>
+
+                        <div className="mt-6 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                          <h4 className="font-semibold text-orange-900 dark:text-orange-100 mb-3">Square Configuration</h4>
+                          <div className="space-y-4">
+                            {renderTextInput('payments', 'square_application_id', settings.payments.square_application_id, 'Square Application ID from developer console')}
+                            {renderPasswordInput('payments', 'square_access_token', settings.payments.square_access_token, 'Square Access Token - keep secure')}
+                          </div>
+                        </div>
+
+                        <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Custom API Configuration</h4>
+                          <div className="space-y-4">
+                            {renderTextInput('payments', 'custom_api_endpoint', settings.payments.custom_api_endpoint, 'Custom payment API endpoint URL')}
+                            {renderPasswordInput('payments', 'custom_api_key', settings.payments.custom_api_key, 'Custom API authentication key - keep secure')}
+                          </div>
+                        </div>
                       </>
                     )}
 

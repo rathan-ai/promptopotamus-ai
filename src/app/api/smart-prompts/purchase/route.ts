@@ -1,26 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { Client, CheckoutPaymentIntent, OrderRequest, Environment } from '@paypal/paypal-server-sdk';
-
-const stripe = process.env.STRIPE_SECRET_KEY 
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-11-20.acacia',
-    })
-  : null;
-
-// Initialize PayPal client
-const paypalClient = process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET
-  ? new Client({
-      clientCredentialsAuthCredentials: {
-        oAuthClientId: process.env.PAYPAL_CLIENT_ID,
-        oAuthClientSecret: process.env.PAYPAL_CLIENT_SECRET,
-      },
-      environment: process.env.NODE_ENV === 'production' 
-        ? Environment.Live 
-        : Environment.Sandbox,
-    })
-  : null;
+import { paymentAdapter } from '@/lib/payment-adapter';
 
 export async function POST(req: Request) {
   const supabase = await createServerClient();
@@ -31,7 +11,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { promptId, paymentProvider = 'stripe' } = await req.json();
+    const { promptId } = await req.json();
 
     if (!promptId) {
       return NextResponse.json({ error: 'Prompt ID is required' }, { status: 400 });
@@ -103,83 +83,50 @@ export async function POST(req: Request) {
       });
     }
 
-    // For paid prompts, create payment based on provider
-    if (paymentProvider === 'paypal') {
-      if (!paypalClient) {
-        return NextResponse.json({ 
-          error: 'PayPal payment processing is not configured. Please contact support.' 
-        }, { status: 500 });
-      }
-
-      const orderRequest: OrderRequest = {
-        intent: CheckoutPaymentIntent.Capture,
-        purchaseUnits: [{
-          amount: {
-            currencyCode: 'USD',
-            value: prompt.price.toFixed(2),
-          },
-          description: `Smart Prompt: ${prompt.title}`,
-          customId: `smart_prompt_${promptId}_${user.id}`,
-        }],
-        applicationContext: {
-          brandName: 'Promptopotamus',
-          userAction: 'PAY_NOW',
-        },
-      };
-
-      try {
-        const response = await paypalClient.ordersController.ordersCreate({
-          body: orderRequest,
-          prefer: 'return=representation',
-        });
-
-        if (response.statusCode !== 201 || !response.result.id) {
-          return NextResponse.json({ 
-            error: 'Failed to create PayPal order' 
-          }, { status: 500 });
-        }
-
-        return NextResponse.json({
-          success: true,
-          paypalOrderId: response.result.id,
-          amount: prompt.price,
-          promptTitle: prompt.title,
-          sellerName: prompt.profiles?.full_name || 'Unknown Creator'
-        });
-      } catch (error) {
-        console.error('PayPal order creation error:', error);
-        return NextResponse.json({ 
-          error: 'Failed to create PayPal payment' 
-        }, { status: 500 });
-      }
-    } else {
-      // Stripe payment (legacy)
-      if (!stripe) {
-        return NextResponse.json({ 
-          error: 'Stripe payment processing is not configured. Please contact support.' 
-        }, { status: 500 });
-      }
-
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(prompt.price * 100), // Convert to cents
-        currency: 'usd',
+    // For paid prompts, use the universal payment adapter
+    try {
+      const paymentResponse = await paymentAdapter.createPayment({
+        amount: prompt.price,
+        currency: 'USD',
+        description: `Smart Prompt: ${prompt.title}`,
+        userId: user.id,
         metadata: {
           type: 'smart_prompt_purchase',
           prompt_id: promptId.toString(),
           buyer_id: user.id,
           seller_id: prompt.user_id,
           prompt_title: prompt.title,
-        },
-        description: `Purchase of Smart Prompt: ${prompt.title}`,
+          returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/smart-prompts/purchase-success`,
+          cancelUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/smart-prompts/purchase-cancelled`,
+          orderId: `smart_prompt_${promptId}_${user.id}`
+        }
       });
+
+      if (!paymentResponse.success) {
+        return NextResponse.json({ 
+          error: paymentResponse.error || 'Failed to create payment' 
+        }, { status: 500 });
+      }
+
+      // Get active payment provider for response
+      const activeProvider = await paymentAdapter.getActiveProvider();
 
       return NextResponse.json({
         success: true,
-        clientSecret: paymentIntent.client_secret,
+        transactionId: paymentResponse.transactionId,
+        clientSecret: paymentResponse.clientSecret,
+        redirectUrl: paymentResponse.redirectUrl,
         amount: prompt.price,
         promptTitle: prompt.title,
-        sellerName: prompt.profiles?.full_name || 'Unknown Creator'
+        sellerName: prompt.profiles?.full_name || 'Unknown Creator',
+        paymentProvider: activeProvider?.id || 'unknown'
       });
+
+    } catch (error) {
+      console.error('Payment creation error:', error);
+      return NextResponse.json({ 
+        error: 'Failed to create payment. Please try again or contact support.' 
+      }, { status: 500 });
     }
 
   } catch (error) {
@@ -198,117 +145,120 @@ export async function PUT(req: Request) {
   }
 
   try {
-    const { paymentIntentId, status, paypalOrderId, paymentProvider = 'stripe' } = await req.json();
+    const { transactionId, paymentMethodId } = await req.json();
 
-    if (paymentProvider === 'paypal' && paypalOrderId && status === 'approved') {
-      if (!paypalClient) {
-        return NextResponse.json({ 
-          error: 'PayPal payment processing is not configured' 
-        }, { status: 500 });
-      }
-
-      try {
-        // Capture the PayPal payment
-        const captureResponse = await paypalClient.ordersController.ordersCapture({
-          id: paypalOrderId,
-          prefer: 'return=representation',
-        });
-
-        if (captureResponse.statusCode === 201 && captureResponse.result.status === 'COMPLETED') {
-          const orderDetails = captureResponse.result;
-          const purchaseUnit = orderDetails.purchaseUnits?.[0];
-          const customId = purchaseUnit?.customId || '';
-          
-          // Parse custom ID to get prompt and user info
-          const [, promptIdStr, buyerId] = customId.split('_');
-          const promptId = parseInt(promptIdStr);
-          
-          if (!promptId || buyerId !== user.id) {
-            return NextResponse.json({ error: 'Invalid purchase data' }, { status: 400 });
-          }
-
-          // Get prompt details for seller ID
-          const { data: prompt } = await supabase
-            .from('saved_prompts')
-            .select('user_id')
-            .eq('id', promptId)
-            .single();
-
-          if (!prompt) {
-            return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
-          }
-
-          // Create purchase record
-          const { error: purchaseError } = await supabase
-            .from('smart_prompt_purchases')
-            .insert({
-              prompt_id: promptId,
-              buyer_id: user.id,
-              seller_id: prompt.user_id,
-              purchase_price: parseFloat(purchaseUnit?.amount?.value || '0'),
-              paypal_order_id: paypalOrderId,
-              purchased_at: new Date().toISOString()
-            });
-
-          if (purchaseError) {
-            console.error('Error recording PayPal purchase:', purchaseError);
-            return NextResponse.json({ error: 'Failed to record purchase' }, { status: 500 });
-          }
-
-          // Update download count
-          await supabase
-            .from('saved_prompts')
-            .update({ downloads_count: supabase.sql`downloads_count + 1` })
-            .eq('id', promptId);
-
-          return NextResponse.json({ success: true, message: 'PayPal purchase completed successfully' });
-        } else {
-          return NextResponse.json({ error: 'PayPal payment capture failed' }, { status: 400 });
-        }
-      } catch (error) {
-        console.error('PayPal capture error:', error);
-        return NextResponse.json({ error: 'Failed to capture PayPal payment' }, { status: 500 });
-      }
-    } else if (paymentProvider === 'stripe' && paymentIntentId && status === 'succeeded') {
-      // Handle Stripe payment (legacy)
-      if (!stripe) {
-        return NextResponse.json({ 
-          error: 'Stripe payment processing is not configured' 
-        }, { status: 500 });
-      }
-
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-      const metadata = paymentIntent.metadata;
-
-      if (metadata.type === 'smart_prompt_purchase') {
-        // Create purchase record
-        const { error: purchaseError } = await supabase
-          .from('smart_prompt_purchases')
-          .insert({
-            prompt_id: parseInt(metadata.prompt_id),
-            buyer_id: metadata.buyer_id,
-            seller_id: metadata.seller_id,
-            purchase_price: paymentIntent.amount / 100, // Convert back to dollars
-            stripe_payment_intent_id: paymentIntentId,
-            purchased_at: new Date().toISOString()
-          });
-
-        if (purchaseError) {
-          console.error('Error recording Stripe purchase:', purchaseError);
-          return NextResponse.json({ error: 'Failed to record purchase' }, { status: 500 });
-        }
-
-        // Update download count
-        await supabase
-          .from('saved_prompts')
-          .update({ downloads_count: supabase.sql`downloads_count + 1` })
-          .eq('id', parseInt(metadata.prompt_id));
-
-        return NextResponse.json({ success: true, message: 'Stripe purchase recorded successfully' });
-      }
+    if (!transactionId) {
+      return NextResponse.json({ error: 'Transaction ID is required' }, { status: 400 });
     }
 
-    return NextResponse.json({ error: 'Invalid payment status, provider, or data' }, { status: 400 });
+    try {
+      // Use universal payment adapter to confirm the payment
+      const confirmResponse = await paymentAdapter.confirmPayment(transactionId, paymentMethodId);
+
+      if (!confirmResponse.success) {
+        return NextResponse.json({ 
+          error: confirmResponse.error || 'Payment confirmation failed' 
+        }, { status: 400 });
+      }
+
+      // Get payment details to extract metadata
+      const statusResponse = await paymentAdapter.getPaymentStatus(transactionId);
+      
+      if (statusResponse.status === 'error') {
+        return NextResponse.json({ error: 'Failed to get payment details' }, { status: 500 });
+      }
+
+      // Parse the metadata from the payment details
+      let promptId: number;
+      let buyerId: string;
+      let sellerId: string;
+      let purchasePrice: number;
+
+      // Extract metadata from payment details (varies by provider)
+      const details = statusResponse.details;
+      const activeProvider = await paymentAdapter.getActiveProvider();
+
+      if (activeProvider?.id === 'paypal') {
+        // PayPal: extract from custom_id
+        const customId = details?.purchase_units?.[0]?.custom_id || '';
+        const [, promptIdStr, userIdFromCustom] = customId.split('_');
+        promptId = parseInt(promptIdStr);
+        buyerId = userIdFromCustom;
+        purchasePrice = parseFloat(details?.purchase_units?.[0]?.amount?.value || '0');
+      } else if (activeProvider?.id === 'stripe') {
+        // Stripe: extract from metadata
+        const metadata = details?.metadata || {};
+        promptId = parseInt(metadata.prompt_id);
+        buyerId = metadata.buyer_id;
+        sellerId = metadata.seller_id;
+        purchasePrice = details?.amount ? details.amount / 100 : 0; // Convert from cents
+      } else {
+        // Custom API: expect consistent metadata format
+        const metadata = details?.metadata || details;
+        promptId = parseInt(metadata.prompt_id);
+        buyerId = metadata.buyer_id;
+        sellerId = metadata.seller_id;
+        purchasePrice = parseFloat(metadata.amount || details?.amount || '0');
+      }
+
+      // Validate extracted data
+      if (!promptId || buyerId !== user.id) {
+        return NextResponse.json({ error: 'Invalid payment metadata' }, { status: 400 });
+      }
+
+      // Get prompt details if seller ID not available
+      if (!sellerId) {
+        const { data: prompt } = await supabase
+          .from('saved_prompts')
+          .select('user_id, price')
+          .eq('id', promptId)
+          .single();
+
+        if (!prompt) {
+          return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
+        }
+
+        sellerId = prompt.user_id;
+        if (!purchasePrice) {
+          purchasePrice = prompt.price;
+        }
+      }
+
+      // Create purchase record
+      const { error: purchaseError } = await supabase
+        .from('smart_prompt_purchases')
+        .insert({
+          prompt_id: promptId,
+          buyer_id: user.id,
+          seller_id: sellerId,
+          purchase_price: purchasePrice,
+          transaction_id: confirmResponse.transactionId || transactionId,
+          payment_provider: activeProvider?.id || 'unknown',
+          purchased_at: new Date().toISOString()
+        });
+
+      if (purchaseError) {
+        console.error('Error recording purchase:', purchaseError);
+        return NextResponse.json({ error: 'Failed to record purchase' }, { status: 500 });
+      }
+
+      // Update download count
+      await supabase
+        .from('saved_prompts')
+        .update({ downloads_count: supabase.sql`downloads_count + 1` })
+        .eq('id', promptId);
+
+      return NextResponse.json({ 
+        success: true, 
+        message: `Purchase completed successfully via ${activeProvider?.name || 'payment provider'}` 
+      });
+
+    } catch (error) {
+      console.error('Payment confirmation error:', error);
+      return NextResponse.json({ 
+        error: 'Failed to confirm payment. Please contact support if you were charged.' 
+      }, { status: 500 });
+    }
 
   } catch (error) {
     console.error('Error handling payment confirmation:', error);
