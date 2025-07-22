@@ -33,15 +33,16 @@ export async function GET() {
 
         console.log(`Found ${users.length} auth users`);
 
-        // Get all profiles with certificates using admin client for better permissions
-        const { data: profiles, error: profilesError } = await supabaseAdmin.from('profiles').select(`
+        // Get all profiles with certificates using regular client for proper relationships
+        const { data: profiles, error: profilesError } = await supabase.from('profiles').select(`
             id, 
             full_name, 
             role, 
             subscription_tier,
             subscription_status,
             subscription_start_date,
-            subscription_end_date
+            subscription_end_date,
+            user_certificates(*)
         `);
 
         if (profilesError) {
@@ -50,32 +51,13 @@ export async function GET() {
         }
 
         console.log(`Found ${profiles?.length || 0} profiles`);
-
-        // Get user certificates separately
-        const { data: userCertificates, error: certsError } = await supabaseAdmin.from('user_certificates').select('*');
-
-        if (certsError) {
-            console.error('Certificates fetch error:', certsError);
-        }
-
-        console.log(`Found ${userCertificates?.length || 0} certificates`);
         
         const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
-        
-        // Group certificates by user
-        const certificatesByUser = new Map();
-        userCertificates?.forEach(cert => {
-            if (!certificatesByUser.has(cert.user_id)) {
-                certificatesByUser.set(cert.user_id, []);
-            }
-            certificatesByUser.get(cert.user_id).push(cert);
-        });
 
         // Combine auth users with profiles and certificates
         console.log('Using auth users with profiles as data source');
         const combinedData = users.map(user => {
             const profile = profilesMap.get(user.id);
-            const certificates = certificatesByUser.get(user.id) || [];
             
             return {
                 id: user.id,
@@ -88,7 +70,7 @@ export async function GET() {
                 subscription_status: profile?.subscription_status || 'inactive',
                 subscription_start_date: profile?.subscription_start_date,
                 subscription_end_date: profile?.subscription_end_date,
-                user_certificates: certificates,
+                user_certificates: profile?.user_certificates || [],
             };
         }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
