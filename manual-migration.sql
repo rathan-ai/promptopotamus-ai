@@ -1,11 +1,14 @@
--- Create admin settings table for dynamic platform configuration
+-- Admin Settings Table Creation (Manual)
+-- Run this SQL in Supabase SQL Editor or pgAdmin
+
+-- Create the admin_settings table
 CREATE TABLE IF NOT EXISTS admin_settings (
     id SERIAL PRIMARY KEY,
-    category TEXT NOT NULL, -- 'subscription', 'limits', 'features', 'payments', etc.
-    key TEXT NOT NULL,      -- setting identifier
-    value JSONB NOT NULL,   -- setting value (can store strings, numbers, objects, arrays)
-    description TEXT,       -- human-readable description
-    data_type TEXT NOT NULL DEFAULT 'string', -- 'string', 'number', 'boolean', 'json', 'array'
+    category TEXT NOT NULL,
+    key TEXT NOT NULL,
+    value JSONB NOT NULL,
+    description TEXT,
+    data_type TEXT NOT NULL DEFAULT 'string',
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -13,7 +16,7 @@ CREATE TABLE IF NOT EXISTS admin_settings (
     UNIQUE(category, key)
 );
 
--- Create index for faster lookups
+-- Create indexes
 CREATE INDEX IF NOT EXISTS idx_admin_settings_category_key ON admin_settings(category, key);
 CREATE INDEX IF NOT EXISTS idx_admin_settings_active ON admin_settings(is_active);
 
@@ -30,7 +33,7 @@ FOR ALL USING (
     )
 );
 
--- Insert default platform settings
+-- Insert default platform settings with proper JSON formatting
 INSERT INTO admin_settings (category, key, value, description, data_type) VALUES
 -- Subscription Pricing
 ('subscription', 'free_tier_price', '0', 'Price for Free tier subscription', 'number'),
@@ -85,45 +88,13 @@ INSERT INTO admin_settings (category, key, value, description, data_type) VALUES
 -- Communication Settings  
 ('communication', 'support_email', '"support@promptopotamus.com"', 'Platform support email', 'string'),
 ('communication', 'company_name', '"Innorag Technologies Private Limited"', 'Company name for certificates', 'string'),
-('communication', 'platform_name', '"Promptopotamus"', 'Platform display name', 'string');
+('communication', 'platform_name', '"Promptopotamus"', 'Platform display name', 'string')
 
--- Create admin users management table
-CREATE TABLE IF NOT EXISTS admin_users (
-    id UUID PRIMARY KEY REFERENCES auth.users(id),
-    email TEXT NOT NULL,
-    full_name TEXT,
-    role TEXT NOT NULL DEFAULT 'admin', -- 'admin', 'super_admin', 'moderator'
-    permissions JSONB DEFAULT '[]'::jsonb, -- array of permissions
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    created_by UUID REFERENCES auth.users(id),
-    last_active TIMESTAMP WITH TIME ZONE
-);
-
--- Enable RLS for admin users
-ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
-
--- Policy for admin users management
-CREATE POLICY "Super admins can manage admin users" ON admin_users
-FOR ALL USING (
-    EXISTS (
-        SELECT 1 FROM auth.users 
-        WHERE auth.users.id = auth.uid() 
-        AND auth.users.raw_user_meta_data->>'role' = 'super_admin'
-    )
-);
-
-CREATE POLICY "Admins can view admin users" ON admin_users
-FOR SELECT USING (
-    EXISTS (
-        SELECT 1 FROM auth.users 
-        WHERE auth.users.id = auth.uid() 
-        AND (
-            auth.users.raw_user_meta_data->>'role' = 'super_admin' OR
-            auth.users.raw_user_meta_data->>'is_admin' = 'true'
-        )
-    )
-);
+ON CONFLICT (category, key) DO UPDATE SET
+    value = EXCLUDED.value,
+    description = EXCLUDED.description,
+    data_type = EXCLUDED.data_type,
+    updated_at = NOW();
 
 -- Function to get settings by category
 CREATE OR REPLACE FUNCTION get_admin_settings(setting_category TEXT DEFAULT NULL)
