@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart, Users, Zap, Calendar, Clock, Link2, Settings } from 'lucide-react';
+import { BarChart, Users, Zap, Calendar, Clock, Link2, Settings, Mail, Brain, FileText, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { certificates as certDetails } from '@/lib/data';
 import AffiliateManager from '@/components/admin/AffiliateManager';
@@ -10,6 +10,17 @@ import UserSubscriptionManager from '@/components/admin/UserSubscriptionManager'
 interface Stat {
   totalUsers: number;
   totalCertificates: number;
+  newsletterSubscribers: number;
+  quizAttempts: number;
+  savedPrompts: number;
+  affiliateResources: number;
+  subscriptionBreakdown: {
+    free: number;
+    pro: number;
+    premium: number;
+    active: number;
+    inactive: number;
+  };
 }
 
 interface User {
@@ -81,14 +92,38 @@ export default function AdminDashboardPage() {
       <h1 className="text-3xl font-bold mb-8 dark:text-white">Admin Dashboard</h1>
       
       {/* Statistics Cards - Always Visible */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><Users className="mr-2" /> Total Users</h3>
           <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.totalUsers}</p>
         </div>
         <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><BarChart className="mr-2" /> Certificates Issued</h3>
+          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><BarChart className="mr-2" /> Certificates</h3>
           <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.totalCertificates}</p>
+        </div>
+        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><Mail className="mr-2" /> Newsletter</h3>
+          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.newsletterSubscribers}</p>
+        </div>
+        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><Brain className="mr-2" /> Quiz Attempts</h3>
+          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.quizAttempts}</p>
+        </div>
+        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><FileText className="mr-2" /> Saved Prompts</h3>
+          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.savedPrompts}</p>
+        </div>
+        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><Package className="mr-2" /> Affiliates</h3>
+          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.affiliateResources}</p>
+        </div>
+        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><Users className="mr-2" /> Active Subs</h3>
+          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.subscriptionBreakdown?.active}</p>
+        </div>
+        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-neutral-600 dark:text-neutral-300 flex items-center"><BarChart className="mr-2" /> Premium Users</h3>
+          <p className="text-4xl font-bold mt-2">{loading ? '...' : stats?.subscriptionBreakdown?.premium}</p>
         </div>
       </div>
 
