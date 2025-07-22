@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Loader2, CheckCircle, AlertTriangle, Info, ExternalLink, Crown, Lightbulb, BookOpen, TrendingUp, Users, Calendar } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import UpgradeModal from './UpgradeModal';
+import { getSettings, type LimitSettings } from '@/lib/admin-settings';
 
 interface AnalysisResult {
     score: number;
@@ -24,9 +25,34 @@ const samplePrompts = [
 export default function PromptAnalyzer() {
     const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [usageCount, setUsageCount] = useState(5);
+    const [usageCount, setUsageCount] = useState(5); // Will be updated from settings
     const [currentPrompt, setCurrentPrompt] = useState('');
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [limitSettings, setLimitSettings] = useState<LimitSettings>({
+        prompt_builder_free_daily: 3,
+        prompt_analyzer_free_daily: 5,
+        prompt_builder_pro_daily: 25,
+        prompt_analyzer_pro_daily: 50,
+        prompt_builder_premium_daily: -1,
+        prompt_analyzer_premium_daily: -1,
+    });
+
+    // Load limit settings from admin configuration
+    useEffect(() => {
+        const loadLimitSettings = async () => {
+            try {
+                const settings = await getSettings('limits') as LimitSettings;
+                setLimitSettings(settings);
+                // Update initial usage count based on settings (assuming free tier for now)
+                setUsageCount(settings.prompt_analyzer_free_daily);
+            } catch (error) {
+                console.error('Failed to load limit settings:', error);
+                // Keep default values if loading fails
+            }
+        };
+        
+        loadLimitSettings();
+    }, []);
 
     const analyzePrompt = (prompt: string): AnalysisResult => {
         let score = 0;
@@ -165,7 +191,7 @@ export default function PromptAnalyzer() {
                 </div>
                 <div className="text-right">
                     <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                        Free analyses: {usageCount}/5
+                        Free analyses: {usageCount}/{limitSettings.prompt_analyzer_free_daily}
                     </div>
                     {usageCount <= 1 && (
                         <button 
@@ -437,7 +463,7 @@ export default function PromptAnalyzer() {
                                     variant="outline"
                                     onClick={() => {
                                         track('tomorrow_reminder_analyzer');
-                                        toast.success('Come back tomorrow for 5 more free analyses!');
+                                        toast.success(`Come back tomorrow for ${limitSettings.prompt_analyzer_free_daily} more free analyses!`);
                                     }}
                                     className="border-rose-300 text-rose-700 hover:bg-rose-100 dark:hover:bg-rose-900/30"
                                 >

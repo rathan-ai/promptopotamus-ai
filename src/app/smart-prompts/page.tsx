@@ -5,7 +5,7 @@ import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye } from 'lucid
 import { Button } from '@/components/ui/Button';
 import SmartPromptsBuilder from '@/components/SmartPromptsBuilder';
 import PromptPreviewModal from '@/components/PromptPreviewModal';
-import StripePaymentModal from '@/components/StripePaymentModal';
+import PayPalPaymentModal from '@/components/PayPalPaymentModal';
 import toast from 'react-hot-toast';
 
 interface Variable {
@@ -473,9 +473,9 @@ export default function SmartPromptsPage() {
         />
       )}
 
-      {/* Stripe Payment Modal */}
+      {/* PayPal Payment Modal */}
       {selectedPromptForPurchase && showPaymentModal && (
-        <StripePaymentModal
+        <PayPalPaymentModal
           isOpen={showPaymentModal}
           onClose={() => {
             setShowPaymentModal(false);

@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@paypal/paypal-js": "^8.2.0",
+    "@paypal/paypal-server-sdk": "^1.1.0",
+    "@paypal/react-paypal-js": "^8.8.3",
     "@radix-ui/react-slot": "^1.2.3",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.5.0",

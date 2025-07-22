@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { certificates as certDetails } from '@/lib/data';
 import AffiliateManager from '@/components/admin/AffiliateManager';
 import UserSubscriptionManager from '@/components/admin/UserSubscriptionManager';
+import SettingsManager from '@/components/admin/SettingsManager';
 
 interface Stat {
   totalUsers: number;
@@ -41,7 +42,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stat | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'affiliates'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'affiliates' | 'settings'>('dashboard');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
@@ -108,6 +109,7 @@ export default function AdminDashboardPage() {
     { id: 'dashboard', name: 'Dashboard', icon: BarChart },
     { id: 'users', name: 'User Management', icon: Users },
     { id: 'affiliates', name: 'Affiliate Manager', icon: Link2 },
+    { id: 'settings', name: 'Platform Settings', icon: Settings },
   ];
 
   return (
@@ -159,7 +161,7 @@ export default function AdminDashboardPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as 'dashboard' | 'users' | 'affiliates')}
+                  onClick={() => setActiveTab(tab.id as 'dashboard' | 'users' | 'affiliates' | 'settings')}
                   className={`flex items-center px-1 py-4 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
                       ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
@@ -282,6 +284,10 @@ export default function AdminDashboardPage() {
       
       {activeTab === 'affiliates' && (
         <AffiliateManager />
+      )}
+      
+      {activeTab === 'settings' && (
+        <SettingsManager />
       )}
       
       {selectedUser && (

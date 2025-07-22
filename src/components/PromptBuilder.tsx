@@ -8,6 +8,7 @@ import type { User } from '@supabase/supabase-js';
 import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown, Calendar, Bell, BookOpen } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import UpgradeModal from './UpgradeModal';
+import { getSettings, type LimitSettings } from '@/lib/admin-settings';
 
 const promptSuggestions = [
     { persona: "Marketing Expert", task: "Create a compelling email campaign", context: "For a new product launch targeting millennials", format: "Subject line and 3-paragraph email" },
@@ -29,8 +30,16 @@ export default function PromptBuilder() {
     const [enhancedPrompt, setEnhancedPrompt] = useState('');
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const [usageCount, setUsageCount] = useState(3); // Free tier limit
+    const [usageCount, setUsageCount] = useState(3); // Free tier limit (will be updated from settings)
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [limitSettings, setLimitSettings] = useState<LimitSettings>({
+        prompt_builder_free_daily: 3,
+        prompt_analyzer_free_daily: 5,
+        prompt_builder_pro_daily: 25,
+        prompt_analyzer_pro_daily: 50,
+        prompt_builder_premium_daily: -1,
+        prompt_analyzer_premium_daily: -1,
+    });
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -39,6 +48,21 @@ export default function PromptBuilder() {
             setUser(user);
         };
         fetchUser();
+
+        // Load limit settings from admin configuration
+        const loadLimitSettings = async () => {
+            try {
+                const settings = await getSettings('limits') as LimitSettings;
+                setLimitSettings(settings);
+                // Update initial usage count based on settings (assuming free tier for now)
+                setUsageCount(settings.prompt_builder_free_daily);
+            } catch (error) {
+                console.error('Failed to load limit settings:', error);
+                // Keep default values if loading fails
+            }
+        };
+        
+        loadLimitSettings();
     }, []);
 
     const buildPromptText = () => {
@@ -200,7 +224,7 @@ export default function PromptBuilder() {
                 </div>
                 <div className="text-right">
                     <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                        Free AI enhancements: {usageCount}/3
+                        Free AI enhancements: {usageCount}/{limitSettings.prompt_builder_free_daily}
                     </div>
                     {usageCount <= 1 && (
                         <button 
@@ -467,7 +491,7 @@ export default function PromptBuilder() {
                                     variant="outline"
                                     onClick={() => {
                                         track('tomorrow_reminder_set');
-                                        toast.success('Come back tomorrow for 3 more free enhancements!');
+                                        toast.success(`Come back tomorrow for ${limitSettings.prompt_builder_free_daily} more free enhancements!`);
                                     }}
                                     className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
                                 >

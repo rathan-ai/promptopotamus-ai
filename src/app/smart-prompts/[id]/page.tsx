@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
-import StripePaymentModal from '@/components/StripePaymentModal';
+import PayPalPaymentModal from '@/components/PayPalPaymentModal';
 import ReviewsList from '@/components/ReviewsList';
 
 interface SmartPromptDetail {
@@ -651,7 +651,7 @@ export default function SmartPromptDetailPage() {
 
       {/* Stripe Payment Modal */}
       {prompt && showPaymentModal && (
-        <StripePaymentModal
+        <PayPalPaymentModal
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
           onSuccess={handlePaymentSuccess}

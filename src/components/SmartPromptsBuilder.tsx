@@ -19,6 +19,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getSettings, type SmartPromptSettings } from '@/lib/admin-settings';
 
 interface Variable {
   name: string;
@@ -98,10 +99,35 @@ export default function SmartPromptsBuilder({
     price: 0,
     ...initialData
   });
+  
+  const [pricingSettings, setPricingSettings] = useState<SmartPromptSettings>({
+    max_free_prompts_personal: 10,
+    default_commission_rate: 0.20,
+    pro_commission_rate: 0.15,
+    premium_commission_rate: 0.10,
+    allow_user_pricing: true,
+    min_price: 1.00,
+    max_price: 99.99,
+  });
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  
+  // Load pricing settings from admin configuration
+  useEffect(() => {
+    const loadPricingSettings = async () => {
+      try {
+        const settings = await getSettings('smart_prompts') as SmartPromptSettings;
+        setPricingSettings(settings);
+      } catch (error) {
+        console.error('Failed to load pricing settings:', error);
+        // Keep default values if loading fails
+      }
+    };
+    
+    loadPricingSettings();
+  }, []);
   const [newTag, setNewTag] = useState('');
   const [newUseCase, setNewUseCase] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -736,16 +762,26 @@ export default function SmartPromptsBuilder({
                           <input
                             type="number"
                             min="0"
+                            max={pricingSettings.max_price}
                             step="0.01"
                             value={formData.price}
-                            onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                            onChange={(e) => {
+                              const price = parseFloat(e.target.value) || 0;
+                              const clampedPrice = Math.min(Math.max(price, 0), pricingSettings.max_price);
+                              setFormData(prev => ({ ...prev, price: clampedPrice }));
+                            }}
                             placeholder="0.00"
                             className="w-full pl-10 pr-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
                           />
                         </div>
-                        <p className="text-sm text-neutral-500 mt-1">
-                          Set to $0.00 for free prompts. You&apos;ll earn {formData.price > 25 ? '85%' : '80%'} of paid sales.
-                        </p>
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-neutral-500 mt-1">
+                            Set to $0.00 for free prompts. You&apos;ll earn {Math.round((1 - pricingSettings.default_commission_rate) * 100)}% of paid sales.
+                          </p>
+                          <p className="text-xs text-neutral-400 mt-1">
+                            Max: ${pricingSettings.max_price.toFixed(2)}
+                          </p>
+                        </div>
                       </div>
 
                       {/* Example Inputs/Outputs */}
