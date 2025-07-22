@@ -1,15 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Grid, List, Star, Download, DollarSign } from 'lucide-react';
+import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import SmartPromptsBuilder from '@/components/SmartPromptsBuilder';
+import PromptPreviewModal from '@/components/PromptPreviewModal';
+import StripePaymentModal from '@/components/StripePaymentModal';
 import toast from 'react-hot-toast';
+
+interface Variable {
+  name: string;
+  type: 'text' | 'select' | 'textarea' | 'number';
+  description: string;
+  required: boolean;
+  options?: string[];
+  defaultValue?: string;
+}
 
 interface SmartPrompt {
   id: number;
   title: string;
   description: string;
+  prompt_text: string;
   complexity_level: 'simple' | 'smart' | 'recipe';
   category: string;
   difficulty_level: 'beginner' | 'intermediate' | 'advanced';
@@ -20,6 +32,8 @@ interface SmartPrompt {
   rating_count: number;
   use_cases: string[];
   ai_model_compatibility: string[];
+  variables: Variable[];
+  example_inputs: Record<string, string>;
   created_at: string;
   profiles?: { full_name: string };
 }
@@ -63,6 +77,10 @@ export default function SmartPromptsPage() {
     hasValidCertificate: false,
     certificates: []
   });
+  const [previewPrompt, setPreviewPrompt] = useState<SmartPrompt | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPromptForPurchase, setSelectedPromptForPurchase] = useState<SmartPrompt | null>(null);
 
   const fetchPrompts = async () => {
     try {
@@ -165,6 +183,34 @@ export default function SmartPromptsPage() {
     }
   };
 
+  const handlePreview = (prompt: SmartPrompt) => {
+    setPreviewPrompt(prompt);
+    setShowPreviewModal(true);
+  };
+
+  const handlePreviewPurchase = () => {
+    if (previewPrompt) {
+      setSelectedPromptForPurchase(previewPrompt);
+      setShowPreviewModal(false);
+      
+      // If it's a free prompt, handle directly
+      if (previewPrompt.price === 0) {
+        handlePurchase(previewPrompt.id);
+      } else {
+        // For paid prompts, show payment modal
+        setShowPaymentModal(true);
+      }
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    toast.success('🎉 Smart Prompt purchased successfully!');
+    setShowPaymentModal(false);
+    setSelectedPromptForPurchase(null);
+    // Refresh prompts to update purchase status
+    fetchPrompts();
+  };
+
   const renderStars = (rating: number, count: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -231,7 +277,12 @@ export default function SmartPromptsPage() {
       <div className="flex items-center justify-between">
         {renderStars(prompt.rating_average, prompt.rating_count)}
         <div className="flex gap-2">
-          <Button size="sm" variant="outline">
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => handlePreview(prompt)}
+          >
+            <Eye className="w-3 h-3 mr-1" />
             Preview
           </Button>
           <Button 
@@ -409,6 +460,33 @@ export default function SmartPromptsPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewPrompt && showPreviewModal && (
+        <PromptPreviewModal
+          isOpen={showPreviewModal}
+          onClose={() => setShowPreviewModal(false)}
+          prompt={previewPrompt}
+          onPurchase={handlePreviewPurchase}
+          showPurchaseButton={true}
+        />
+      )}
+
+      {/* Stripe Payment Modal */}
+      {selectedPromptForPurchase && showPaymentModal && (
+        <StripePaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setSelectedPromptForPurchase(null);
+          }}
+          onSuccess={handlePaymentSuccess}
+          promptId={selectedPromptForPurchase.id}
+          amount={selectedPromptForPurchase.price}
+          promptTitle={selectedPromptForPurchase.title}
+          sellerName={selectedPromptForPurchase.profiles?.full_name || 'Unknown Creator'}
+        />
       )}
     </div>
   );
