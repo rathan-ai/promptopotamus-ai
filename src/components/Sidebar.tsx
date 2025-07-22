@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/Button';
 import { X, Moon, LogIn, LogOut, LayoutDashboard, Shield } from 'lucide-react';
+import { track } from '@vercel/analytics';
 
 const navItems = [
     { title: 'Home & Tools', links: [
@@ -19,6 +20,7 @@ const navItems = [
     ]},
     { title: 'Resources', links: [
       { href: '/templates', label: 'AI Templates' },
+      { href: '/resources', label: 'Premium Tools' },
       { href: '/#prompt-recipes', label: 'Prompt Recipes' },
     ]},
     { title: 'Guides', links: [
@@ -108,23 +110,60 @@ export default function Sidebar() {
                       <p className="text-sm text-neutral-500 dark:text-neutral-400">Signed in as</p>
                       <p className="font-semibold truncate">{user.email}</p>
                       <div className="space-y-2 mt-3">
-                        <Link href="/dashboard" className="flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                        <Link 
+                            href="/dashboard" 
+                            onClick={() => {
+                                track('dashboard_access', {
+                                    user_email: user.email || 'unknown',
+                                    source: 'sidebar'
+                                });
+                            }}
+                            className="flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                        >
                           <LayoutDashboard className="mr-2 h-4 w-4" />
                           View Dashboard
                         </Link>
                         {profile?.role === 'admin' && (
-                          <Link href="/admin" className="flex items-center text-sm font-semibold text-red-500 hover:underline">
+                          <Link 
+                              href="/admin"
+                              onClick={() => {
+                                  track('admin_access', {
+                                      user_email: user.email || 'unknown',
+                                      source: 'sidebar'
+                                  });
+                              }} 
+                              className="flex items-center text-sm font-semibold text-red-500 hover:underline"
+                          >
                             <Shield className="mr-2 h-4 w-4" />
                             Admin Dashboard
                           </Link>
                         )}
                       </div>
-                      <Button variant="link" size="sm" onClick={handleSignOut} className="text-red-500 p-0 h-auto mt-2">
+                      <Button 
+                          variant="link" 
+                          size="sm" 
+                          onClick={() => {
+                              track('user_sign_out', {
+                                  user_email: user.email || 'unknown',
+                                  source: 'sidebar'
+                              });
+                              handleSignOut();
+                          }} 
+                          className="text-red-500 p-0 h-auto mt-2"
+                      >
                         <LogOut className="mr-1 h-4 w-4" /> Sign Out
                       </Button>
                   </div>
               ) : (
-                  <Link href="/login" passHref>
+                  <Link 
+                      href="/login" 
+                      onClick={() => {
+                          track('login_access', {
+                              source: 'sidebar'
+                          });
+                      }}
+                      passHref
+                  >
                     <Button className="w-full">
                       <LogIn className="mr-2 h-4 w-4" /> Login / Sign Up
                     </Button>
@@ -137,7 +176,21 @@ export default function Sidebar() {
                 <div key={i}>
                     <p className="px-3 pt-4 pb-2 text-xs font-semibold uppercase text-neutral-500 dark:text-neutral-400 tracking-wider">{section.title}</p>
                     {section.links.map((link, j) => (
-                        <Link href={link.href} key={j} className="block py-2 px-3 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-600 dark:text-neutral-300">
+                        <Link 
+                            href={link.href} 
+                            key={j} 
+                            onClick={() => {
+                                // Track navigation clicks
+                                track('navigation_click', {
+                                    section: section.title,
+                                    label: link.label,
+                                    href: link.href,
+                                    is_external: link.href.startsWith('http'),
+                                    is_anchor: link.href.includes('#')
+                                });
+                            }}
+                            className="block py-2 px-3 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-600 dark:text-neutral-300"
+                        >
                             {link.label}
                         </Link>
                     ))}
@@ -146,7 +199,18 @@ export default function Sidebar() {
           </nav>
           
           <div className="mt-6 space-y-2">
-             <Button variant="outline" onClick={toggleTheme} className="w-full">
+             <Button 
+                 variant="outline" 
+                 onClick={() => {
+                     const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                     track('theme_toggle', {
+                         from_theme: currentTheme,
+                         to_theme: currentTheme === 'dark' ? 'light' : 'dark'
+                     });
+                     toggleTheme();
+                 }} 
+                 className="w-full"
+             >
                  <Moon className="mr-2 h-4 w-4" /> Toggle Theme
              </Button>
           </div>

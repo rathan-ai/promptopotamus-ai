@@ -5,11 +5,30 @@ import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { Save } from 'lucide-react';
+import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown } from 'lucide-react';
+import { track } from '@vercel/analytics';
+
+const promptSuggestions = [
+    { persona: "Marketing Expert", task: "Create a compelling email campaign", context: "For a new product launch targeting millennials", format: "Subject line and 3-paragraph email" },
+    { persona: "Data Scientist", task: "Analyze customer behavior patterns", context: "From e-commerce website data", format: "Executive summary with key insights" },
+    { persona: "Creative Writer", task: "Write a short story", context: "Set in a dystopian future where AI runs everything", format: "500-word narrative" },
+    { persona: "Business Consultant", task: "Develop a growth strategy", context: "For a small tech startup with limited funding", format: "5-point action plan" }
+];
+
+const aiPlatforms = [
+    { name: "ChatGPT", url: "https://chat.openai.com?ref=promptopotamus", free: true },
+    { name: "Claude", url: "https://claude.ai?ref=promptopotamus", free: true },
+    { name: "Gemini", url: "https://gemini.google.com?ref=promptopotamus", free: true },
+    { name: "Perplexity", url: "https://perplexity.ai?ref=promptopotamus", free: true }
+];
 
 export default function PromptBuilder() {
     const [generatedPrompt, setGeneratedPrompt] = useState('');
     const [user, setUser] = useState<User | null>(null);
+    const [enhancedPrompt, setEnhancedPrompt] = useState('');
+    const [isEnhancing, setIsEnhancing] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [usageCount, setUsageCount] = useState(3); // Free tier limit
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -38,18 +57,99 @@ export default function PromptBuilder() {
         const finalPrompt = buildPromptText();
         
         if (finalPrompt) {
+            // Track successful prompt generation
+            track('prompt_generated', {
+                prompt_length: finalPrompt.length,
+                has_persona: finalPrompt.includes('Act as'),
+                has_context: finalPrompt.includes('Context:'),
+                has_format: finalPrompt.includes('Format:')
+            });
+            
             setGeneratedPrompt(finalPrompt);
             navigator.clipboard.writeText(finalPrompt);
             toast.success('Prompt copied to clipboard!');
         } else {
+            track('prompt_generation_failed', {
+                reason: 'empty_fields'
+            });
             toast.error('Please fill out at least one field to generate a prompt.');
         }
+    };
+
+    const handleEnhancePrompt = async () => {
+        if (usageCount <= 0) {
+            track('prompt_enhancement_limit_reached');
+            toast.error('Free usage limit reached! Upgrade for unlimited enhancements.');
+            return;
+        }
+
+        const basePrompt = buildPromptText();
+        if (!basePrompt) {
+            track('prompt_enhancement_failed', {
+                reason: 'no_base_prompt'
+            });
+            toast.error('Please create a basic prompt first.');
+            return;
+        }
+
+        // Track enhancement start
+        track('prompt_enhancement_started', {
+            base_prompt_length: basePrompt.length,
+            remaining_uses: usageCount - 1
+        });
+
+        setIsEnhancing(true);
+        setUsageCount(prev => prev - 1);
+
+        // Simulate AI enhancement - in real app, would call actual AI API
+        setTimeout(() => {
+            const enhanced = enhancePromptWithAI(basePrompt);
+            
+            // Track successful enhancement
+            track('prompt_enhanced', {
+                original_length: basePrompt.length,
+                enhanced_length: enhanced.length,
+                enhancement_ratio: enhanced.length / basePrompt.length
+            });
+            
+            setEnhancedPrompt(enhanced);
+            setIsEnhancing(false);
+            toast.success('Prompt enhanced with AI suggestions!');
+        }, 2000);
+    };
+
+    const enhancePromptWithAI = (prompt: string) => {
+        // This simulates AI enhancement - replace with actual AI API calls
+        const enhancements = [
+            "Be specific about the output format and length.",
+            "Include examples or templates for better guidance.",
+            "Add constraints or requirements to focus the response.",
+            "Specify the target audience or expertise level.",
+            "Include a call-to-action or next steps."
+        ];
+        
+        return `${prompt}\n\n--- AI Enhanced Version ---\n${prompt}\n\nAdditional Instructions:\n${enhancements.slice(0, 2).map(e => `• ${e}`).join('\n')}\n\nPlease ensure the response is actionable and tailored to the specific context provided.`;
+    };
+
+    const applySuggestion = (suggestion: typeof promptSuggestions[0]) => {
+        // Track suggestion usage
+        track('prompt_suggestion_applied', {
+            persona: suggestion.persona,
+            task_type: suggestion.task.split(' ')[0].toLowerCase()
+        });
+        
+        (document.getElementById('generic-persona') as HTMLInputElement).value = suggestion.persona;
+        (document.getElementById('generic-task') as HTMLInputElement).value = suggestion.task;
+        (document.getElementById('generic-context') as HTMLTextAreaElement).value = suggestion.context;
+        (document.getElementById('generic-format') as HTMLInputElement).value = suggestion.format;
+        setShowSuggestions(false);
+        toast.success('Suggestion applied! Click Generate to create your prompt.');
     };
 
     const handleSave = async () => {
         const title = (document.getElementById('prompt-title') as HTMLInputElement)?.value;
         const task = (document.getElementById('generic-task') as HTMLInputElement)?.value;
-        const finalPrompt = buildPromptText();
+        const finalPrompt = enhancedPrompt || buildPromptText();
 
         if (!task || !finalPrompt) {
             toast.error('A "Task" is required to save a prompt.');
@@ -71,56 +171,200 @@ export default function PromptBuilder() {
 
         const data = await res.json();
         if (res.ok) {
+            // Track successful prompt save
+            track('prompt_saved', {
+                title: title || 'Untitled Prompt',
+                prompt_length: finalPrompt.length,
+                has_enhancement: !!enhancedPrompt
+            });
             toast.success(data.message);
         } else {
+            track('prompt_save_failed', {
+                error: data.error
+            });
             toast.error(data.error);
         }
     };
 
     return (
         <section id="generator" className="bg-white dark:bg-neutral-800/50 p-6 md:p-8 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700">
-            <h2 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Interactive Prompt Builder</h2>
-            <p className="text-neutral-600 dark:text-neutral-300 mb-6">Construct a detailed prompt. Log in to save your creations to your dashboard.</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                    <label htmlFor="prompt-title" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Title (Optional)</label>
-                    <input id="prompt-title" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., My History Lesson Plan Prompt" />
-                </div>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
                 <div>
-                    <label htmlFor="generic-persona" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Persona</label>
-                    <input id="generic-persona" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., A witty historian" />
+                    <h2 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Interactive Prompt Builder</h2>
+                    <p className="text-neutral-600 dark:text-neutral-300">Construct detailed prompts with AI assistance.</p>
                 </div>
-                <div>
-                    <label htmlFor="generic-task" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Task</label>
-                    <input id="generic-task" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., Explain the fall of Rome" />
-                </div>
-                <div className="md:col-span-2">
-                    <label htmlFor="generic-context" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Context</label>
-                    <textarea id="generic-context" rows={3} className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., For an audience of high-school students."></textarea>
-                </div>
-                <div className="md:col-span-2">
-                    <label htmlFor="generic-format" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Format</label>
-                    <input id="generic-format" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., A three-paragraph summary" />
+                <div className="text-right">
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                        Free AI enhancements: {usageCount}/3
+                    </div>
+                    {usageCount <= 1 && (
+                        <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                            <Crown className="w-3 h-3 inline mr-1" />
+                            Upgrade for unlimited
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {generatedPrompt && (
-                <div className="mt-6 bg-neutral-100 dark:bg-neutral-900/50 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
-                    <h3 className="font-semibold text-lg text-neutral-800 dark:text-neutral-200">Generated Prompt:</h3>
-                    <pre className="font-mono whitespace-pre-wrap text-sm mt-2 text-neutral-600 dark:text-neutral-300">{generatedPrompt}</pre>
+            {/* Suggestions Toggle */}
+            <div className="mb-6">
+                <Button
+                    onClick={() => setShowSuggestions(!showSuggestions)}
+                    variant="outline"
+                    size="sm"
+                >
+                    <Lightbulb className="w-4 h-4 mr-2" />
+                    {showSuggestions ? 'Hide' : 'Show'} Suggestions
+                </Button>
+            </div>
+
+            {/* Quick Suggestions */}
+            {showSuggestions && (
+                <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-3">✨ Quick Start Ideas</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {promptSuggestions.map((suggestion, index) => (
+                            <div
+                                key={index}
+                                onClick={() => applySuggestion(suggestion)}
+                                className="p-3 bg-white dark:bg-neutral-800 rounded border border-blue-200 dark:border-blue-700 cursor-pointer hover:shadow-md transition-shadow"
+                            >
+                                <div className="font-medium text-blue-700 dark:text-blue-300">{suggestion.persona}</div>
+                                <div className="text-sm text-neutral-600 dark:text-neutral-400 truncate">{suggestion.task}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
-            <div className="mt-6 flex justify-end gap-2">
+            {/* Form Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="md:col-span-2">
+                    <label htmlFor="prompt-title" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Title (Optional)</label>
+                    <input id="prompt-title" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., My Marketing Campaign Prompt" />
+                </div>
+                <div>
+                    <label htmlFor="generic-persona" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Persona</label>
+                    <input id="generic-persona" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., Marketing Expert" />
+                </div>
+                <div>
+                    <label htmlFor="generic-task" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Task</label>
+                    <input id="generic-task" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., Create compelling email content" />
+                </div>
+                <div className="md:col-span-2">
+                    <label htmlFor="generic-context" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Context</label>
+                    <textarea id="generic-context" rows={3} className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., For a product launch targeting young professionals"></textarea>
+                </div>
+                <div className="md:col-span-2">
+                    <label htmlFor="generic-format" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Format</label>
+                    <input id="generic-format" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., Subject line + 3-paragraph email body" />
+                </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2 mb-6">
+                <Button onClick={handleGenerate} className="flex-1 min-w-fit">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Generate Prompt
+                </Button>
+                <Button
+                    onClick={handleEnhancePrompt}
+                    variant="secondary"
+                    disabled={isEnhancing || usageCount <= 0}
+                    className="flex-1 min-w-fit"
+                >
+                    {isEnhancing ? (
+                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Wand2 className="mr-2 h-4 w-4" />
+                    )}
+                    {usageCount <= 0 ? 'Upgrade for AI' : 'Enhance with AI'}
+                </Button>
                 {user && (
-                    <Button onClick={handleSave} variant="secondary">
-                        <Save className="mr-2 h-4 w-4" /> Save Prompt
+                    <Button onClick={handleSave} variant="outline">
+                        <Save className="mr-2 h-4 w-4" />
+                        Save
                     </Button>
                 )}
-                <Button onClick={handleGenerate}>
-                    ✨ Generate & Copy Prompt
-                </Button>
             </div>
+
+            {/* Generated Prompt Display */}
+            {(generatedPrompt || enhancedPrompt) && (
+                <div className="space-y-4">
+                    {generatedPrompt && (
+                        <div className="bg-neutral-100 dark:bg-neutral-900/50 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="font-semibold text-lg text-neutral-800 dark:text-neutral-200">Generated Prompt:</h3>
+                                <Button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(generatedPrompt);
+                                        toast.success('Copied to clipboard!');
+                                    }}
+                                    size="sm"
+                                    variant="outline"
+                                >
+                                    <Copy className="w-4 h-4" />
+                                </Button>
+                            </div>
+                            <pre className="font-mono whitespace-pre-wrap text-sm text-neutral-600 dark:text-neutral-300">{generatedPrompt}</pre>
+                        </div>
+                    )}
+
+                    {enhancedPrompt && (
+                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="font-semibold text-lg text-purple-800 dark:text-purple-200 flex items-center">
+                                    <Wand2 className="w-5 h-5 mr-2" />
+                                    AI Enhanced Prompt:
+                                </h3>
+                                <Button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(enhancedPrompt);
+                                        toast.success('Enhanced prompt copied!');
+                                    }}
+                                    size="sm"
+                                    variant="outline"
+                                >
+                                    <Copy className="w-4 h-4" />
+                                </Button>
+                            </div>
+                            <pre className="font-mono whitespace-pre-wrap text-sm text-purple-700 dark:text-purple-300">{enhancedPrompt}</pre>
+                        </div>
+                    )}
+
+                    {/* Try with AI Platforms */}
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                        <h3 className="font-semibold text-green-800 dark:text-green-200 mb-3">🚀 Try your prompt with these AI platforms:</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {aiPlatforms.map((platform) => (
+                                <a
+                                    key={platform.name}
+                                    href={platform.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => {
+                                        // Track affiliate click from prompt builder
+                                        track('affiliate_click_builder', {
+                                            platform: platform.name,
+                                            source: 'prompt_builder',
+                                            has_generated_prompt: !!generatedPrompt,
+                                            has_enhanced_prompt: !!enhancedPrompt
+                                        });
+                                    }}
+                                    className="inline-flex items-center px-3 py-1 bg-white dark:bg-neutral-800 border border-green-200 dark:border-green-700 rounded-full text-sm text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors"
+                                >
+                                    {platform.name}
+                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                </a>
+                            ))}
+                        </div>
+                        <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                            💡 All platforms have free tiers perfect for testing your prompts!
+                        </p>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
