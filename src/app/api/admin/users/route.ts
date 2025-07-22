@@ -2,7 +2,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-async function isAdmin(supabase: any) {
+async function isAdmin(supabase: Awaited<ReturnType<typeof createServerClient>>) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
@@ -10,7 +10,7 @@ async function isAdmin(supabase: any) {
 }
 
 export async function GET() {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     if (!(await isAdmin(supabase))) {
         console.error("Admin user check failed.");
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
