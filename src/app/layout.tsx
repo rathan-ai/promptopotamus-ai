@@ -12,8 +12,47 @@ const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const roboto_mono = Roboto_Mono({ subsets: ['latin'], variable: '--font-roboto-mono' });
 
 export const metadata: Metadata = {
-  title: "Promptopotamus",
-  description: "The Ultimate Guide to AI Prompt Engineering",
+  title: {
+    default: "Promptopotamus - AI Prompt Engineering & Smart Prompts Marketplace",
+    template: "%s | Promptopotamus"
+  },
+  description: "Master AI prompt engineering with our certification system and discover Smart Prompts marketplace. Created by Innorag Technologies - your path to prompt mastery.",
+  keywords: ["AI prompts", "prompt engineering", "ChatGPT", "artificial intelligence", "smart prompts", "AI certification", "prompt marketplace"],
+  authors: [{ name: "Innorag Technologies Private Limited" }],
+  creator: "Innorag Technologies Private Limited",
+  publisher: "Innorag Technologies Private Limited",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://promptopotamus.ai'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: '/',
+    title: 'Promptopotamus - AI Prompt Engineering & Smart Prompts Marketplace',
+    description: 'Master AI prompt engineering with our certification system and discover Smart Prompts marketplace.',
+    siteName: 'Promptopotamus',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Promptopotamus - AI Prompt Engineering & Smart Prompts Marketplace',
+    description: 'Master AI prompt engineering with our certification system and discover Smart Prompts marketplace.',
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
+    ],
+  },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({

@@ -9,8 +9,9 @@ import { clsx } from 'clsx';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/Button';
-import { X, Moon, LogIn, LogOut, LayoutDashboard, Shield, Award, Brain } from 'lucide-react';
+import { X, LogIn, LogOut, LayoutDashboard, Shield, Award, Brain } from 'lucide-react';
 import { track } from '@vercel/analytics';
+import UserIdentityBadge from './UserIdentityBadge';
 
 const navItems = [
     { title: 'Home & Tools', links: [
@@ -19,9 +20,7 @@ const navItems = [
       { href: '/#analyzer', label: 'Prompt Analyzer' },
     ]},
     { title: 'Resources', links: [
-      { href: '/templates', label: 'AI Templates' },
       { href: '/resources', label: 'Premium Tools' },
-      { href: '/#prompt-recipes', label: 'Prompt Recipes' },
     ]},
     { title: 'Guides', links: [
       { href: '/#basic-techniques', label: 'Basic Techniques' },
@@ -46,13 +45,6 @@ export default function Sidebar() {
     const supabase = createClient();
     const router = useRouter();
 
-    useEffect(() => {
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-    }, []);
     
     useEffect(() => {
       const fetchUserAndProfile = async () => {
@@ -79,11 +71,6 @@ export default function Sidebar() {
     }, [supabase]);
   
     useEffect(() => { setIsOpen(false); }, [pathname, setIsOpen]);
-    
-    const toggleTheme = () => {
-        const isDark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    };
   
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -106,8 +93,13 @@ export default function Sidebar() {
           <div className="mb-4 p-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg">
               {user ? (
                   <div>
-                      <p className="text-sm text-neutral-500 dark:text-neutral-400">Signed in as</p>
-                      <p className="font-semibold truncate">{user.email}</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <UserIdentityBadge user={user} size="sm" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-neutral-500 dark:text-neutral-400">Signed in as</p>
+                          <p className="text-sm font-semibold truncate">{user.email}</p>
+                        </div>
+                      </div>
                       <div className="space-y-2 mt-3">
                         <Link 
                             href="/dashboard" 
@@ -223,22 +215,6 @@ export default function Sidebar() {
             ))}
           </nav>
           
-          <div className="mt-6 space-y-2">
-             <Button 
-                 variant="outline" 
-                 onClick={() => {
-                     const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-                     track('theme_toggle', {
-                         from_theme: currentTheme,
-                         to_theme: currentTheme === 'dark' ? 'light' : 'dark'
-                     });
-                     toggleTheme();
-                 }} 
-                 className="w-full"
-             >
-                 <Moon className="mr-2 h-4 w-4" /> Toggle Theme
-             </Button>
-          </div>
         </aside>
         {/* Mobile Overlay */}
         {isOpen && <div className="md:hidden fixed inset-0 bg-black/60 z-30" onClick={() => setIsOpen(false)}></div>}

@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { certificates as certDetails } from '@/lib/data';
 import UserSmartPromptsManager from '@/components/UserSmartPromptsManager';
+import UserIdentityBadge from '@/components/UserIdentityBadge';
+import { createClient } from '@/lib/supabase/client';
 
 // Define interfaces for our data
 interface Profile {
@@ -35,9 +37,15 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchData = async () => {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      
       const res = await fetch('/api/dashboard');
       if (res.ok) {
         const dashboardData = await res.json();
@@ -88,7 +96,10 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-12">
-      <h1 className="text-4xl font-bold dark:text-white">Your Dashboard</h1>
+      <div className="flex items-center gap-4">
+        <h1 className="text-4xl font-bold dark:text-white">Your Dashboard</h1>
+        {user && <UserIdentityBadge user={user} size="lg" />}
+      </div>
 
       {/* Profile Settings Section */}
       <section>
@@ -154,7 +165,7 @@ export default function DashboardPage() {
                     <p className="font-semibold">{certDetails[cert.certificate_slug]?.badgeName || 'Certificate'}</p>
                     <p className="text-sm text-neutral-500">Earned on: {new Date(cert.earned_at).toLocaleDateString()}</p>
                   </div>
-                  <Link href={`/certificates/view/${cert.credential_id}`} passHref>
+                  <Link href={`/certificates/view/${cert.certificate_slug}`} passHref>
                     <Button asChild size="sm" variant="outline">
                       <a><Eye className="mr-2 h-4 w-4" /> View</a>
                     </Button>

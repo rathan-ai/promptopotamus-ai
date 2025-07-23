@@ -102,11 +102,8 @@ export default function SettingsManager() {
     setUsingFallback(false);
     try {
       const response = await fetch('/api/admin/settings');
-      console.log('Admin settings API response:', response.status, response.statusText);
-      
       if (response.ok) {
         const data = await response.json();
-        console.log('Admin settings data:', data);
         setSettings(data.settings);
         setUsingFallback(false);
         toast.success('Admin settings loaded successfully');
@@ -120,7 +117,6 @@ export default function SettingsManager() {
           setUsingFallback(true);
         } else {
           // Fallback to public settings for other errors (like table not existing)
-          console.warn('Admin settings not available, falling back to public settings');
           const publicResponse = await fetch('/api/public/settings');
           if (publicResponse.ok) {
             const publicData = await publicResponse.json();

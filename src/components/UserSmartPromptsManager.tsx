@@ -358,7 +358,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => {/* TODO: Edit functionality */}}
+                          onClick={() => toast.info('Edit functionality coming soon!')}
                         >
                           <Edit3 className="w-4 h-4" />
                         </Button>

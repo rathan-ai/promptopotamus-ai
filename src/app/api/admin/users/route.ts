@@ -31,7 +31,6 @@ export async function GET() {
         console.error("Error fetching auth users:", authError.message);
         return NextResponse.json({ error: `Failed to fetch auth users: ${authError.message}` }, { status: 500 });
     }
-    console.log(`Found ${users.length} users in Supabase Auth.`);
 
     // 2. Get all profiles and their certificates
     const { data: profiles, error: profilesError } = await supabase
@@ -42,7 +41,6 @@ export async function GET() {
         console.error("Error fetching profiles:", profilesError.message);
         return NextResponse.json({ error: `Failed to fetch profiles: ${profilesError.message}` }, { status: 500 });
     }
-    console.log(`Found ${profiles.length} user profiles.`);
     
     const profilesMap = new Map(profiles.map(p => [p.id, p]));
 

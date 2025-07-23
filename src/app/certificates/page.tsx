@@ -129,7 +129,11 @@ const EnhancedCertificateCard = ({
       </div>
 
       {/* Action Button */}
-      <Link href={isLocked ? '#' : `/certificates/${cert.slug}`} passHref>
+      <Link href={
+        isLocked ? '#' 
+        : status === 'completed' ? `/certificates/view/${cert.slug}`
+        : `/certificates/${cert.slug}`
+      } passHref>
         <Button 
           asChild={!isLocked} 
           disabled={isLocked}

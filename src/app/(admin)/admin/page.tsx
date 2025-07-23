@@ -65,7 +65,6 @@ export default function AdminDashboardPage() {
       
       if (usersRes.ok) {
         const usersData = await usersRes.json();
-        console.log('Users data received:', usersData);
         setUsers(usersData);
       } else {
         const usersError = await usersRes.text();

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Brain/Prompt icon design -->
+  <defs>
+    <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#7C3AED;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#brainGradient)" stroke="#fff" stroke-width="2"/>
+  
+  <!-- Brain/Neural network design -->
+  <g transform="translate(50,50)">
+    <!-- Central prompt symbol -->
+    <circle cx="0" cy="0" r="8" fill="#fff" opacity="0.9"/>
+    <text x="0" y="2" text-anchor="middle" font-size="8" font-weight="bold" fill="#4F46E5">P</text>
+    
+    <!-- Neural connections -->
+    <g stroke="#fff" stroke-width="2" opacity="0.7" fill="none">
+      <!-- Top connections -->
+      <path d="M-5,-8 Q-15,-15 -20,-25"/>
+      <path d="M5,-8 Q15,-15 20,-25"/>
+      <path d="M0,-8 Q0,-18 0,-28"/>
+      
+      <!-- Side connections -->
+      <path d="M-8,-3 Q-18,-8 -28,-12"/>
+      <path d="M8,-3 Q18,-8 28,-12"/>
+      <path d="M-8,3 Q-18,8 -28,12"/>
+      <path d="M8,3 Q18,8 28,12"/>
+      
+      <!-- Bottom connections -->
+      <path d="M-5,8 Q-15,15 -20,25"/>
+      <path d="M5,8 Q15,15 20,25"/>
+      <path d="M0,8 Q0,18 0,28"/>
+    </g>
+    
+    <!-- Connection nodes -->
+    <g fill="#fff" opacity="0.8">
+      <circle cx="-20" cy="-25" r="2"/>
+      <circle cx="20" cy="-25" r="2"/>
+      <circle cx="0" cy="-28" r="2"/>
+      <circle cx="-28" cy="-12" r="2"/>
+      <circle cx="28" cy="-12" r="2"/>
+      <circle cx="-28" cy="12" r="2"/>
+      <circle cx="28" cy="12" r="2"/>
+      <circle cx="-20" cy="25" r="2"/>
+      <circle cx="20" cy="25" r="2"/>
+      <circle cx="0" cy="28" r="2"/>
+    </g>
+    
+    <!-- Thinking/prompt dots -->
+    <g fill="#fff" opacity="0.6">
+      <circle cx="-12" cy="-5" r="1"/>
+      <circle cx="12" cy="-5" r="1"/>
+      <circle cx="-12" cy="5" r="1"/>
+      <circle cx="12" cy="5" r="1"/>
+    </g>
+  </g>
+</svg>

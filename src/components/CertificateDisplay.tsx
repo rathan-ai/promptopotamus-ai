@@ -91,10 +91,30 @@ export default function CertificateDisplay({ level, badgeName, userName, credent
           <p className={`mt-8 text-lg ${styles.textColor} opacity-90`}>This certifies that</p>
           <p className={`text-3xl font-extrabold my-2 text-white`}>{userName || 'Valued Learner'}</p>
           <p className={`text-lg ${styles.textColor} opacity-90`}>has successfully demonstrated the required skills.</p>
-          <div className={`text-xs mt-8 ${styles.textColor} opacity-70 space-y-1`}>
+          
+          {/* Expiry Date - Prominent Display */}
+          {expiryDate && (
+            <div className={`mt-6 p-3 rounded-lg border ${isExpired 
+              ? 'bg-red-100/20 border-red-300/50 dark:bg-red-900/20 dark:border-red-600/50' 
+              : 'bg-white/10 border-white/20'
+            }`}>
+              <p className={`text-sm font-semibold ${isExpired ? 'text-red-200' : styles.textColor}`}>
+                {isExpired ? '⚠️ Certificate Expired' : '✓ Valid Until'}
+              </p>
+              <p className={`text-lg font-bold ${isExpired ? 'text-red-100' : 'text-white'}`}>
+                {new Date(expiryDate).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </p>
+            </div>
+          )}
+          
+          <div className={`text-xs mt-6 ${styles.textColor} opacity-70 space-y-1`}>
             <p className="font-medium">Created by Innorag Technologies Private Limited</p>
             <p>Issued on: {issueDate ? new Date(issueDate).toLocaleDateString() : new Date().toLocaleDateString()}</p>
-            <p>Expires on: {expiryDate ? new Date(expiryDate).toLocaleDateString() : 'N/A'}</p>
+            {credentialId && <p>Credential ID: {credentialId}</p>}
           </div>
         </div>
       </div>

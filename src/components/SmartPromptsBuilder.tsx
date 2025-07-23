@@ -16,10 +16,31 @@ import {
   Zap,
   Brain,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  Lightbulb,
+  Target,
+  BookOpen,
+  Sparkles,
+  CheckCircle,
+  XCircle,
+  Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getSettings, type SmartPromptSettings } from '@/lib/admin-settings';
+import {
+  SMART_TEMPLATES,
+  getTemplateById,
+  getTemplateRecommendations,
+  type SmartTemplate,
+  type Variable as SmartVariable,
+  TEMPLATE_CATEGORIES
+} from '@/lib/smart-templates';
+import {
+  AIAssistant,
+  type QualityScore,
+  type IntentAnalysis,
+  type OptimizationSuggestion
+} from '@/lib/ai-assistant';
 
 interface Variable {
   name: string;
@@ -62,6 +83,15 @@ interface SmartPromptsBuilderProps {
   onSave?: (prompt: SmartPromptData) => void;
   initialData?: Partial<SmartPromptData>;
   canCreateMarketplace: boolean;
+}
+
+interface AIAssistanceState {
+  intentAnalysis: IntentAnalysis | null;
+  qualityScore: QualityScore | null;
+  realTimeSuggestions: OptimizationSuggestion[];
+  selectedTemplate: SmartTemplate | null;
+  showTemplateLibrary: boolean;
+  showAIInsights: boolean;
 }
 
 const categories = [
@@ -128,6 +158,17 @@ export default function SmartPromptsBuilder({
     
     loadPricingSettings();
   }, []);
+
+  // Real-time prompt quality analysis
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.prompt_text) {
+        analyzePromptQuality(formData.prompt_text);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [formData.prompt_text]);
   const [newTag, setNewTag] = useState('');
   const [newUseCase, setNewUseCase] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -137,12 +178,85 @@ export default function SmartPromptsBuilder({
     marketplace: false
   });
 
+  // AI assistance state
+  const [aiState, setAiState] = useState<AIAssistanceState>({
+    intentAnalysis: null,
+    qualityScore: null,
+    realTimeSuggestions: [],
+    selectedTemplate: null,
+    showTemplateLibrary: false,
+    showAIInsights: true
+  });
+
+  const [userIntent, setUserIntent] = useState('');
+  const [templateSearch, setTemplateSearch] = useState('');
+
   const steps = [
+    { id: 'intent', title: 'AI Analysis', icon: Target },
+    { id: 'template', title: 'Smart Templates', icon: BookOpen },
     { id: 'basic', title: 'Basic Info', icon: FileText },
     { id: 'content', title: 'Prompt Content', icon: Brain },
     { id: 'advanced', title: 'Advanced Features', icon: Zap },
     { id: 'marketplace', title: 'Marketplace Settings', icon: DollarSign }
   ];
+
+  // AI Assistant Functions
+  const analyzeUserIntent = (input: string) => {
+    if (input.trim().length > 10) {
+      const analysis = AIAssistant.analyzeIntent(input);
+      setAiState(prev => ({ ...prev, intentAnalysis: analysis }));
+      
+      // Get template recommendations
+      const recommendations = getTemplateRecommendations(input);
+      return recommendations;
+    }
+    return [];
+  };
+
+  const analyzePromptQuality = (prompt: string) => {
+    if (prompt.trim().length > 0) {
+      const quality = AIAssistant.analyzePromptQuality(prompt);
+      setAiState(prev => ({ ...prev, qualityScore: quality }));
+    }
+  };
+
+  const applyTemplate = (template: SmartTemplate) => {
+    setAiState(prev => ({ ...prev, selectedTemplate: template }));
+    
+    // Apply template data to form
+    setFormData(prev => ({
+      ...prev,
+      title: template.name,
+      description: template.description,
+      category: TEMPLATE_CATEGORIES[template.category]?.name || template.category,
+      difficulty_level: template.difficulty,
+      tags: template.tags || [],
+      complexity_level: template.sections.length > 1 ? 'smart' : 'simple',
+      // Convert smart template variables to form variables
+      variables: template.sections.flatMap(section => 
+        section.variables.map(v => ({
+          name: v.name,
+          type: v.type,
+          description: v.description || v.label,
+          required: v.required,
+          options: v.options,
+          defaultValue: v.defaultValue?.toString()
+        }))
+      )
+    }));
+    
+    // If template has sections, use the first section's template as prompt text
+    if (template.sections.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        prompt_text: template.sections[0].template,
+        instructions: template.aiPromptingGuide.join('\n\n')
+      }));
+    }
+    
+    // Move to basic info step
+    setCurrentStep(2);
+  };
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -370,8 +484,161 @@ export default function SmartPromptsBuilder({
 
         {/* Step Content */}
         <div className="space-y-8">
-          {/* Step 1: Basic Info */}
+          {/* Step 0: Intent Analysis */}
           {currentStep === 0 && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <Target className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                <h2 className="text-2xl font-semibold dark:text-white mb-2">What do you want to create?</h2>
+                <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+                  Describe your goal and our AI will analyze your intent and recommend the best templates
+                </p>
+              </div>
+
+              <div className="max-w-2xl mx-auto">
+                <textarea
+                  value={userIntent}
+                  onChange={(e) => {
+                    setUserIntent(e.target.value);
+                    if (e.target.value.length > 10) {
+                      analyzeUserIntent(e.target.value);
+                    }
+                  }}
+                  placeholder="Example: I want to create a marketing email sequence for a new product launch targeting small business owners..."
+                  rows={4}
+                  className="w-full p-4 border-2 border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:text-white text-lg"
+                />
+
+                {aiState.intentAnalysis && (
+                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <div className="flex items-start gap-4">
+                      <Sparkles className="w-6 h-6 text-blue-500 mt-1" />
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">AI Analysis</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">Primary Intent:</span>
+                            <span className="ml-2 text-blue-900 dark:text-blue-100 capitalize">{aiState.intentAnalysis.primaryIntent}</span>
+                            <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                              {Math.round(aiState.intentAnalysis.confidence * 100)}% confidence
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">Complexity:</span>
+                            <span className="ml-2 text-blue-900 dark:text-blue-100 capitalize">{aiState.intentAnalysis.estimatedComplexity}</span>
+                          </div>
+                          <div>
+                            <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">Recommended Approach:</span>
+                            <p className="text-blue-900 dark:text-blue-100 mt-1">{aiState.intentAnalysis.recommendedApproach}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Step 1: Smart Templates */}
+          {currentStep === 1 && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold dark:text-white">Choose a Smart Template</h2>
+                  <p className="text-neutral-600 dark:text-neutral-400 mt-1">
+                    Select from AI-optimized templates or start from scratch
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => setCurrentStep(2)} 
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Start from Scratch
+                </Button>
+              </div>
+
+              {/* Template Categories */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                {Object.entries(TEMPLATE_CATEGORIES).map(([key, category]) => {
+                  const categoryTemplates = SMART_TEMPLATES.filter(t => t.category === key);
+                  return (
+                    <div
+                      key={key}
+                      className="p-4 border-2 border-neutral-200 dark:border-neutral-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 cursor-pointer transition-colors"
+                      onClick={() => setTemplateSearch(key)}
+                    >
+                      <div className="text-2xl mb-2">{category.icon}</div>
+                      <h3 className="font-medium dark:text-white">{category.name}</h3>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">{category.description}</p>
+                      <span className="text-xs bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded mt-2 inline-block">
+                        {categoryTemplates.length} templates
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Template List */}
+              <div className="space-y-4">
+                {SMART_TEMPLATES.filter(template => 
+                  !templateSearch || template.category === templateSearch || 
+                  template.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
+                  template.description.toLowerCase().includes(templateSearch.toLowerCase())
+                ).map(template => (
+                  <div key={template.id} className="border border-neutral-200 dark:border-neutral-600 rounded-lg p-6 hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold dark:text-white">{template.name}</h3>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            template.difficulty === 'beginner' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' :
+                            template.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200' :
+                            'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200'
+                          }`}>
+                            {template.difficulty}
+                          </span>
+                        </div>
+                        <p className="text-neutral-600 dark:text-neutral-400 mb-3">{template.description}</p>
+                        <div className="flex items-center gap-4 text-sm text-neutral-500">
+                          <span>📂 {TEMPLATE_CATEGORIES[template.category]?.name}</span>
+                          <span>⏱️ {template.estimatedTime}</span>
+                          <span>🎯 {template.useCase}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {template.tags?.slice(0, 3).map(tag => (
+                            <span key={tag} className="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => applyTemplate(template)}
+                        className="ml-4"
+                      >
+                        Use Template
+                      </Button>
+                    </div>
+                    
+                    {/* Template Preview */}
+                    <div className="bg-neutral-50 dark:bg-neutral-700/50 rounded p-3 mt-4">
+                      <h4 className="font-medium text-sm dark:text-white mb-2">Template Sections ({template.sections.length}):</h4>
+                      <div className="text-xs text-neutral-600 dark:text-neutral-400 space-y-1">
+                        {template.sections.map(section => (
+                          <div key={section.id}>• {section.title}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Step 2: Basic Info */}
+          {currentStep === 2 && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold dark:text-white">Basic Information</h2>
               
@@ -458,16 +725,98 @@ export default function SmartPromptsBuilder({
             </div>
           )}
 
-          {/* Step 2: Prompt Content */}
-          {currentStep === 1 && (
+          {/* Step 3: Prompt Content */}
+          {currentStep === 3 && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold dark:text-white">Prompt Content</h2>
 
+              {/* AI Quality Analysis Panel */}
+              {aiState.showAIInsights && aiState.qualityScore && (
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-green-900 dark:text-green-100 flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      AI Quality Analysis
+                    </h3>
+                    <button
+                      onClick={() => setAiState(prev => ({ ...prev, showAIInsights: false }))}
+                      className="text-green-600 hover:text-green-800"
+                    >
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  {/* Overall Score */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-green-800 dark:text-green-200">Overall Quality</span>
+                        <span className="text-lg font-bold text-green-900 dark:text-green-100">{aiState.qualityScore.overall}/10</span>
+                      </div>
+                      <div className="w-full bg-green-200 dark:bg-green-800 rounded-full h-2">
+                        <div 
+                          className="bg-green-600 h-2 rounded-full transition-all" 
+                          style={{ width: `${(aiState.qualityScore.overall / 10) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quality Breakdown */}
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                    {Object.entries(aiState.qualityScore.breakdown).map(([key, value]) => (
+                      <div key={key} className="text-center">
+                        <div className="text-xs text-green-700 dark:text-green-300 capitalize">{key}</div>
+                        <div className="text-sm font-bold text-green-900 dark:text-green-100">{value}/10</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Top Suggestions */}
+                  {aiState.qualityScore.suggestions.slice(0, 3).map(suggestion => (
+                    <div key={suggestion.id} className={`flex items-start gap-3 p-3 rounded-lg mb-2 ${
+                      suggestion.severity === 'high' ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' :
+                      suggestion.severity === 'medium' ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' :
+                      'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                    }`}>
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                        suggestion.severity === 'high' ? 'bg-red-500 text-white' :
+                        suggestion.severity === 'medium' ? 'bg-yellow-500 text-white' :
+                        'bg-blue-500 text-white'
+                      }`}>
+                        {suggestion.type === 'warning' ? '⚠️' : suggestion.type === 'tip' ? '💡' : '✨'}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm">{suggestion.title}</h4>
+                        <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">{suggestion.suggestion}</p>
+                        {suggestion.example && (
+                          <div className="bg-white dark:bg-neutral-700 rounded p-2 mt-2 text-xs font-mono">
+                            {suggestion.example}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Main Prompt Text */}
               <div>
-                <label className="block text-sm font-medium mb-2 dark:text-white">
-                  Prompt Text <span className="text-red-500">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium dark:text-white">
+                    Prompt Text <span className="text-red-500">*</span>
+                  </label>
+                  {!aiState.showAIInsights && (
+                    <Button
+                      onClick={() => setAiState(prev => ({ ...prev, showAIInsights: true }))}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Sparkles className="w-4 h-4 mr-1" />
+                      Show AI Analysis
+                    </Button>
+                  )}
+                </div>
                 <textarea
                   value={formData.prompt_text}
                   onChange={(e) => setFormData(prev => ({ ...prev, prompt_text: e.target.value }))}
@@ -524,8 +873,8 @@ export default function SmartPromptsBuilder({
             </div>
           )}
 
-          {/* Step 3: Advanced Features */}
-          {currentStep === 2 && (
+          {/* Step 4: Advanced Features */}
+          {currentStep === 4 && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold dark:text-white">Advanced Features</h2>
 
@@ -724,8 +1073,8 @@ export default function SmartPromptsBuilder({
             </div>
           )}
 
-          {/* Step 4: Marketplace Settings */}
-          {currentStep === 3 && (
+          {/* Step 5: Marketplace Settings */}
+          {currentStep === 5 && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold dark:text-white">Marketplace Settings</h2>
 
@@ -883,14 +1232,41 @@ export default function SmartPromptsBuilder({
                 Previous
               </Button>
             )}
+            
+            {/* Skip Template Selection */}
+            {currentStep === 0 && (
+              <Button onClick={() => setCurrentStep(2)} variant="outline">
+                Skip AI Analysis
+              </Button>
+            )}
           </div>
           
           <div className="flex gap-3">
-            {currentStep < steps.length - 1 ? (
+            {/* Smart navigation logic */}
+            {currentStep === 0 && userIntent.trim().length > 10 && (
+              <Button onClick={() => setCurrentStep(1)}>
+                <Target className="w-4 h-4 mr-2" />
+                View Templates
+              </Button>
+            )}
+            
+            {currentStep === 0 && userIntent.trim().length <= 10 && (
+              <Button onClick={() => setCurrentStep(2)}>
+                Continue to Basic Info
+              </Button>
+            )}
+            
+            {currentStep === 1 && (
+              <Button onClick={() => setCurrentStep(2)}>
+                Continue to Basic Info
+              </Button>
+            )}
+            
+            {currentStep > 1 && currentStep < steps.length - 1 ? (
               <Button onClick={() => setCurrentStep(prev => prev + 1)}>
                 Next
               </Button>
-            ) : (
+            ) : currentStep === steps.length - 1 ? (
               <Button onClick={handleSave} disabled={isSaving} className="min-w-32">
                 {isSaving ? (
                   <div className="flex items-center">
@@ -904,7 +1280,7 @@ export default function SmartPromptsBuilder({
                   </>
                 )}
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
