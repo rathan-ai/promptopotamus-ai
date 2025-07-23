@@ -10,6 +10,7 @@ interface UserCertificate {
   certificate_slug: string;
   expires_at: string;
   earned_at: string;
+  credential_id: string;
 }
 
 interface CertificationStatus {
@@ -25,12 +26,14 @@ const EnhancedCertificateCard = ({
   cert, 
   status,
   isLocked,
-  prerequisite 
+  prerequisite,
+  credentialId
 }: { 
   cert: Certificate;
   status: 'available' | 'completed' | 'locked' | 'expired';
   isLocked: boolean;
   prerequisite?: string;
+  credentialId?: string;
 }) => {
   const getStatusInfo = () => {
     switch (status) {
@@ -131,7 +134,7 @@ const EnhancedCertificateCard = ({
       {/* Action Button */}
       <Link href={
         isLocked ? '#' 
-        : status === 'completed' ? `/certificates/view/${cert.slug}`
+        : status === 'completed' && credentialId ? `/certificates/view/${credentialId}`
         : `/certificates/${cert.slug}`
       } passHref>
         <Button 
@@ -223,6 +226,11 @@ export default function CertificatesPage() {
     return undefined;
   };
 
+  const getCredentialId = (certSlug: string): string | undefined => {
+    const userCert = userCertificates.find(cert => cert.certificate_slug === certSlug);
+    return userCert?.credential_id;
+  };
+
   const certs = Object.values(certificates);
 
   if (loading) {
@@ -288,6 +296,7 @@ export default function CertificatesPage() {
             status={getCertStatus(cert.slug)}
             isLocked={getCertStatus(cert.slug) === 'locked'}
             prerequisite={getPrerequisite(cert.slug)}
+            credentialId={getCredentialId(cert.slug)}
           />
         ))}
       </div>

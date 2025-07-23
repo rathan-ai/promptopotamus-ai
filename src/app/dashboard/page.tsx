@@ -165,7 +165,7 @@ export default function DashboardPage() {
                     <p className="font-semibold">{certDetails[cert.certificate_slug]?.badgeName || 'Certificate'}</p>
                     <p className="text-sm text-neutral-500">Earned on: {new Date(cert.earned_at).toLocaleDateString()}</p>
                   </div>
-                  <Link href={`/certificates/view/${cert.certificate_slug}`} passHref>
+                  <Link href={`/certificates/view/${cert.credential_id}`} passHref>
                     <Button asChild size="sm" variant="outline">
                       <a><Eye className="mr-2 h-4 w-4" /> View</a>
                     </Button>
