@@ -1,3 +1,19 @@
+# Promptopotamus - AI Prompt Engineering Platform
+
+> **Status**: Phase 6A Complete ✅ | Social Features & Gamification Live | Building the Future of AI Prompting
+
+## 📖 Development Log
+
+For detailed project progress, architecture decisions, and phase breakdowns, see:
+
+**[📋 Main Development Log](.context/README.md)** - Quick scan of all phases
+
+**[📁 Detailed Phase Documentation](.context/phases/)** - Deep technical details
+
+---
+
+## Getting Started (Development)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
