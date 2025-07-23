@@ -289,16 +289,20 @@ export default function CertificatesPage() {
 
       {/* Certificate Cards */}
       <div className="grid gap-8">
-        {certs.map(cert => (
-          <EnhancedCertificateCard 
-            key={cert.slug} 
-            cert={cert}
-            status={getCertStatus(cert.slug)}
-            isLocked={getCertStatus(cert.slug) === 'locked'}
-            prerequisite={getPrerequisite(cert.slug)}
-            credentialId={getCredentialId(cert.slug)}
-          />
-        ))}
+        {certs.map(cert => {
+          const status = getCertStatus(cert.slug);
+          const credentialId = getCredentialId(cert.slug);
+          return (
+            <EnhancedCertificateCard 
+              key={cert.slug} 
+              cert={cert}
+              status={status}
+              isLocked={status === 'locked'}
+              prerequisite={getPrerequisite(cert.slug)}
+              credentialId={credentialId}
+            />
+          );
+        })}
       </div>
     </div>
   );

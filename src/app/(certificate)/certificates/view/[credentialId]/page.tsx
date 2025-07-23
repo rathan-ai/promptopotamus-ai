@@ -1,6 +1,9 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { certificates } from "@/lib/data";
 import CertificateDisplay from "@/components/CertificateDisplay";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import type { Metadata } from 'next';
 
 // Step 1: Define the params as a Promise
@@ -74,12 +77,24 @@ export default async function CertificateViewPage({ params: paramsPromise }: Pag
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Back Navigation */}
+      <div className="mb-8">
+        <Link href="/certificates">
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Certificates
+          </Button>
+        </Link>
+      </div>
+      
       <h1 className="text-center text-2xl font-bold mb-8">Certificate of Achievement</h1>
       <CertificateDisplay 
         level={certInfo.level} 
         badgeName={certInfo.badgeName} 
         userName={userName} 
-        credentialId={certData.credential_id} 
+        credentialId={certData.credential_id}
+        issueDate={certData.earned_at}
+        expiryDate={certData.expires_at}
       />
     </div>
   );

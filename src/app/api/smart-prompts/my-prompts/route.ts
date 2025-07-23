@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     // Get user's certification status for marketplace features
     const { data: userCertificates } = await supabase
       .from('user_certificates')
-      .select('certificate_slug, expires_at')
+      .select('certificate_slug, expires_at, earned_at, credential_id')
       .eq('user_id', user.id);
 
     const hasValidCertificate = hasAnyValidCertificate(userCertificates || []);

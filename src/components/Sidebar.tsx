@@ -19,7 +19,9 @@ const navItems = [
       { href: '/#generator', label: 'Prompt Builder' }, 
       { href: '/#analyzer', label: 'Prompt Analyzer' },
     ]},
-    { title: 'Resources', links: [
+    { title: 'AI Content & Templates', links: [
+      { href: '/templates', label: 'AI Templates' },
+      { href: '/#prompt-recipes', label: 'Prompt Recipes' },
       { href: '/resources', label: 'Premium Tools' },
     ]},
     { title: 'Guides', links: [
@@ -90,17 +92,30 @@ export default function Sidebar() {
               <button className="md:hidden p-2" onClick={() => setIsOpen(false)}> <X /> </button>
           </div>
           
-          <div className="mb-4 p-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg">
+          <div className="mb-4 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg overflow-hidden">
               {user ? (
                   <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <UserIdentityBadge user={user} size="sm" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-neutral-500 dark:text-neutral-400">Signed in as</p>
-                          <p className="text-sm font-semibold truncate">{user.email}</p>
-                        </div>
+                      {/* User Identity Strip */}
+                      <div className="px-3 py-1">
+                        <UserIdentityBadge user={user} size="sm" showTierName={false} />
                       </div>
-                      <div className="space-y-2 mt-3">
+                      
+                      {/* User Info */}
+                      <div className="px-3 pb-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400">Welcome back</p>
+                            <div 
+                              className="text-sm font-semibold truncate cursor-pointer" 
+                              title={user.email}
+                            >
+                              {user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}
+                            </div>
+                          </div>
+                        </div>
+                      
+                      {/* Navigation Links */}
+                      <div className="space-y-2 px-3 pb-3">
                         <Link 
                             href="/dashboard" 
                             onClick={() => {

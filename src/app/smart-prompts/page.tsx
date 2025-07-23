@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye } from 'lucide-react';
+import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye, ExternalLink, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import SmartPromptsBuilder from '@/components/SmartPromptsBuilder';
 import PromptPreviewModal from '@/components/PromptPreviewModal';
@@ -307,11 +307,30 @@ export default function SmartPromptsPage() {
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold dark:text-white">Smart Prompts</h1>
           <p className="text-neutral-600 dark:text-neutral-400 mt-2">
             Discover and create intelligent prompt templates and recipes
           </p>
+          {/* Inspiration Links */}
+          <div className="flex gap-4 mt-3">
+            <a
+              href="/templates"
+              className="inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
+            >
+              <Sparkles className="w-4 h-4 mr-1" />
+              Browse AI Templates
+              <ExternalLink className="w-3 h-3 ml-1" />
+            </a>
+            <a
+              href="/#prompt-recipes"
+              className="inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
+            >
+              <Sparkles className="w-4 h-4 mr-1" />
+              View Prompt Recipes
+              <ExternalLink className="w-3 h-3 ml-1" />
+            </a>
+          </div>
         </div>
         
         <div className="flex gap-3">
