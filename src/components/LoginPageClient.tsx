@@ -82,6 +82,8 @@ export function LoginPageClient() {
           theme="dark"
           providers={['google']}
           redirectTo={getURL()}
+          view="sign_in"
+          showLinks={false}
         />
         
         <div className="mt-4 text-center">
