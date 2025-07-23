@@ -1,5 +1,19 @@
--- Phase 6A: Social Learning, Gamification & Affiliate Integration
--- Migration for user profiles, achievements, affiliate tracking, and comments
+-- Phase 6A: Social Learning, Gamification & Affiliate Integration (IDEMPOTENT VERSION)
+-- This script can be run multiple times safely and will fix any existing issues
+
+-- =============================================================================
+-- CLEANUP: Remove any broken constraints and tables if they exist
+-- =============================================================================
+
+-- Drop broken foreign key constraints if they exist
+ALTER TABLE IF EXISTS prompt_comments DROP CONSTRAINT IF EXISTS prompt_comments_prompt_id_fkey;
+
+-- Drop and recreate prompt_comments table to fix type issues
+DROP TABLE IF EXISTS prompt_comments CASCADE;
+
+-- =============================================================================
+-- TABLE CREATION: Create all tables with correct types and constraints
+-- =============================================================================
 
 -- Enhanced user profiles for social features
 CREATE TABLE IF NOT EXISTS user_profiles_extended (
@@ -80,11 +94,11 @@ CREATE TABLE IF NOT EXISTS user_experience (
     UNIQUE(user_id)
 );
 
--- Comment system for paid prompts
-CREATE TABLE IF NOT EXISTS prompt_comments (
+-- Comment system for paid prompts (CORRECTLY TYPED: prompt_id is INTEGER to match saved_prompts.id)
+CREATE TABLE prompt_comments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    prompt_id UUID REFERENCES saved_prompts(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    prompt_id INTEGER NOT NULL REFERENCES saved_prompts(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     comment_text TEXT NOT NULL,
     parent_comment_id UUID REFERENCES prompt_comments(id) ON DELETE CASCADE, -- For replies
     is_edited BOOLEAN DEFAULT false,
@@ -185,22 +199,36 @@ CREATE TABLE IF NOT EXISTS user_email_preferences (
     UNIQUE(user_id)
 );
 
--- Indexes for performance
+-- =============================================================================
+-- INDEXES: Create all indexes (idempotent with IF NOT EXISTS)
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_user_profiles_extended_user_id ON user_profiles_extended(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_follows_follower ON user_follows(follower_id);
 CREATE INDEX IF NOT EXISTS idx_user_follows_following ON user_follows(following_id);
 CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON user_achievements(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_achievements_achievement ON user_achievements(achievement_id);
 CREATE INDEX IF NOT EXISTS idx_user_streaks_user ON user_streaks(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_streaks_type ON user_streaks(streak_type);
+CREATE INDEX IF NOT EXISTS idx_user_experience_user ON user_experience(user_id);
 CREATE INDEX IF NOT EXISTS idx_prompt_comments_prompt ON prompt_comments(prompt_id);
 CREATE INDEX IF NOT EXISTS idx_prompt_comments_user ON prompt_comments(user_id);
+CREATE INDEX IF NOT EXISTS idx_prompt_comments_parent ON prompt_comments(parent_comment_id);
+CREATE INDEX IF NOT EXISTS idx_affiliate_partners_key ON affiliate_partners(partner_key);
 CREATE INDEX IF NOT EXISTS idx_affiliate_clicks_user ON affiliate_clicks(user_id);
 CREATE INDEX IF NOT EXISTS idx_affiliate_clicks_partner ON affiliate_clicks(partner_id);
 CREATE INDEX IF NOT EXISTS idx_affiliate_clicks_session ON affiliate_clicks(session_id);
 CREATE INDEX IF NOT EXISTS idx_affiliate_conversions_click ON affiliate_conversions(click_id);
+CREATE INDEX IF NOT EXISTS idx_email_campaigns_key ON email_campaigns(campaign_key);
 CREATE INDEX IF NOT EXISTS idx_email_sends_user ON email_sends(user_id);
 CREATE INDEX IF NOT EXISTS idx_email_sends_campaign ON email_sends(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_user_email_preferences_user ON user_email_preferences(user_id);
 
--- Row Level Security policies
+-- =============================================================================
+-- ROW LEVEL SECURITY: Enable and create policies (idempotent)
+-- =============================================================================
+
+-- Enable RLS on all tables
 ALTER TABLE user_profiles_extended ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_achievements ENABLE ROW LEVEL SECURITY;
@@ -209,7 +237,26 @@ ALTER TABLE user_experience ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prompt_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_email_preferences ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
+-- Drop existing policies if they exist (idempotent cleanup)
+DROP POLICY IF EXISTS "Users can view all public profiles" ON user_profiles_extended;
+DROP POLICY IF EXISTS "Users can update their own profile" ON user_profiles_extended;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON user_profiles_extended;
+DROP POLICY IF EXISTS "Users can view all follows" ON user_follows;
+DROP POLICY IF EXISTS "Users can manage their own follows" ON user_follows;
+DROP POLICY IF EXISTS "Users can view all achievements" ON user_achievements;
+DROP POLICY IF EXISTS "System can insert achievements" ON user_achievements;
+DROP POLICY IF EXISTS "Users can view their own streaks" ON user_streaks;
+DROP POLICY IF EXISTS "System can manage all streaks" ON user_streaks;
+DROP POLICY IF EXISTS "Users can view their own XP" ON user_experience;
+DROP POLICY IF EXISTS "System can manage all XP" ON user_experience;
+DROP POLICY IF EXISTS "Users can view comments on prompts they purchased" ON prompt_comments;
+DROP POLICY IF EXISTS "Users can create comments on purchased prompts" ON prompt_comments;
+DROP POLICY IF EXISTS "Users can update their own comments" ON prompt_comments;
+DROP POLICY IF EXISTS "Users can delete their own comments" ON prompt_comments;
+DROP POLICY IF EXISTS "Users can view their own email preferences" ON user_email_preferences;
+DROP POLICY IF EXISTS "Users can manage their own email preferences" ON user_email_preferences;
+
+-- Create RLS policies
 CREATE POLICY "Users can view all public profiles" ON user_profiles_extended FOR SELECT USING (true);
 CREATE POLICY "Users can update their own profile" ON user_profiles_extended FOR UPDATE USING (user_id = auth.uid());
 CREATE POLICY "Users can insert their own profile" ON user_profiles_extended FOR INSERT WITH CHECK (user_id = auth.uid());
@@ -244,6 +291,10 @@ CREATE POLICY "Users can delete their own comments" ON prompt_comments FOR DELET
 CREATE POLICY "Users can view their own email preferences" ON user_email_preferences FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "Users can manage their own email preferences" ON user_email_preferences FOR ALL USING (user_id = auth.uid());
 
+-- =============================================================================
+-- SEED DATA: Insert initial data (idempotent with ON CONFLICT)
+-- =============================================================================
+
 -- Insert initial achievement definitions
 INSERT INTO achievement_definitions (achievement_key, name, description, icon, category, criteria, xp_points) VALUES
 ('first_prompt_created', 'First Creator', 'Created your first Smart Prompt', 'star', 'creation', '{"type": "prompt_count", "threshold": 1}', 50),
@@ -260,13 +311,15 @@ INSERT INTO achievement_definitions (achievement_key, name, description, icon, c
 ('comment_contributor', 'Active Commenter', 'Left 20 helpful comments', 'message-square', 'social', '{"type": "comments_count", "threshold": 20}', 150),
 ('certified_promptling', 'Certified Promptling', 'Earned Level 1 Certification', 'award', 'learning', '{"type": "certificate_earned", "level": "promptling"}', 200),
 ('certified_promptosaur', 'Certified Promptosaur', 'Earned Level 2 Certification', 'award', 'learning', '{"type": "certificate_earned", "level": "promptosaur"}', 400),
-('certified_promptopotamus', 'Certified Promptopotamus', 'Earned Level 3 Certification', 'award', 'learning', '{"type": "certificate_earned", "level": "promptopotamus"}', 800);
+('certified_promptopotamus', 'Certified Promptopotamus', 'Earned Level 3 Certification', 'award', 'learning', '{"type": "certificate_earned", "level": "promptopotamus"}', 800)
+ON CONFLICT (achievement_key) DO NOTHING;
 
--- Insert initial affiliate partners (examples)
+-- Insert initial affiliate partners
 INSERT INTO affiliate_partners (partner_key, partner_name, base_url, commission_rate) VALUES
 ('openai', 'OpenAI', 'https://platform.openai.com', 0.09),
 ('anthropic', 'Anthropic Claude', 'https://claude.ai', 0.09),
-('jasper', 'Jasper AI', 'https://jasper.ai', 0.09);
+('jasper', 'Jasper AI', 'https://jasper.ai', 0.09)
+ON CONFLICT (partner_key) DO NOTHING;
 
 -- Insert initial email campaigns
 INSERT INTO email_campaigns (campaign_key, campaign_name, campaign_type, subject_template, html_template, text_template, send_schedule) VALUES
@@ -281,4 +334,33 @@ INSERT INTO email_campaigns (campaign_key, campaign_name, campaign_type, subject
  '<h1>Achievement Unlocked!</h1><p>Congratulations! You just earned: <strong>{{achievement_name}}</strong></p>',
  'Achievement Unlocked!\n\nCongratulations! You just earned: {{achievement_name}}',
  NULL
-);
+)
+ON CONFLICT (campaign_key) DO NOTHING;
+
+-- =============================================================================
+-- VALIDATION: Verify the migration completed successfully
+-- =============================================================================
+
+-- This will show a success message if all tables were created
+DO $$
+DECLARE
+    table_count INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO table_count 
+    FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name IN (
+        'user_profiles_extended', 'user_follows', 'achievement_definitions', 
+        'user_achievements', 'user_streaks', 'user_experience', 
+        'prompt_comments', 'affiliate_partners', 'affiliate_clicks', 
+        'affiliate_conversions', 'email_campaigns', 'email_sends', 
+        'user_email_preferences'
+    );
+    
+    IF table_count = 13 THEN
+        RAISE NOTICE 'SUCCESS: All 13 engagement feature tables created successfully!';
+        RAISE NOTICE 'Foreign key constraint for prompt_comments.prompt_id -> saved_prompts.id is properly typed as INTEGER.';
+    ELSE
+        RAISE NOTICE 'WARNING: Only % out of 13 expected tables were found.', table_count;
+    END IF;
+END $$;

@@ -1,6 +1,17 @@
-You are absolutely right, and I sincerely apologize. My attempts to provide a complete scaffolding script have failed, were incomplete, and have caused unnecessary frustration. You are correct to call this out, and your suggestion to proceed individually is a much better and safer way forward.
+# Promptopotamus Development Context
 
-Let's abandon the script entirely. From now on, we will build or modify one file at a time, ensuring each piece is correct before moving to the next.
+## Core Development Standards
+
+### Database Migration Standards
+**CRITICAL REQUIREMENT: All database scripts and migrations MUST be idempotent**
+- Scripts must be safely runnable multiple times without errors
+- Use `IF NOT EXISTS`, `IF EXISTS`, `ON CONFLICT DO NOTHING` patterns
+- Include cleanup sections to handle partial migrations
+- Always validate successful completion with feedback messages
+- Drop and recreate problematic constraints/tables when needed for fixes
+
+### General Development Approach
+Build or modify one file at a time, ensuring each piece is correct before moving to the next. This methodical approach prevents cascading errors and ensures quality.
 
 Let's Start Fresh
 To guarantee a perfect foundation, let's create a clean project using the official Next.js command.
