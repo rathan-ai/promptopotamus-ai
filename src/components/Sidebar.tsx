@@ -185,6 +185,7 @@ export default function Sidebar() {
                       >
                         <LogOut className="mr-1 h-4 w-4" /> Sign Out
                       </Button>
+                      </div>
                   </div>
               ) : (
                   <Link 
