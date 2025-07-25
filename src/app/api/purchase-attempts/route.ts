@@ -1,6 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { paymentAdapter } from '@/lib/payment-adapter';
+import { UniversalPaymentAdapter } from '@/lib/payment-adapter';
 import { getCurrentUser } from '@/lib/auth';
 import { QUIZ_CONFIG } from '@/config/constants';
 
@@ -22,10 +22,13 @@ export async function POST(req: Request) {
     }
     
     try {
+        // Initialize payment adapter
+        const paymentAdapter = new UniversalPaymentAdapter();
+        
         // Verify payment status
         const paymentStatus = await paymentAdapter.getPaymentStatus(paymentIntentId);
         
-        if (paymentStatus.status !== 'succeeded') {
+        if (paymentStatus.status !== 'succeeded' && paymentStatus.status !== 'completed') {
             return NextResponse.json({ 
                 error: 'Payment not completed. Please complete payment first.' 
             }, { status: 400 });
@@ -116,6 +119,9 @@ export async function GET(req: Request) {
     }
 
     try {
+        // Initialize payment adapter
+        const paymentAdapter = new UniversalPaymentAdapter();
+        
         // Create payment intent
         const paymentResponse = await paymentAdapter.createPayment({
             amount: QUIZ_CONFIG.ATTEMPT_PRICE,

@@ -36,7 +36,11 @@ export default function PayPalPaymentModal({
   };
 
   const handleSuccess = () => {
-    toast.success('🎉 Smart Prompt purchased successfully!');
+    if (promptId === -1) {
+      toast.success('🎉 Subscription activated successfully!');
+    } else {
+      toast.success('🎉 Smart Prompt purchased successfully!');
+    }
     onSuccess();
     onClose();
     setError(null);

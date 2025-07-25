@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Crown, Star, Check } from 'lucide-react';
+import { X, Crown, Star, Check, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { track } from '@vercel/analytics';
+import PayPalPaymentModal from './PayPalPaymentModal';
+import { updateSubscriptionFromPayment } from '@/lib/subscription';
+import toast from 'react-hot-toast';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -26,7 +29,9 @@ const plans = [
       'Access to Pro templates',
       'Enhanced AI suggestions',
       'Priority support',
-      'Export prompts to PDF'
+      'Export prompts to PDF',
+      '5 exam attempts per level',
+      'Extra retry after failure'
     ]
   },
   {
@@ -44,7 +49,9 @@ const plans = [
       'Custom prompt templates',
       'Advanced analytics dashboard',
       'Team collaboration features',
-      '1-on-1 expert consultation'
+      '1-on-1 expert consultation',
+      'Unlimited exam attempts',
+      'Unlimited exam retries'
     ]
   }
 ];
@@ -52,6 +59,8 @@ const plans = [
 export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: UpgradeModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPayPalModal, setShowPayPalModal] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState(0);
 
   if (!isOpen) return null;
 
@@ -73,26 +82,60 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
       price: plans.find(p => p.id === planId)?.price || 'unknown'
     });
 
-    // TODO: Replace with actual payment integration
-    // For now, simulate a process and show options
-    setTimeout(() => {
+    // Get the selected plan details
+    const plan = plans.find(p => p.id === planId);
+    if (!plan) {
       setIsProcessing(false);
+      return;
+    }
+
+    // Extract numeric price from string (e.g., "$9" -> 9)
+    const price = parseFloat(plan.price.replace('$', ''));
+    setPaymentAmount(price);
+    
+    // Show PayPal payment modal
+    setShowPayPalModal(true);
+    setIsProcessing(false);
+  };
+
+  const handlePaymentSuccess = async () => {
+    track('upgrade_payment_success', {
+      plan: selectedPlan,
+      source: source,
+      amount: paymentAmount
+    });
+    
+    try {
+      // Get user ID from auth context or session
+      // For now, we'll need to implement proper user authentication
+      // This is a placeholder that would work with actual authentication
+      const response = await fetch('/api/profile');
+      const { user } = await response.json();
       
-      // Show contact options
-      const plan = plans.find(p => p.id === planId);
-      const message = `Hi! I'm interested in upgrading to the ${plan?.name} plan (${plan?.price}${plan?.period}). Please send me payment instructions.`;
-      const mailtoLink = `mailto:payment@innorag.com?subject=Upgrade to ${plan?.name} Plan&body=${encodeURIComponent(message)}`;
-      
-      window.open(mailtoLink, '_blank');
-      
-      track('upgrade_contact_initiated', {
-        plan: planId,
-        source: source,
-        method: 'email'
-      });
-      
-      onClose();
-    }, 1500);
+      if (user && selectedPlan) {
+        const success = await updateSubscriptionFromPayment(
+          user.id,
+          selectedPlan as 'pro' | 'premium',
+          'paypal'
+        );
+        
+        if (success) {
+          toast.success(`🎉 Successfully upgraded to ${selectedPlan} plan!`);
+        } else {
+          toast.error('Payment successful but subscription update failed. Please contact support.');
+        }
+      }
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      toast.error('Payment successful but subscription update failed. Please contact support.');
+    }
+    
+    setShowPayPalModal(false);
+    onClose();
+  };
+
+  const handlePaymentClose = () => {
+    setShowPayPalModal(false);
   };
 
   return (
@@ -179,7 +222,10 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
                     {isProcessing && selectedPlan === plan.id ? (
                       'Processing...'
                     ) : (
-                      `Choose ${plan.name}`
+                      <>
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Pay with PayPal
+                      </>
                     )}
                   </Button>
                 </div>
@@ -209,6 +255,19 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
           </div>
         </div>
       </div>
+      
+      {/* PayPal Payment Modal */}
+      {showPayPalModal && selectedPlan && (
+        <PayPalPaymentModal
+          isOpen={showPayPalModal}
+          onClose={handlePaymentClose}
+          onSuccess={handlePaymentSuccess}
+          promptId={-1} // Using -1 to indicate subscription payment
+          amount={paymentAmount}
+          promptTitle={`${plans.find(p => p.id === selectedPlan)?.name} Plan Subscription`}
+          sellerName="Promptopotamus"
+        />
+      )}
     </div>
   );
 }

@@ -448,9 +448,9 @@ export class UniversalPaymentAdapter {
       switch (primaryProvider.toLowerCase()) {
         case 'paypal':
           providerCredentials = {
-            client_id: paymentSettings.paypal_client_id || '',
-            client_secret: paymentSettings.paypal_client_secret || '',
-            environment: paymentSettings.paypal_environment || 'sandbox'
+            client_id: paymentSettings.paypal_client_id || process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+            client_secret: paymentSettings.paypal_client_secret || process.env.PAYPAL_CLIENT_SECRET || '',
+            environment: paymentSettings.paypal_environment || process.env.PAYPAL_ENVIRONMENT || 'sandbox'
           } as PayPalCredentials;
           this.adapter = new PayPalAdapter(providerCredentials);
           break;

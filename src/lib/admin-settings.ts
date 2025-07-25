@@ -47,7 +47,7 @@ const DEFAULT_SETTINGS = {
     processing_fee: 0.029,
     paypal_client_id: '',
     paypal_client_secret: '',
-    paypal_environment: 'sandbox',
+    paypal_environment: 'live',
     stripe_publishable_key: '',
     stripe_secret_key: '',
     razorpay_key_id: '',

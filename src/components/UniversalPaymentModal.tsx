@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { X, CreditCard, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
+import { X, CreditCard, AlertTriangle, CheckCircle, Loader2, Wallet, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface PaymentProvider {
@@ -303,24 +303,57 @@ export default function UniversalPaymentModal({
             <div className="space-y-4">
               <h4 className="font-medium dark:text-white">Choose Payment Method</h4>
               
-              {availableProviders.map((provider) => (
-                <button
-                  key={provider.id}
-                  onClick={() => handleProviderSelect(provider.id)}
-                  className={`w-full p-4 border-2 rounded-lg text-left transition-all hover:shadow-md ${
-                    paymentProvider === provider.id
-                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
-                      : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium dark:text-white">{provider.name}</span>
-                    {provider.enabled && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Primary</span>
-                    )}
-                  </div>
-                </button>
-              ))}
+              {availableProviders.map((provider) => {
+                const getProviderIcon = (id: string) => {
+                  switch (id) {
+                    case 'paypal': return <Wallet className="w-5 h-5 text-blue-600" />;
+                    case 'stripe': return <CreditCard className="w-5 h-5 text-purple-600" />;
+                    default: return <Star className="w-5 h-5 text-amber-600" />;
+                  }
+                };
+                
+                const getProviderDescription = (id: string) => {
+                  switch (id) {
+                    case 'paypal': return 'Pay with your PayPal account or card';
+                    case 'stripe': return 'Pay with credit/debit card via Stripe';
+                    default: return 'Alternative payment method';
+                  }
+                };
+                
+                return (
+                  <button
+                    key={provider.id}
+                    onClick={() => handleProviderSelect(provider.id)}
+                    className={`w-full p-4 border-2 rounded-lg text-left transition-all hover:shadow-md ${
+                      paymentProvider === provider.id
+                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {getProviderIcon(provider.id)}
+                        <div>
+                          <div className="font-medium dark:text-white">{provider.name}</div>
+                          <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                            {getProviderDescription(provider.id)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {provider.enabled && (
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Primary</span>
+                        )}
+                        {paymentProvider === provider.id && (
+                          <div className="w-4 h-4 bg-indigo-500 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
 
               <Button
                 onClick={initiatePayment}
