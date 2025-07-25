@@ -1,13 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-
-async function isAdmin(supabase: Awaited<ReturnType<typeof createServerClient>>) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    return profile?.role === 'admin';
-}
+import { isAdmin } from '@/lib/auth';
 
 export async function GET() {
     const supabase = await createServerClient();

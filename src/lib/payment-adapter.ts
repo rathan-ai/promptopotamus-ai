@@ -1,34 +1,16 @@
 import { getSettings } from '@/lib/admin-settings';
-
-export interface PaymentProvider {
-  id: string;
-  name: string;
-  enabled: boolean;
-  credentials: Record<string, any>;
-}
-
-export interface PaymentRequest {
-  amount: number;
-  currency: string;
-  description: string;
-  metadata?: Record<string, any>;
-  userId?: string;
-}
-
-export interface PaymentResponse {
-  success: boolean;
-  transactionId?: string;
-  clientSecret?: string;
-  redirectUrl?: string;
-  error?: string;
-}
-
-export interface PaymentAdapter {
-  createPayment(request: PaymentRequest): Promise<PaymentResponse>;
-  confirmPayment(paymentId: string, paymentMethodId?: string): Promise<PaymentResponse>;
-  refundPayment(transactionId: string, amount?: number): Promise<PaymentResponse>;
-  getPaymentStatus(paymentId: string): Promise<{ status: string; details?: any }>;
-}
+import Stripe from 'stripe';
+import type {
+  PaymentProvider,
+  PaymentRequest,
+  PaymentResponse,
+  PaymentAdapter,
+  PaymentStatus,
+  StripeCredentials,
+  PayPalCredentials,
+  CustomAPICredentials,
+  PaymentConfiguration
+} from '@/types/payment';
 
 // PayPal Adapter
 class PayPalAdapter implements PaymentAdapter {
@@ -36,10 +18,10 @@ class PayPalAdapter implements PaymentAdapter {
   private clientSecret: string;
   private environment: 'sandbox' | 'live';
 
-  constructor(credentials: Record<string, any>) {
-    this.clientId = credentials.client_id || '';
-    this.clientSecret = credentials.client_secret || '';
-    this.environment = credentials.environment === 'live' ? 'live' : 'sandbox';
+  constructor(credentials: PayPalCredentials) {
+    this.clientId = credentials.client_id;
+    this.clientSecret = credentials.client_secret;
+    this.environment = credentials.environment;
   }
 
   async createPayment(request: PaymentRequest): Promise<PaymentResponse> {
@@ -179,7 +161,7 @@ class PayPalAdapter implements PaymentAdapter {
     }
   }
 
-  async getPaymentStatus(paymentId: string): Promise<{ status: string; details?: any }> {
+  async getPaymentStatus(paymentId: string): Promise<PaymentStatus> {
     try {
       const tokenResponse = await this.getAccessToken();
       if (!tokenResponse.success) {
@@ -240,19 +222,19 @@ class PayPalAdapter implements PaymentAdapter {
 
 // Stripe Adapter
 class StripeAdapter implements PaymentAdapter {
-  private secretKey: string;
+  private stripe: Stripe;
   private publishableKey: string;
 
-  constructor(credentials: Record<string, any>) {
-    this.secretKey = credentials.secret_key || '';
-    this.publishableKey = credentials.publishable_key || '';
+  constructor(credentials: StripeCredentials) {
+    this.stripe = new Stripe(credentials.secret_key, {
+      apiVersion: '2024-11-20.acacia'
+    });
+    this.publishableKey = credentials.publishable_key;
   }
 
   async createPayment(request: PaymentRequest): Promise<PaymentResponse> {
     try {
-      const stripe = require('stripe')(this.secretKey);
-
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await this.stripe.paymentIntents.create({
         amount: Math.round(request.amount * 100), // Convert to cents
         currency: request.currency.toLowerCase(),
         description: request.description,
@@ -274,9 +256,7 @@ class StripeAdapter implements PaymentAdapter {
 
   async confirmPayment(paymentId: string, paymentMethodId?: string): Promise<PaymentResponse> {
     try {
-      const stripe = require('stripe')(this.secretKey);
-
-      const paymentIntent = await stripe.paymentIntents.confirm(paymentId, {
+      const paymentIntent = await this.stripe.paymentIntents.confirm(paymentId, {
         payment_method: paymentMethodId
       });
 
@@ -293,14 +273,12 @@ class StripeAdapter implements PaymentAdapter {
 
   async refundPayment(transactionId: string, amount?: number): Promise<PaymentResponse> {
     try {
-      const stripe = require('stripe')(this.secretKey);
-
       const refundData: any = { payment_intent: transactionId };
       if (amount) {
         refundData.amount = Math.round(amount * 100); // Convert to cents
       }
 
-      const refund = await stripe.refunds.create(refundData);
+      const refund = await this.stripe.refunds.create(refundData);
 
       return {
         success: true,
@@ -313,10 +291,9 @@ class StripeAdapter implements PaymentAdapter {
     }
   }
 
-  async getPaymentStatus(paymentId: string): Promise<{ status: string; details?: any }> {
+  async getPaymentStatus(paymentId: string): Promise<PaymentStatus> {
     try {
-      const stripe = require('stripe')(this.secretKey);
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+      const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentId);
       
       return { status: paymentIntent.status, details: paymentIntent };
 
@@ -333,9 +310,9 @@ class CustomAPIAdapter implements PaymentAdapter {
   private apiKey: string;
   private headers: Record<string, string>;
 
-  constructor(credentials: Record<string, any>) {
-    this.apiEndpoint = credentials.api_endpoint || '';
-    this.apiKey = credentials.api_key || '';
+  constructor(credentials: CustomAPICredentials) {
+    this.apiEndpoint = credentials.api_endpoint;
+    this.apiKey = credentials.api_key;
     this.headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${this.apiKey}`,
@@ -431,7 +408,7 @@ class CustomAPIAdapter implements PaymentAdapter {
     }
   }
 
-  async getPaymentStatus(paymentId: string): Promise<{ status: string; details?: any }> {
+  async getPaymentStatus(paymentId: string): Promise<PaymentStatus> {
     try {
       const response = await fetch(`${this.apiEndpoint}/payments/${paymentId}`, {
         method: 'GET',
@@ -466,19 +443,23 @@ export class UniversalPaymentAdapter {
       const primaryProvider = paymentSettings.payment_provider || 'stripe';
 
       // Map provider credentials
-      const providerCredentials: Record<string, any> = {};
+      let providerCredentials: any = {};
 
       switch (primaryProvider.toLowerCase()) {
         case 'paypal':
-          providerCredentials.client_id = paymentSettings.paypal_client_id || '';
-          providerCredentials.client_secret = paymentSettings.paypal_client_secret || '';
-          providerCredentials.environment = paymentSettings.paypal_environment || 'sandbox';
+          providerCredentials = {
+            client_id: paymentSettings.paypal_client_id || '',
+            client_secret: paymentSettings.paypal_client_secret || '',
+            environment: paymentSettings.paypal_environment || 'sandbox'
+          } as PayPalCredentials;
           this.adapter = new PayPalAdapter(providerCredentials);
           break;
 
         case 'stripe':
-          providerCredentials.secret_key = paymentSettings.stripe_secret_key || process.env.STRIPE_SECRET_KEY || '';
-          providerCredentials.publishable_key = paymentSettings.stripe_publishable_key || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
+          providerCredentials = {
+            secret_key: paymentSettings.stripe_secret_key || process.env.STRIPE_SECRET_KEY || '',
+            publishable_key: paymentSettings.stripe_publishable_key || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
+          } as StripeCredentials;
           this.adapter = new StripeAdapter(providerCredentials);
           break;
 
@@ -491,16 +472,21 @@ export class UniversalPaymentAdapter {
           throw new Error('Square adapter not implemented yet');
 
         case 'custom':
-          providerCredentials.api_endpoint = paymentSettings.custom_api_endpoint || '';
-          providerCredentials.api_key = paymentSettings.custom_api_key || '';
+          providerCredentials = {
+            api_endpoint: paymentSettings.custom_api_endpoint || '',
+            api_key: paymentSettings.custom_api_key || '',
+            custom_headers: paymentSettings.custom_headers || {}
+          } as CustomAPICredentials;
           this.adapter = new CustomAPIAdapter(providerCredentials);
           break;
 
         default:
           // Default to Stripe if provider not recognized
           console.warn(`Unknown payment provider: ${primaryProvider}. Defaulting to Stripe.`);
-          providerCredentials.secret_key = process.env.STRIPE_SECRET_KEY || '';
-          providerCredentials.publishable_key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
+          providerCredentials = {
+            secret_key: process.env.STRIPE_SECRET_KEY || '',
+            publishable_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
+          } as StripeCredentials;
           this.adapter = new StripeAdapter(providerCredentials);
       }
 
@@ -545,7 +531,7 @@ export class UniversalPaymentAdapter {
     return this.adapter.refundPayment(transactionId, amount);
   }
 
-  async getPaymentStatus(paymentId: string): Promise<{ status: string; details?: any }> {
+  async getPaymentStatus(paymentId: string): Promise<PaymentStatus> {
     await this.initializeAdapter();
     if (!this.adapter) throw new Error('Payment adapter not initialized');
     return this.adapter.getPaymentStatus(paymentId);

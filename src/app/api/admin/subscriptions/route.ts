@@ -1,13 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server';
-import { SupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-
-async function isAdmin(supabase: SupabaseClient) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    return profile?.role === 'admin';
-}
+import { isAdmin } from '@/lib/auth';
 
 // GET - Fetch user subscriptions for admin management
 export async function GET() {

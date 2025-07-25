@@ -3,14 +3,15 @@ import {
   type CookieOptions 
 } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { getRequiredEnv } from '@/lib/env-validation';
 
 export async function createServerClient() {
   const cookieStore = await cookies();
   
   // Now we call the renamed import, resolving the conflict
   return createSupabaseServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL'),
+    getRequiredEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
     {
       cookies: {
         get(name: string) {
@@ -19,15 +20,17 @@ export async function createServerClient() {
         set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options });
-          } catch {
+          } catch (error) {
             // This can be ignored if you have middleware refreshing user sessions.
+            console.warn('Supabase cookie set operation failed:', error);
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options });
-          } catch {
+          } catch (error) {
             // This can be ignored if you have middleware refreshing user sessions.
+            console.warn('Supabase cookie remove operation failed:', error);
           }
         },
       },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { serverEmailAutomation } from '@/lib/email-automation-server';
+import { isAdmin, constantTimeCompare } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,20 +14,10 @@ export async function POST(request: NextRequest) {
     let isAuthorized = false;
     
     if (authHeader?.startsWith('Bearer ')) {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (user) {
-        // Check if user is admin
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-        
-        isAuthorized = profile?.role === 'admin';
-      }
-    } else if (apiKey) {
-      // Check API key (you should store this securely)
-      isAuthorized = apiKey === process.env.EMAIL_API_KEY;
+      isAuthorized = await isAdmin(supabase);
+    } else if (apiKey && process.env.EMAIL_API_KEY) {
+      // Use constant-time comparison to prevent timing attacks
+      isAuthorized = constantTimeCompare(apiKey, process.env.EMAIL_API_KEY);
     }
 
     if (!isAuthorized) {
@@ -124,13 +115,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is admin
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.role !== 'admin') {
+    if (!(await isAdmin(supabase))) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }

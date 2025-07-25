@@ -1,8 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { QuizLevel, levelSlugs } from '@/lib/data';
-
-const PASSING_SCORE_PERCENTAGE = 75;
+import { QUIZ_CONFIG } from '@/config/constants';
 
 type UserAnswers = { [key: number]: string };
 
@@ -43,7 +42,7 @@ export async function POST(req: NextRequest) {
     }
     
     const percentage = (score / questionIds.length) * 100;
-    const passed = percentage >= PASSING_SCORE_PERCENTAGE;
+    const passed = percentage >= QUIZ_CONFIG.PASSING_SCORE_PERCENTAGE;
 
     const { data: lastAttempt } = await supabase
         .from('quiz_attempts')

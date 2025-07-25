@@ -1,9 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { QuizLevel } from '@/lib/data';
-
-const QUIZ_LENGTH = 25;
-const TIME_LIMIT_IN_MINUTES = 25;
+import { QUIZ_CONFIG } from '@/config/constants';
 
 // The change is in the function signature below
 export async function GET(req: NextRequest, { params: paramsPromise }: { params: Promise<{ level: QuizLevel }> }) {
@@ -24,15 +22,15 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
         return NextResponse.json({ error: 'Could not fetch exam questions for this level.' }, { status: 500 });
     }
 
-    if (allQuestions.length < QUIZ_LENGTH) {
-        return NextResponse.json({ error: `Not enough questions in the database for this level. Found ${allQuestions.length}, need ${QUIZ_LENGTH}.` }, { status: 500 });
+    if (allQuestions.length < QUIZ_CONFIG.QUIZ_LENGTH) {
+        return NextResponse.json({ error: `Not enough questions in the database for this level. Found ${allQuestions.length}, need ${QUIZ_CONFIG.QUIZ_LENGTH}.` }, { status: 500 });
     }
 
     const shuffled = allQuestions.sort(() => 0.5 - Math.random());
-    const selectedQuestions = shuffled.slice(0, QUIZ_LENGTH);
+    const selectedQuestions = shuffled.slice(0, QUIZ_CONFIG.QUIZ_LENGTH);
     
     return NextResponse.json({ 
         questions: selectedQuestions, 
-        timeLimit: TIME_LIMIT_IN_MINUTES * 60 
+        timeLimit: QUIZ_CONFIG.TIME_LIMIT_IN_MINUTES * 60 
     });
 }
