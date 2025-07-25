@@ -83,8 +83,8 @@ export default function Sidebar() {
     return (
       <>
         <aside className={clsx(
-            "fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 p-4 flex flex-col",
-            "transition-transform duration-300 ease-in-out md:translate-x-0",
+            "fixed inset-y-0 left-0 z-40 w-72 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md border-r border-neutral-200/50 dark:border-neutral-800/50 p-4 flex flex-col shadow-xl",
+            "transition-all duration-300 ease-in-out md:translate-x-0",
             { 'translate-x-0': isOpen, '-translate-x-full': !isOpen }
         )}>
           <div className="flex justify-between items-center mb-6 px-2">

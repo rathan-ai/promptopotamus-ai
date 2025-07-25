@@ -6,6 +6,7 @@ import type { User } from '@supabase/supabase-js';
 import Introduction from "@/components/guides/Introduction";
 import SubscriptionStatusBanner from "@/components/SubscriptionStatusBanner";
 import FeaturedPromptsShowcase from "@/components/FeaturedPromptsShowcase";
+import HowItWorks from "@/components/HowItWorks";
 import PromptBuilder from "@/components/PromptBuilder";
 import PromptAnalyzer from "@/components/PromptAnalyzer";
 import BasicTechniques from "@/components/guides/BasicTechniques";
@@ -47,6 +48,9 @@ export default function Home() {
       
       {/* Featured Prompts Marketplace */}
       <FeaturedPromptsShowcase />
+      
+      {/* How It Works Section */}
+      <HowItWorks />
       
       {/* Educational Content */}
       <div className="max-w-4xl mx-auto space-y-12">

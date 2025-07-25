@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { Provider } from 'jotai';
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Analytics } from "@vercel/analytics/react";
 import IssueReportWidget from "@/components/IssueReportWidget";
 import "./globals.css";
@@ -73,6 +74,7 @@ export default function RootLayout({
               <main className="flex-1 p-4 md:p-8">
                 {children}
               </main>
+              <Footer />
             </div>
           </div>
           
