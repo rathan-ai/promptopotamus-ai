@@ -41,6 +41,8 @@ import {
   type IntentAnalysis,
   type OptimizationSuggestion
 } from '@/lib/ai-assistant';
+import ComplexityGuidance from './ComplexityGuidance';
+import RecipeFlowVisualizer from './RecipeFlowVisualizer';
 
 interface Variable {
   name: string;
@@ -83,6 +85,7 @@ interface SmartPromptsBuilderProps {
   onSave?: (prompt: SmartPromptData) => void;
   initialData?: Partial<SmartPromptData>;
   canCreateMarketplace: boolean;
+  initialComplexityType?: 'simple' | 'smart' | 'recipe';
 }
 
 interface AIAssistanceState {
@@ -107,13 +110,14 @@ const aiModels = [
 export default function SmartPromptsBuilder({ 
   onSave, 
   initialData, 
-  canCreateMarketplace = false 
+  canCreateMarketplace = false,
+  initialComplexityType
 }: SmartPromptsBuilderProps) {
   const [formData, setFormData] = useState<SmartPromptData>({
     title: '',
     description: '',
     prompt_text: '',
-    complexity_level: 'simple',
+    complexity_level: initialComplexityType || 'simple',
     category: '',
     difficulty_level: 'beginner',
     tags: [],
@@ -308,19 +312,17 @@ export default function SmartPromptsBuilder({
     }));
   };
 
-  const updateRecipeStep = (index: number, updates: Partial<RecipeStep>) => {
+  const updateRecipeSteps = (steps: RecipeStep[]) => {
     setFormData(prev => ({
       ...prev,
-      recipe_steps: prev.recipe_steps.map((step, i) => 
-        i === index ? { ...step, ...updates } : step
-      )
+      recipe_steps: steps
     }));
   };
 
-  const removeRecipeStep = (index: number) => {
+  const removeRecipeStepById = (stepId: string) => {
     setFormData(prev => ({
       ...prev,
-      recipe_steps: prev.recipe_steps.filter((_, i) => i !== index)
+      recipe_steps: prev.recipe_steps.filter(step => step.id !== stepId)
     }));
   };
 
@@ -722,6 +724,9 @@ export default function SmartPromptsBuilder({
                   ))}
                 </div>
               </div>
+
+              {/* Complexity Guidance */}
+              <ComplexityGuidance complexityLevel={formData.complexity_level} />
             </div>
           )}
 
@@ -959,60 +964,13 @@ export default function SmartPromptsBuilder({
 
               {/* Recipe Steps (only for recipe complexity) */}
               {formData.complexity_level === 'recipe' && (
-                <div className="border dark:border-neutral-600 rounded-lg">
-                  <button
-                    onClick={() => toggleSection('recipes')}
-                    className="w-full flex items-center justify-between p-4 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700"
-                  >
-                    <h3 className="font-medium dark:text-white">Recipe Steps</h3>
-                    {expandedSections.recipes ? 
-                      <ChevronDown className="w-5 h-5" /> : 
-                      <ChevronRight className="w-5 h-5" />
-                    }
-                  </button>
-                  
-                  {expandedSections.recipes && (
-                    <div className="p-4 border-t dark:border-neutral-600 space-y-4">
-                      {formData.recipe_steps.map((step, index) => (
-                        <div key={step.id} className="bg-neutral-50 dark:bg-neutral-700 p-4 rounded-lg">
-                          <div className="flex items-center justify-between mb-3">
-                            <input
-                              type="text"
-                              placeholder="Step title"
-                              value={step.title}
-                              onChange={(e) => updateRecipeStep(index, { title: e.target.value })}
-                              className="flex-1 p-2 border border-neutral-300 dark:border-neutral-600 rounded dark:bg-neutral-600 dark:text-white mr-3"
-                            />
-                            <button
-                              onClick={() => removeRecipeStep(index)}
-                              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                          <textarea
-                            placeholder="Step instructions"
-                            value={step.instruction}
-                            onChange={(e) => updateRecipeStep(index, { instruction: e.target.value })}
-                            rows={3}
-                            className="w-full p-2 border border-neutral-300 dark:border-neutral-600 rounded dark:bg-neutral-600 dark:text-white mb-3"
-                          />
-                          <textarea
-                            placeholder="Prompt template for this step"
-                            value={step.prompt_template}
-                            onChange={(e) => updateRecipeStep(index, { prompt_template: e.target.value })}
-                            rows={4}
-                            className="w-full p-2 border border-neutral-300 dark:border-neutral-600 rounded dark:bg-neutral-600 dark:text-white font-mono"
-                          />
-                        </div>
-                      ))}
-                      <Button onClick={addRecipeStep} variant="outline" className="w-full">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Recipe Step
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                <RecipeFlowVisualizer
+                  steps={formData.recipe_steps}
+                  availableVariables={formData.variables.map(v => v.name)}
+                  onStepsChange={updateRecipeSteps}
+                  onAddStep={addRecipeStep}
+                  onRemoveStep={removeRecipeStepById}
+                />
               )}
 
               {/* Tags */}

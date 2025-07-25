@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye, ExternalLink, Sparkles } from 'lucide-react';
+import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye, ExternalLink, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import SmartPromptsBuilder from '@/components/SmartPromptsBuilder';
 import PromptPreviewModal from '@/components/PromptPreviewModal';
 import PayPalPaymentModal from '@/components/PayPalPaymentModal';
+import PromptTypesGuide from '@/components/PromptTypesGuide';
+import VariablesExplainer from '@/components/VariablesExplainer';
 import toast from 'react-hot-toast';
 
 interface Variable {
@@ -62,7 +64,7 @@ const difficultyColors = {
 };
 
 export default function SmartPromptsPage() {
-  const [activeView, setActiveView] = useState<'marketplace' | 'builder'>('marketplace');
+  const [activeView, setActiveView] = useState<'marketplace' | 'builder' | 'learn'>('marketplace');
   const [prompts, setPrompts] = useState<SmartPrompt[]>([]);
   const [filteredPrompts, setFilteredPrompts] = useState<SmartPrompt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,6 +83,7 @@ export default function SmartPromptsPage() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPromptForPurchase, setSelectedPromptForPurchase] = useState<SmartPrompt | null>(null);
+  const [selectedComplexityType, setSelectedComplexityType] = useState<string>('');
 
   const fetchPrompts = async () => {
     try {
@@ -341,6 +344,13 @@ export default function SmartPromptsPage() {
             Marketplace
           </Button>
           <Button
+            onClick={() => setActiveView('learn')}
+            variant={activeView === 'learn' ? 'default' : 'outline'}
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            Learn
+          </Button>
+          <Button
             onClick={() => setActiveView('builder')}
             variant={activeView === 'builder' ? 'default' : 'outline'}
           >
@@ -353,11 +363,95 @@ export default function SmartPromptsPage() {
       {activeView === 'builder' ? (
         <SmartPromptsBuilder 
           canCreateMarketplace={certificationStatus.hasValidCertificate}
+          initialComplexityType={selectedComplexityType as 'simple' | 'smart' | 'recipe' | undefined}
           onSave={() => {
             setActiveView('marketplace');
             fetchPrompts();
+            setSelectedComplexityType(''); // Reset after save
           }}
         />
+      ) : activeView === 'learn' ? (
+        <div className="space-y-8">
+          {/* Learning Path Header */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <HelpCircle className="w-8 h-8 text-blue-600" />
+              <div>
+                <h2 className="text-2xl font-bold dark:text-white">Learn Smart Prompting</h2>
+                <p className="text-neutral-600 dark:text-neutral-400">
+                  Master the art of creating reusable, intelligent prompts that save time and deliver consistent results.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap gap-3 mt-4">
+              <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Interactive examples</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span>Hands-on practice</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Best practices</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Prompt Types Guide */}
+          <PromptTypesGuide 
+            onTypeSelect={(type) => {
+              setSelectedComplexityType(type);
+              setActiveView('builder');
+            }}
+            selectedType={selectedComplexityType}
+          />
+
+          {/* Variables Explainer */}
+          <VariablesExplainer />
+
+          {/* Quick Start CTA */}
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-6 text-center">
+            <h3 className="text-xl font-bold dark:text-white mb-3">Ready to Create Your First Smart Prompt?</h3>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+              Apply what you've learned by building a prompt that solves a real problem for you.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button
+                onClick={() => {
+                  setSelectedComplexityType('simple');
+                  setActiveView('builder');
+                }}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                Start with Simple Prompt
+              </Button>
+              <Button
+                onClick={() => {
+                  setSelectedComplexityType('smart');
+                  setActiveView('builder');
+                }}
+                className="flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create Smart Prompt
+              </Button>
+              <Button
+                onClick={() => {
+                  setSelectedComplexityType('recipe');
+                  setActiveView('builder');
+                }}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                Try Recipe Builder
+              </Button>
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="space-y-6">
           {/* Search and Filters */}

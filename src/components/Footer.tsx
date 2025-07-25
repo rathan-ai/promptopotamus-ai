@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Github, Twitter, Linkedin, Mail, Heart, ExternalLink, BookOpen, Shield, FileText, HelpCircle } from 'lucide-react';
+import { Mail, Heart, ExternalLink, Shield, FileText, HelpCircle, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 const Footer = () => {
@@ -29,26 +29,19 @@ const Footer = () => {
       links: [
         { href: '/about', label: 'About Us', internal: true },
         { href: '/pricing', label: 'Pricing', internal: true },
-        { href: '/blog', label: 'Blog', internal: true },
-        { href: 'mailto:support@promptopotamus.com', label: 'Contact', internal: false },
+        { href: 'mailto:info@innorag.com', label: 'Contact', internal: false },
       ]
     },
     {
       title: 'Legal',
       links: [
-        { href: '/privacy', label: 'Privacy Policy', internal: true },
-        { href: '/terms', label: 'Terms of Service', internal: true },
-        { href: '/cookies', label: 'Cookie Policy', internal: true },
-        { href: '/refund', label: 'Refund Policy', internal: true },
+        { href: '/privacy-policy', label: 'Privacy Policy', internal: true },
+        { href: '/terms-of-service', label: 'Terms of Service', internal: true },
+        { href: '/refund-policy', label: 'Refund Policy', internal: true },
       ]
     }
   ];
 
-  const socialLinks = [
-    { href: 'https://github.com/promptopotamus', icon: Github, label: 'GitHub' },
-    { href: 'https://twitter.com/promptopotamus', icon: Twitter, label: 'Twitter' },
-    { href: 'https://linkedin.com/company/promptopotamus', icon: Linkedin, label: 'LinkedIn' },
-  ];
 
   return (
     <footer className="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 mt-24">
@@ -92,25 +85,6 @@ const Footer = () => {
               Master the art of AI prompting with our comprehensive guides, tools, and certified Smart Prompts marketplace.
             </p>
             
-            {/* Social Links */}
-            <div className="mt-6 flex gap-4">
-              {socialLinks.map((social) => {
-                const Icon = social.icon;
-                return (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
-                    aria-label={social.label}
-                  >
-                    <Icon className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
-                  </a>
-                );
-              })}
-            </div>
-
             {/* Trust Badges */}
             <div className="mt-6 flex flex-wrap gap-3">
               <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
@@ -164,6 +138,9 @@ const Footer = () => {
             <p className="text-sm text-neutral-600 dark:text-neutral-400">
               © {currentYear} Promptopotamus. All rights reserved.
             </p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+              Built by <a href="https://innorag.com" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">innorag.com</a>
+            </p>
             
             {/* Quick Actions */}
             <div className="flex items-center gap-6">
@@ -194,7 +171,7 @@ const Footer = () => {
           </div>
 
           {/* Fun Tagline */}
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
               🦛 Crafted with love and lots of prompts • Powered by creativity and caffeine
             </p>

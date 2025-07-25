@@ -83,7 +83,7 @@ INSERT INTO admin_settings (category, key, value, description, data_type) VALUES
 ('payments', 'custom_api_key', '""', 'Custom Payment API Key (encrypted)', 'string'),
 
 -- Communication Settings  
-('communication', 'support_email', '"support@promptopotamus.com"', 'Platform support email', 'string'),
+('communication', 'support_email', '"info@innorag.com"', 'Platform support email', 'string'),
 ('communication', 'company_name', '"Innorag Technologies Private Limited"', 'Company name for certificates', 'string'),
 ('communication', 'platform_name', '"Promptopotamus"', 'Platform display name', 'string');
 
