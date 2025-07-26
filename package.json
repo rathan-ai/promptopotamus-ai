@@ -6,7 +6,16 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:status": "supabase migration list",
+    "db:push": "supabase db push",
+    "db:pull": "supabase db pull",
+    "db:reset": "supabase db reset",
+    "db:diff": "supabase db diff",
+    "db:generate": "supabase migration new",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:link": "supabase link"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.57.0",
