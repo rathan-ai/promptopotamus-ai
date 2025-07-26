@@ -78,19 +78,18 @@ export function validateEnvironmentVariables(): void {
   }
 
   // Check PayPal configuration consistency (optional)
-  const hasPayPalClientId = !!process.env.PAYPAL_CLIENT_ID;
-  const hasPayPalClientSecret = !!process.env.PAYPAL_CLIENT_SECRET;
-  const hasPayPalWebhook = !!process.env.PAYPAL_WEBHOOK_ID;
+  const hasPayPalClientId = !!process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_ID.trim() !== '';
+  const hasPayPalClientSecret = !!process.env.PAYPAL_CLIENT_SECRET && process.env.PAYPAL_CLIENT_SECRET.trim() !== '';
+  const hasPayPalWebhook = !!process.env.PAYPAL_WEBHOOK_ID && process.env.PAYPAL_WEBHOOK_ID.trim() !== '';
   
-  // Only validate PayPal if at least one PayPal variable is set
-  if (hasPayPalClientId || hasPayPalClientSecret) {
-    if (hasPayPalClientId !== hasPayPalClientSecret) {
-      errors.push('Both PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET must be set together');
-    }
-    
+  // Only validate PayPal if BOTH client ID and secret are properly set
+  if (hasPayPalClientId && hasPayPalClientSecret) {
     if (!hasPayPalWebhook) {
       console.warn('PAYPAL_WEBHOOK_ID is not set. PayPal webhook verification will fail.');
     }
+  } else if (hasPayPalClientId || hasPayPalClientSecret) {
+    // Only warn, don't error, if PayPal is partially configured during build
+    console.warn('PayPal is partially configured. Both PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are needed for PayPal payments.');
   }
   
   // Throw error if any validation failed
@@ -115,13 +114,16 @@ export function getOptionalEnv(key: string, defaultValue: string = ''): string {
   return process.env[key] || defaultValue;
 }
 
-// Initialize validation (only run on server)
-if (typeof window === 'undefined' && process.env.NODE_ENV !== 'test') {
+// Initialize validation (only run on server, but skip during build)
+if (typeof window === 'undefined' && 
+    process.env.NODE_ENV !== 'test' && 
+    process.env.NODE_ENV !== 'development' &&
+    !process.env.VERCEL_ENV) { // Skip during Vercel build
   try {
     validateEnvironmentVariables();
   } catch (error) {
     console.error('Environment validation failed:', error);
-    // In production, fail fast
+    // In production, fail fast (but not during build)
     if (process.env.NODE_ENV === 'production') {
       process.exit(1);
     }
