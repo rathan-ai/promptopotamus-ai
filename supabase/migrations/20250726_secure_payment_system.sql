@@ -157,7 +157,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 6. Create view for user PromptCoin balance summary
+-- 6. Add PromptCoin credit columns to profiles table
+ALTER TABLE profiles 
+ADD COLUMN IF NOT EXISTS credits_analysis INTEGER DEFAULT 50,
+ADD COLUMN IF NOT EXISTS credits_enhancement INTEGER DEFAULT 45,
+ADD COLUMN IF NOT EXISTS credits_exam INTEGER DEFAULT 150,
+ADD COLUMN IF NOT EXISTS credits_export INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20) DEFAULT 'none',
+ADD COLUMN IF NOT EXISTS last_payment_date TIMESTAMPTZ DEFAULT NULL;
+
+-- Add indexes for PromptCoin queries
+CREATE INDEX IF NOT EXISTS idx_profiles_credits_analysis ON profiles(credits_analysis) WHERE credits_analysis > 0;
+CREATE INDEX IF NOT EXISTS idx_profiles_credits_enhancement ON profiles(credits_enhancement) WHERE credits_enhancement > 0;
+CREATE INDEX IF NOT EXISTS idx_profiles_credits_exam ON profiles(credits_exam) WHERE credits_exam > 0;
+CREATE INDEX IF NOT EXISTS idx_profiles_credits_export ON profiles(credits_export) WHERE credits_export > 0;
+CREATE INDEX IF NOT EXISTS idx_profiles_payment_status ON profiles(payment_status) WHERE payment_status != 'none';
+
+-- 7. Create view for user PromptCoin balance summary
 CREATE OR REPLACE VIEW user_promptcoin_balance AS
 SELECT 
     p.id as user_id,
@@ -178,7 +194,7 @@ ALTER VIEW user_promptcoin_balance SET (security_barrier = true);
 CREATE POLICY "Users can see their own balance" ON user_promptcoin_balance
     FOR SELECT USING (auth.uid() = user_id);
 
--- 7. Update existing payment_transactions table if it exists
+-- 8. Update existing payment_transactions table if it exists
 DO $$
 BEGIN
     -- Check if payment_transactions table exists and add missing columns
@@ -201,7 +217,7 @@ BEGIN
     END IF;
 END $$;
 
--- 8. Create trigger to auto-log PromptCoin balance changes
+-- 9. Create trigger to auto-log PromptCoin balance changes
 CREATE OR REPLACE FUNCTION trigger_log_promptcoin_changes()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -264,7 +280,7 @@ CREATE TRIGGER trigger_promptcoin_audit
     FOR EACH ROW
     EXECUTE FUNCTION trigger_log_promptcoin_changes();
 
--- 9. Add comment documentation
+-- 10. Add comment documentation
 COMMENT ON TABLE promptcoin_transactions IS 'Audit trail for all PromptCoin movements and transactions';
 COMMENT ON TABLE payment_security_events IS 'Security event logging for payment-related activities';
 COMMENT ON FUNCTION log_promptcoin_transaction IS 'Securely log PromptCoin transactions with balance tracking';
