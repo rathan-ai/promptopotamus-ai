@@ -133,9 +133,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to log security events
 CREATE OR REPLACE FUNCTION log_payment_security_event(
-    p_user_id UUID DEFAULT NULL,
     p_event_type VARCHAR(30),
     p_severity VARCHAR(10),
+    p_user_id UUID DEFAULT NULL,
     p_ip_address INET DEFAULT NULL,
     p_user_agent TEXT DEFAULT NULL,
     p_request_data JSONB DEFAULT '{}',
