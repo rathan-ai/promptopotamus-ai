@@ -77,17 +77,20 @@ export function validateEnvironmentVariables(): void {
     console.warn('STRIPE_WEBHOOK_SECRET is not set. Webhook verification will fail.');
   }
 
-  // Check PayPal configuration consistency
+  // Check PayPal configuration consistency (optional)
   const hasPayPalClientId = !!process.env.PAYPAL_CLIENT_ID;
   const hasPayPalClientSecret = !!process.env.PAYPAL_CLIENT_SECRET;
   const hasPayPalWebhook = !!process.env.PAYPAL_WEBHOOK_ID;
   
-  if (hasPayPalClientId !== hasPayPalClientSecret) {
-    errors.push('Both PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET must be set together');
-  }
-  
-  if ((hasPayPalClientId || hasPayPalClientSecret) && !hasPayPalWebhook) {
-    console.warn('PAYPAL_WEBHOOK_ID is not set. PayPal webhook verification will fail.');
+  // Only validate PayPal if at least one PayPal variable is set
+  if (hasPayPalClientId || hasPayPalClientSecret) {
+    if (hasPayPalClientId !== hasPayPalClientSecret) {
+      errors.push('Both PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET must be set together');
+    }
+    
+    if (!hasPayPalWebhook) {
+      console.warn('PAYPAL_WEBHOOK_ID is not set. PayPal webhook verification will fail.');
+    }
   }
   
   // Throw error if any validation failed

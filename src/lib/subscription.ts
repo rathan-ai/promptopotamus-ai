@@ -434,3 +434,99 @@ export async function purchaseRecipeWithPromptCoins(
         return { success: false, error: 'Internal error processing purchase' };
     }
 }
+
+// Legacy exports for backward compatibility
+export type SubscriptionTier = 'free' | 'pro' | 'premium';
+export type SubscriptionStatus = 'inactive' | 'active' | 'cancelled' | 'expired';
+
+export interface UserSubscription {
+    tier: SubscriptionTier;
+    status: SubscriptionStatus;
+    startDate?: string;
+    endDate?: string;
+    isActive: boolean;
+}
+
+/**
+ * Legacy function for backward compatibility
+ * Maps new UserProfile to old UserSubscription format
+ */
+export async function getUserSubscription(userId: string): Promise<UserSubscription> {
+    const profile = await getUserProfile(userId);
+    
+    return {
+        tier: profile.type === 'paid' ? 'pro' : 'free',
+        status: profile.paymentStatus === 'active' ? 'active' : 'inactive',
+        isActive: profile.type === 'paid' || profile.type === 'free'
+    };
+}
+
+/**
+ * Legacy subscription limits for backward compatibility
+ */
+export const SUBSCRIPTION_LIMITS = {
+    free: {
+        promptEnhancements: Math.floor(FREE_DAILY_LIMITS.enhancement / PROMPTCOIN_COSTS.enhancement),
+        promptAnalyses: Math.floor(FREE_DAILY_LIMITS.analysis / PROMPTCOIN_COSTS.analysis),
+        templatesAccess: 'free' as const,
+        exportFeatures: false,
+        prioritySupport: false,
+        examAttempts: Math.floor(FREE_DAILY_LIMITS.exam / PROMPTCOIN_COSTS.exam),
+        examRetries: false
+    },
+    pro: {
+        promptEnhancements: -1, // unlimited
+        promptAnalyses: -1, // unlimited  
+        templatesAccess: 'pro' as const,
+        exportFeatures: true,
+        prioritySupport: true,
+        examAttempts: -1, // unlimited
+        examRetries: true
+    },
+    premium: {
+        promptEnhancements: -1, // unlimited
+        promptAnalyses: -1, // unlimited
+        templatesAccess: 'premium' as const,
+        exportFeatures: true,
+        prioritySupport: true,
+        customTemplates: true,
+        teamFeatures: true,
+        analytics: true,
+        examAttempts: -1, // unlimited
+        examRetries: true
+    }
+};
+
+/**
+ * Legacy function for backward compatibility
+ * Note: This is a stub since we now use PromptCoin-based payments
+ */
+export async function updateSubscriptionFromPayment(
+    userId: string,
+    tier: SubscriptionTier,
+    paymentMethod: string,
+    transactionId: string
+): Promise<boolean> {
+    console.warn('updateSubscriptionFromPayment is deprecated. Use PromptCoin-based payments instead.');
+    
+    // For backward compatibility, we'll just update payment status
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    try {
+        const { error } = await supabase
+            .from('profiles')
+            .update({ 
+                payment_status: 'active',
+                last_payment_date: new Date().toISOString()
+            })
+            .eq('id', userId);
+
+        return !error;
+    } catch (error) {
+        console.error('Error in legacy updateSubscriptionFromPayment:', error);
+        return false;
+    }
+}
