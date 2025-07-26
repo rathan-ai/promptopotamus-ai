@@ -1,0 +1,269 @@
+name: Claude AI Integration
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+  issue_comment:
+    types: [created, edited]
+  pull_request:
+    types: [opened, edited, review_requested]
+  pull_request_review_comment:
+    types: [created, edited]
+
+jobs:
+  claude-assistance:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.body, '@claude') || contains(github.event.comment.body, '@claude') || contains(github.event.pull_request.body, '@claude')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Claude Code
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          echo "Claude Code installed successfully"
+
+      - name: Configure Claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Configure Claude with project context
+          claude-code config set api_key "$ANTHROPIC_API_KEY"
+          claude-code config set project_name "Promptopotamus"
+          echo "Claude configured for project"
+
+      - name: Analyze Issue/PR Content
+        id: analyze
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Extract the content that mentioned @claude
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            CONTENT="${{ github.event.issue.body }}"
+            TITLE="${{ github.event.issue.title }}"
+            NUMBER="${{ github.event.issue.number }}"
+            TYPE="issue"
+          elif [ "${{ github.event_name }}" = "issue_comment" ]; then
+            CONTENT="${{ github.event.comment.body }}"
+            TITLE="Comment on issue #${{ github.event.issue.number }}"
+            NUMBER="${{ github.event.issue.number }}"
+            TYPE="comment"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            CONTENT="${{ github.event.pull_request.body }}"
+            TITLE="${{ github.event.pull_request.title }}"
+            NUMBER="${{ github.event.pull_request.number }}"
+            TYPE="pull_request"
+          fi
+          
+          echo "content=$CONTENT" >> $GITHUB_OUTPUT
+          echo "title=$TITLE" >> $GITHUB_OUTPUT
+          echo "number=$NUMBER" >> $GITHUB_OUTPUT
+          echo "type=$TYPE" >> $GITHUB_OUTPUT
+
+      - name: Generate Claude Response
+        id: claude_response
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Create a temporary file with the analysis request
+          cat > claude_prompt.md << EOF
+          # Claude AI Integration Request
+          
+          ## Context
+          - Repository: Promptopotamus AI Platform
+          - Type: ${{ steps.analyze.outputs.type }}
+          - Title: ${{ steps.analyze.outputs.title }}
+          - Number: #${{ steps.analyze.outputs.number }}
+          
+          ## Request Content
+          ${{ steps.analyze.outputs.content }}
+          
+          ## Available Information
+          - Project documentation in CLAUDE.md
+          - Supabase database with PromptCoin economy
+          - Vercel deployment platform
+          - Payment integration with Stripe/PayPal
+          - Next.js 15 with TypeScript
+          
+          ## Instructions
+          Please analyze the request and provide:
+          1. A clear understanding of what's being asked
+          2. Specific implementation steps if code changes are needed
+          3. Security considerations for payment/database operations
+          4. Testing recommendations
+          5. If appropriate, create a pull request with the implementation
+          
+          Focus on maintaining the existing architecture patterns and security standards.
+          EOF
+          
+          # Use Claude Code to generate response
+          RESPONSE=$(claude-code ask --file claude_prompt.md --format markdown)
+          echo "response<<EOF" >> $GITHUB_OUTPUT
+          echo "$RESPONSE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create or Update Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const response = `${{ steps.claude_response.outputs.response }}`;
+            const issueNumber = ${{ steps.analyze.outputs.number }};
+            const type = '${{ steps.analyze.outputs.type }}';
+            
+            const commentBody = `## 🤖 Claude AI Assistant Response
+            
+            ${response}
+            
+            ---
+            *This response was generated by Claude AI integrated with GitHub Actions. The suggestions follow the project's established patterns and security requirements as defined in CLAUDE.md.*
+            
+            **Next Steps:**
+            - Review the suggestions carefully
+            - Test any code changes in a development environment first  
+            - Ensure all security requirements are met
+            - Update documentation if needed
+            
+            *Need more help? Mention @claude in a new comment with specific questions.*`;
+            
+            if (type === 'pull_request') {
+              // Comment on pull request
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: issueNumber,
+                body: commentBody,
+                event: 'COMMENT'
+              });
+            } else {
+              // Comment on issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: commentBody
+              });
+            }
+
+      - name: Check for Implementation Request
+        id: check_implementation
+        run: |
+          CONTENT="${{ steps.analyze.outputs.content }}"
+          if echo "$CONTENT" | grep -i "implement\|create\|add\|fix\|build" > /dev/null; then
+            echo "needs_implementation=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_implementation=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Implementation PR
+        if: steps.check_implementation.outputs.needs_implementation == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create a new branch for the implementation
+          BRANCH_NAME="claude/issue-${{ steps.analyze.outputs.number }}-$(date +%s)"
+          git checkout -b "$BRANCH_NAME"
+          
+          # Use Claude Code to implement the requested changes
+          cat > implementation_prompt.md << EOF
+          # Implementation Request
+          
+          Based on the issue/PR: ${{ steps.analyze.outputs.title }}
+          
+          Content: ${{ steps.analyze.outputs.content }}
+          
+          Please implement the requested changes following these guidelines:
+          1. Follow the existing code patterns in the repository
+          2. Maintain TypeScript strict mode compliance
+          3. Add proper error handling and security logging
+          4. Include tests if appropriate
+          5. Update documentation if needed
+          6. Follow the security requirements in CLAUDE.md
+          
+          Create the necessary files and changes to fulfill this request.
+          EOF
+          
+          # Generate implementation using Claude Code
+          claude-code implement --file implementation_prompt.md --auto-commit
+          
+          # Push the branch and create PR
+          git push origin "$BRANCH_NAME"
+          
+          # Create pull request using GitHub CLI
+          gh pr create \
+            --title "🤖 Claude Implementation: ${{ steps.analyze.outputs.title }}" \
+            --body "This PR was automatically created by Claude AI to address issue #${{ steps.analyze.outputs.number }}.
+
+          ## Changes Made
+          - Implementation based on Claude AI analysis
+          - Follows existing project patterns and security requirements
+          - Maintains TypeScript compliance and error handling standards
+
+          ## Testing Required
+          - [ ] Verify functionality in development environment
+          - [ ] Test payment operations if applicable
+          - [ ] Validate database operations and security
+          - [ ] Check Core Web Vitals impact
+
+          ## Security Checklist
+          - [ ] No API keys or secrets committed
+          - [ ] Proper input validation added
+          - [ ] Security event logging included where applicable
+          - [ ] RLS policies respected for database operations
+
+          **Note**: This is an AI-generated implementation. Please review carefully before merging.
+
+          Closes #${{ steps.analyze.outputs.number }}" \
+            --head "$BRANCH_NAME" \
+            --base main
+        continue-on-error: true
+
+  database-monitoring:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'database') || contains(github.event.issue.labels.*.name, 'supabase')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Database Health Check
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Perform basic database connectivity and health checks
+          echo "Running database health checks..."
+          # Add specific database monitoring logic here
+
+  deployment-monitoring:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'deployment') || contains(github.event.issue.labels.*.name, 'vercel')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deployment Status Check
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Check deployment status and performance metrics
+          echo "Checking deployment status..."
+          # Add specific Vercel monitoring logic here

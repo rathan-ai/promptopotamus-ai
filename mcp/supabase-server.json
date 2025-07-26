@@ -1,0 +1,137 @@
+{
+  "name": "supabase-integration",
+  "description": "MCP server for Supabase database integration with Promptopotamus",
+  "version": "1.0.0",
+  "capabilities": {
+    "resources": true,
+    "tools": true,
+    "prompts": true
+  },
+  "tools": [
+    {
+      "name": "query_database",
+      "description": "Execute SQL queries on the Supabase database",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "SQL query to execute"
+          },
+          "safe_mode": {
+            "type": "boolean",
+            "description": "Only allow SELECT queries when true",
+            "default": true
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "get_user_balance",
+      "description": "Get PromptCoin balance for a specific user",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "UUID of the user"
+          }
+        },
+        "required": ["user_id"]
+      }
+    },
+    {
+      "name": "get_security_events",
+      "description": "Retrieve recent payment security events",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Number of events to retrieve",
+            "default": 10
+          },
+          "severity": {
+            "type": "string",
+            "description": "Filter by severity level",
+            "enum": ["low", "medium", "high", "critical"]
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_transaction_patterns",
+      "description": "Analyze PromptCoin transaction patterns for insights",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "time_range": {
+            "type": "string",
+            "description": "Time range for analysis (e.g., '24 hours', '7 days')",
+            "default": "24 hours"
+          }
+        }
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "supabase://tables",
+      "name": "Database Tables",
+      "description": "List of all tables in the Supabase database"
+    },
+    {
+      "uri": "supabase://schema",
+      "name": "Database Schema",
+      "description": "Complete database schema with relationships"
+    },
+    {
+      "uri": "supabase://metrics",
+      "name": "Database Metrics",
+      "description": "Performance and usage metrics"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "analyze_performance",
+      "description": "Analyze database performance and suggest optimizations",
+      "arguments": [
+        {
+          "name": "table",
+          "description": "Specific table to analyze (optional)"
+        }
+      ]
+    },
+    {
+      "name": "security_audit",
+      "description": "Perform a security audit of the database configuration",
+      "arguments": []
+    },
+    {
+      "name": "migration_plan",
+      "description": "Generate a migration plan for schema changes",
+      "arguments": [
+        {
+          "name": "changes",
+          "description": "Description of desired changes"
+        }
+      ]
+    }
+  ],
+  "environment": {
+    "SUPABASE_URL": {
+      "required": true,
+      "description": "Supabase project URL"
+    },
+    "SUPABASE_SERVICE_ROLE_KEY": {
+      "required": true,
+      "description": "Supabase service role key for database access"
+    }
+  },
+  "security": {
+    "read_only_default": true,
+    "require_confirmation": ["DELETE", "DROP", "TRUNCATE", "ALTER"],
+    "audit_log": true
+  }
+}

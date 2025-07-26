@@ -1,0 +1,172 @@
+{
+  "name": "vercel-integration",
+  "description": "MCP server for Vercel platform integration with Promptopotamus",
+  "version": "1.0.0",
+  "capabilities": {
+    "resources": true,
+    "tools": true,
+    "prompts": true
+  },
+  "tools": [
+    {
+      "name": "get_deployments",
+      "description": "Get recent deployments and their status",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Number of deployments to retrieve",
+            "default": 10
+          },
+          "state": {
+            "type": "string",
+            "description": "Filter by deployment state",
+            "enum": ["BUILDING", "READY", "ERROR", "CANCELED"]
+          }
+        }
+      }
+    },
+    {
+      "name": "get_deployment_logs",
+      "description": "Get build logs for a specific deployment",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "deployment_id": {
+            "type": "string",
+            "description": "ID of the deployment"
+          }
+        },
+        "required": ["deployment_id"]
+      }
+    },
+    {
+      "name": "get_analytics",
+      "description": "Get Web Vitals and performance analytics",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "time_range": {
+            "type": "string",
+            "description": "Time range for analytics (e.g., '24h', '7d', '30d')",
+            "default": "24h"
+          },
+          "metric": {
+            "type": "string",
+            "description": "Specific metric to analyze",
+            "enum": ["lcp", "fid", "cls", "fcp", "ttfb"]
+          }
+        }
+      }
+    },
+    {
+      "name": "get_environment_variables",
+      "description": "List environment variables (values hidden for security)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Target environment",
+            "enum": ["development", "preview", "production"],
+            "default": "production"
+          }
+        }
+      }
+    },
+    {
+      "name": "trigger_deployment",
+      "description": "Trigger a new deployment",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "branch": {
+            "type": "string",
+            "description": "Git branch to deploy",
+            "default": "main"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force deployment even if no changes",
+            "default": false
+          }
+        }
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "vercel://project",
+      "name": "Project Information",
+      "description": "Vercel project configuration and settings"
+    },
+    {
+      "uri": "vercel://domains",
+      "name": "Domain Configuration",
+      "description": "Custom domains and SSL certificates"
+    },
+    {
+      "uri": "vercel://edge-config",
+      "name": "Edge Configuration",
+      "description": "Edge runtime configuration and limits"
+    },
+    {
+      "uri": "vercel://functions",
+      "name": "Serverless Functions",
+      "description": "API routes and serverless function metrics"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "performance_analysis",
+      "description": "Analyze deployment performance and suggest optimizations",
+      "arguments": [
+        {
+          "name": "metric_focus",
+          "description": "Specific performance metric to focus on"
+        }
+      ]
+    },
+    {
+      "name": "deployment_troubleshoot",
+      "description": "Troubleshoot deployment issues and suggest fixes",
+      "arguments": [
+        {
+          "name": "error_details",
+          "description": "Details about the deployment error"
+        }
+      ]
+    },
+    {
+      "name": "optimization_plan",
+      "description": "Create an optimization plan for better performance",
+      "arguments": [
+        {
+          "name": "current_metrics",
+          "description": "Current performance metrics to improve"
+        }
+      ]
+    }
+  ],
+  "environment": {
+    "VERCEL_TOKEN": {
+      "required": true,
+      "description": "Vercel API token for platform access"
+    },
+    "VERCEL_PROJECT_ID": {
+      "required": false,
+      "description": "Specific project ID (auto-detected if not provided)"
+    },
+    "VERCEL_TEAM_ID": {
+      "required": false,
+      "description": "Team ID for team projects"
+    }
+  },
+  "security": {
+    "read_only_default": true,
+    "require_confirmation": ["trigger_deployment", "delete_deployment"],
+    "audit_log": true,
+    "sensitive_data_masking": true
+  }
+}
