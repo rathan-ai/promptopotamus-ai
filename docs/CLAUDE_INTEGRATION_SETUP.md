@@ -91,45 +91,57 @@ claude-code ask "How can I improve the security of the payment webhook handlers?
 claude-code analyze src/lib/payment-adapter.ts
 ```
 
-## Phase 3: MCP (Model Context Protocol) Setup
+## Phase 3: Direct Claude Integration Setup
 
-### Step 1: Install MCP Dependencies
+### Step 1: Install Required Dependencies
 
 ```bash
-# Install MCP packages
-npm install @anthropic-ai/mcp-server @anthropic-ai/mcp-client
+# Install the Anthropic SDK for direct Claude integration
+npm install @anthropic-ai/sdk
 
-# Install database and platform clients
-npm install @supabase/supabase-js @vercel/sdk
+# Install platform clients (Vercel SDK already installed, Supabase already available)
+npm install @vercel/sdk
 ```
 
-### Step 2: Configure Supabase MCP Server
+### Step 2: Configure Environment Variables
 
-1. The MCP configuration is already created in `mcp/supabase-server.json`
-2. Set environment variables:
-   ```bash
-   export SUPABASE_URL="https://your-project.supabase.co"
-   export SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
-   ```
+Add to your `.env.local` file:
 
-3. Start the MCP server:
-   ```bash
-   mcp-server start mcp/supabase-server.json
-   ```
+```bash
+# Claude AI Integration
+ANTHROPIC_API_KEY=your-anthropic-api-key
 
-### Step 3: Configure Vercel MCP Server
+# Existing variables (ensure these are set)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+VERCEL_TOKEN=your-vercel-token
+```
 
-1. The MCP configuration is already created in `mcp/vercel-server.json`
-2. Set environment variables:
-   ```bash
-   export VERCEL_TOKEN="your-vercel-token"
-   export VERCEL_PROJECT_ID="your-project-id"
-   ```
+### Step 3: Test Direct Integration
 
-3. Start the MCP server:
-   ```bash
-   mcp-server start mcp/vercel-server.json
-   ```
+The integration service is now available at these API endpoints:
+
+```bash
+# Analyze database performance
+POST /api/claude/analyze-database
+Body: { "tableFilter": "promptcoin" }
+
+# Get security insights
+POST /api/claude/security-insights  
+Body: { "timeRange": "24 hours" }
+
+# Analyze PromptCoin patterns
+POST /api/claude/promptcoin-analysis
+Body: { "timeRange": "7 days" }
+```
+
+### Step 4: Future MCP Integration
+
+The MCP configuration files in `/mcp/` directory are prepared for when the official MCP SDK becomes publicly available. They serve as:
+
+1. **Documentation** of the intended integration structure
+2. **Configuration templates** for future MCP setup
+3. **API specifications** for Claude-Supabase interaction
 
 ## Phase 4: Advanced SDK Integration
 
