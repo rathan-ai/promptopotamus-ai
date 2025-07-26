@@ -3,11 +3,24 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia'
-});
+// Initialize Stripe only if the secret key is available
+const getStripe = () => {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured');
+  }
+  return new Stripe(secretKey, {
+    apiVersion: '2024-11-20.acacia'
+  });
+};
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const getEndpointSecret = () => {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) {
+    throw new Error('STRIPE_WEBHOOK_SECRET is not configured');
+  }
+  return secret;
+};
 
 // Idempotency cache for webhook events (use Redis in production)
 const processedEvents = new Map<string, { timestamp: number; status: string }>();
@@ -54,6 +67,10 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
+    // Get Stripe instance and endpoint secret
+    const stripe = getStripe();
+    const endpointSecret = getEndpointSecret();
+    
     // Verify webhook signature
     event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
   } catch (err) {

@@ -3,10 +3,19 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import crypto from 'crypto';
 
-const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID!;
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID!;
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET!;
-const PAYPAL_ENVIRONMENT = process.env.PAYPAL_ENVIRONMENT || 'sandbox';
+// Get PayPal configuration only when needed
+const getPayPalConfig = () => {
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  const environment = process.env.PAYPAL_ENVIRONMENT || 'sandbox';
+
+  if (!webhookId || !clientId || !clientSecret) {
+    throw new Error('PayPal configuration is incomplete. Missing PAYPAL_WEBHOOK_ID, PAYPAL_CLIENT_ID, or PAYPAL_CLIENT_SECRET');
+  }
+
+  return { webhookId, clientId, clientSecret, environment };
+};
 
 // Idempotency cache for webhook events
 const processedEvents = new Map<string, { timestamp: number; status: string }>();
@@ -49,13 +58,16 @@ async function verifyPayPalWebhook(
       return false;
     }
 
+    // Get PayPal configuration
+    const { webhookId, environment } = getPayPalConfig();
+
     // Get PayPal access token
     const tokenResponse = await getPayPalAccessToken();
     if (!tokenResponse.success) {
       return false;
     }
 
-    const baseUrl = PAYPAL_ENVIRONMENT === 'live' 
+    const baseUrl = environment === 'live' 
       ? 'https://api-m.paypal.com' 
       : 'https://api-m.sandbox.paypal.com';
 
@@ -72,7 +84,7 @@ async function verifyPayPalWebhook(
         transmission_id: transmission_id,
         transmission_sig: transmission_sig,
         transmission_time: transmission_time,
-        webhook_id: PAYPAL_WEBHOOK_ID,
+        webhook_id: webhookId,
         webhook_event: webhookEvent
       })
     });
@@ -88,7 +100,10 @@ async function verifyPayPalWebhook(
 
 async function getPayPalAccessToken(): Promise<{ success: boolean; accessToken?: string }> {
   try {
-    const baseUrl = PAYPAL_ENVIRONMENT === 'live' 
+    // Get PayPal configuration
+    const { clientId, clientSecret, environment } = getPayPalConfig();
+    
+    const baseUrl = environment === 'live' 
       ? 'https://api-m.paypal.com' 
       : 'https://api-m.sandbox.paypal.com';
 
@@ -97,7 +112,7 @@ async function getPayPalAccessToken(): Promise<{ success: boolean; accessToken?:
       headers: {
         'Accept': 'application/json',
         'Accept-Language': 'en_US',
-        'Authorization': `Basic ${Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64')}`,
+        'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
       },
       body: 'grant_type=client_credentials'
     });
