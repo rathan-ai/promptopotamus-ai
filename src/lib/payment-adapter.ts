@@ -32,6 +32,10 @@ class PayPalAdapter implements PaymentAdapter {
         return { success: false, error: 'Failed to get PayPal access token' };
       }
 
+      // Generate idempotency key for this payment request
+      const idempotencyKey = request.metadata?.idempotencyKey || 
+        `paypal_${request.userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
       // Create PayPal order
       const baseUrl = this.environment === 'live' 
         ? 'https://api-m.paypal.com' 
@@ -42,6 +46,7 @@ class PayPalAdapter implements PaymentAdapter {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${tokenResponse.accessToken}`,
+          'PayPal-Request-Id': idempotencyKey, // PayPal's idempotency header
         },
         body: JSON.stringify({
           intent: 'CAPTURE',
@@ -51,7 +56,8 @@ class PayPalAdapter implements PaymentAdapter {
               value: request.amount.toFixed(2)
             },
             description: request.description,
-            custom_id: request.metadata?.orderId || request.userId
+            custom_id: request.metadata?.orderId || request.userId,
+            invoice_id: idempotencyKey
           }],
           application_context: {
             return_url: request.metadata?.returnUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`,
@@ -70,7 +76,8 @@ class PayPalAdapter implements PaymentAdapter {
         success: true,
         transactionId: order.id,
         clientSecret: order.id, // PayPal uses order ID as client secret
-        redirectUrl: order.links?.find((link: any) => link.rel === 'approve')?.href
+        redirectUrl: order.links?.find((link: any) => link.rel === 'approve')?.href,
+        idempotencyKey: idempotencyKey
       };
 
     } catch (error) {
@@ -234,18 +241,29 @@ class StripeAdapter implements PaymentAdapter {
 
   async createPayment(request: PaymentRequest): Promise<PaymentResponse> {
     try {
+      // Generate idempotency key for this payment request
+      const idempotencyKey = request.metadata?.idempotencyKey || 
+        `payment_${request.userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: Math.round(request.amount * 100), // Convert to cents
         currency: request.currency.toLowerCase(),
         description: request.description,
-        metadata: request.metadata || {},
+        metadata: {
+          ...request.metadata,
+          idempotency_key: idempotencyKey,
+          created_at: new Date().toISOString()
+        },
         customer: request.userId,
+      }, {
+        idempotencyKey: idempotencyKey
       });
 
       return {
         success: true,
         transactionId: paymentIntent.id,
-        clientSecret: paymentIntent.client_secret
+        clientSecret: paymentIntent.client_secret,
+        idempotencyKey: idempotencyKey
       };
 
     } catch (error: any) {

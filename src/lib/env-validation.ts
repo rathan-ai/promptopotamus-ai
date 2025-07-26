@@ -8,6 +8,12 @@ export interface RequiredEnvVars {
   // Payment (optional but validated if payment is enabled)
   STRIPE_SECRET_KEY?: string;
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
+  
+  // PayPal
+  PAYPAL_CLIENT_ID?: string;
+  PAYPAL_CLIENT_SECRET?: string;
+  PAYPAL_WEBHOOK_ID?: string;
   
   // Email
   EMAIL_API_KEY?: string;
@@ -61,9 +67,27 @@ export function validateEnvironmentVariables(): void {
   // Check for payment configuration consistency
   const hasStripeSecret = !!process.env.STRIPE_SECRET_KEY;
   const hasStripePublishable = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  const hasStripeWebhook = !!process.env.STRIPE_WEBHOOK_SECRET;
   
   if (hasStripeSecret !== hasStripePublishable) {
     errors.push('Both STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY must be set together');
+  }
+  
+  if ((hasStripeSecret || hasStripePublishable) && !hasStripeWebhook) {
+    console.warn('STRIPE_WEBHOOK_SECRET is not set. Webhook verification will fail.');
+  }
+
+  // Check PayPal configuration consistency
+  const hasPayPalClientId = !!process.env.PAYPAL_CLIENT_ID;
+  const hasPayPalClientSecret = !!process.env.PAYPAL_CLIENT_SECRET;
+  const hasPayPalWebhook = !!process.env.PAYPAL_WEBHOOK_ID;
+  
+  if (hasPayPalClientId !== hasPayPalClientSecret) {
+    errors.push('Both PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET must be set together');
+  }
+  
+  if ((hasPayPalClientId || hasPayPalClientSecret) && !hasPayPalWebhook) {
+    console.warn('PAYPAL_WEBHOOK_ID is not set. PayPal webhook verification will fail.');
   }
   
   // Throw error if any validation failed

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Loader2, CheckCircle, AlertTriangle, Info, ExternalLink, Crown, Lightbulb, BookOpen, TrendingUp, Users, Calendar } from 'lucide-react';
 import { track } from '@vercel/analytics';
-import UpgradeModal from './UpgradeModal';
+import BuyCreditsModal from './BuyCreditsModal';
 import { getSettings, type LimitSettings } from '@/lib/admin-settings';
 
 interface AnalysisResult {
@@ -25,9 +25,9 @@ const samplePrompts = [
 export default function PromptAnalyzer() {
     const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [usageCount, setUsageCount] = useState(5); // Will be updated from settings
+    const [promptCoins, setPromptCoins] = useState(50); // Will be updated from settings (50 PC = 5 analyses)
     const [currentPrompt, setCurrentPrompt] = useState('');
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [showBuyCreditsModal, setShowBuyCreditsModal] = useState(false);
     const [limitSettings, setLimitSettings] = useState<LimitSettings>({
         prompt_builder_free_daily: 3,
         prompt_analyzer_free_daily: 5,
@@ -43,8 +43,8 @@ export default function PromptAnalyzer() {
             try {
                 const settings = await getSettings('limits') as LimitSettings;
                 setLimitSettings(settings);
-                // Update initial usage count based on settings (assuming free tier for now)
-                setUsageCount(settings.prompt_analyzer_free_daily);
+                // Update initial PromptCoins based on settings (assuming free tier for now)
+                setPromptCoins(settings.prompt_analyzer_free_daily * 10); // 10 PC per analysis
             } catch (error) {
                 console.error('Failed to load limit settings:', error);
                 // Keep default values if loading fails
@@ -100,22 +100,22 @@ export default function PromptAnalyzer() {
             return;
         }
         
-        if (usageCount <= 0) {
+        if (promptCoins < 10) { // Need 10 PC for analysis
             track('prompt_analysis_limit_reached', {
                 source: 'prompt_analyzer'
             });
-            setShowUpgradeModal(true);
+            setShowBuyCreditsModal(true);
             return;
         }
         
         setCurrentPrompt(userPrompt);
         setIsLoading(true);
-        setUsageCount(prev => prev - 1);
+        setPromptCoins(prev => prev - 10); // Deduct 10 PC for analysis
 
         // Track analysis start
         track('prompt_analysis_started', {
             prompt_length: userPrompt.length,
-            remaining_uses: usageCount - 1
+            remaining_promptcoins: promptCoins - 10
         });
 
         // Simulate API delay
@@ -191,15 +191,15 @@ export default function PromptAnalyzer() {
                 </div>
                 <div className="text-right">
                     <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                        Free analyses: {usageCount}/{limitSettings.prompt_analyzer_free_daily}
+                        PromptCoins: {promptCoins} ({Math.floor(promptCoins / 10)} analyses left)
                     </div>
-                    {usageCount <= 1 && (
+                    {promptCoins < 20 && ( // Show warning when less than 2 analyses left
                         <button 
-                            onClick={() => setShowUpgradeModal(true)}
+                            onClick={() => setShowBuyCreditsModal(true)}
                             className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer"
                         >
                             <Crown className="w-3 h-3 inline mr-1" />
-                            Upgrade for unlimited
+                            Buy More PromptCoins
                         </button>
                     )}
                 </div>
@@ -242,7 +242,7 @@ export default function PromptAnalyzer() {
                         💡 Tip: Better prompts include persona, task, context, and format
                     </div>
                     <Button 
-                        onClick={usageCount <= 0 ? () => setShowUpgradeModal(true) : handleAnalyze} 
+                        onClick={promptCoins < 10 ? () => setShowBuyCreditsModal(true) : handleAnalyze} 
                         disabled={isLoading}
                         className="px-6"
                     >
@@ -251,10 +251,10 @@ export default function PromptAnalyzer() {
                                 <Loader2 className="animate-spin mr-2 h-4 w-4" />
                                 Analyzing...
                             </>
-                        ) : usageCount <= 0 ? (
+                        ) : promptCoins < 10 ? (
                             <>
                                 <Crown className="mr-2 h-4 w-4" />
-                                Upgrade to Analyze
+                                Buy PromptCoins to Analyze
                             </>
                         ) : (
                             <>
@@ -423,7 +423,7 @@ export default function PromptAnalyzer() {
             )}
 
             {/* Usage Limit Reached - Engagement Strategy */}
-            {usageCount === 0 && !analysis && (
+            {promptCoins < 10 && !analysis && (
                 <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-700 rounded-lg">
                     <div className="flex items-start gap-3">
                         <Crown className="w-6 h-6 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-1" />
@@ -438,7 +438,7 @@ export default function PromptAnalyzer() {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <Button
                                     size="sm"
-                                    onClick={() => setShowUpgradeModal(true)}
+                                    onClick={() => setShowBuyCreditsModal(true)}
                                     className="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700"
                                 >
                                     <Crown className="w-4 h-4 mr-2" />
@@ -463,7 +463,7 @@ export default function PromptAnalyzer() {
                                     variant="outline"
                                     onClick={() => {
                                         track('tomorrow_reminder_analyzer');
-                                        toast.success(`Come back tomorrow for ${limitSettings.prompt_analyzer_free_daily} more free analyses!`);
+                                        toast.success(`Come back tomorrow for ${limitSettings.prompt_analyzer_free_daily * 10} more free PromptCoins!`);
                                     }}
                                     className="border-rose-300 text-rose-700 hover:bg-rose-100 dark:hover:bg-rose-900/30"
                                 >
@@ -476,9 +476,10 @@ export default function PromptAnalyzer() {
                 </div>
             )}
             
-            <UpgradeModal
-                isOpen={showUpgradeModal}
-                onClose={() => setShowUpgradeModal(false)}
+            <BuyCreditsModal
+                isOpen={showBuyCreditsModal}
+                onClose={() => setShowBuyCreditsModal(false)}
+                type="analysis"
                 source="prompt_analyzer"
             />
         </section>

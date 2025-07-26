@@ -43,6 +43,8 @@ export interface PaymentMetadata {
   attempts?: number;
   returnUrl?: string;
   cancelUrl?: string;
+  idempotencyKey?: string;
+  promptcoins?: string; // JSON string of PromptCoin allocation
   [key: string]: any; // Allow additional metadata fields
 }
 
@@ -52,6 +54,7 @@ export interface PaymentResponse {
   clientSecret?: string;
   redirectUrl?: string;
   error?: string;
+  idempotencyKey?: string;
 }
 
 export interface PaymentStatus {

@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown, Calendar, Bell, BookOpen } from 'lucide-react';
 import { track } from '@vercel/analytics';
-import UpgradeModal from './UpgradeModal';
+import BuyCreditsModal from './BuyCreditsModal';
 import { getSettings, type LimitSettings } from '@/lib/admin-settings';
 
 const promptSuggestions = [
@@ -30,8 +30,8 @@ export default function PromptBuilder() {
     const [enhancedPrompt, setEnhancedPrompt] = useState('');
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const [usageCount, setUsageCount] = useState(3); // Free tier limit (will be updated from settings)
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [promptCoins, setPromptCoins] = useState(45); // Free tier limit (45 PC = 3 enhancements, will be updated from settings)
+    const [showBuyCreditsModal, setShowBuyCreditsModal] = useState(false);
     const [limitSettings, setLimitSettings] = useState<LimitSettings>({
         prompt_builder_free_daily: 3,
         prompt_analyzer_free_daily: 5,
@@ -54,8 +54,8 @@ export default function PromptBuilder() {
             try {
                 const settings = await getSettings('limits') as LimitSettings;
                 setLimitSettings(settings);
-                // Update initial usage count based on settings (assuming free tier for now)
-                setUsageCount(settings.prompt_builder_free_daily);
+                // Update initial PromptCoins based on settings (assuming free tier for now)
+                setPromptCoins(settings.prompt_builder_free_daily * 15); // 15 PC per enhancement
             } catch (error) {
                 console.error('Failed to load limit settings:', error);
                 // Keep default values if loading fails
@@ -103,11 +103,11 @@ export default function PromptBuilder() {
     };
 
     const handleEnhancePrompt = async () => {
-        if (usageCount <= 0) {
+        if (promptCoins < 15) { // Need 15 PC for enhancement
             track('prompt_enhancement_limit_reached', {
                 source: 'prompt_builder'
             });
-            setShowUpgradeModal(true);
+            setShowBuyCreditsModal(true);
             return;
         }
 
@@ -123,11 +123,11 @@ export default function PromptBuilder() {
         // Track enhancement start
         track('prompt_enhancement_started', {
             base_prompt_length: basePrompt.length,
-            remaining_uses: usageCount - 1
+            remaining_promptcoins: promptCoins - 15
         });
 
         setIsEnhancing(true);
-        setUsageCount(prev => prev - 1);
+        setPromptCoins(prev => prev - 15); // Deduct 15 PC for enhancement
 
         // Simulate AI enhancement - in real app, would call actual AI API
         setTimeout(() => {
@@ -224,15 +224,15 @@ export default function PromptBuilder() {
                 </div>
                 <div className="text-right">
                     <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                        Free AI enhancements: {usageCount}/{limitSettings.prompt_builder_free_daily}
+                        PromptCoins: {promptCoins} ({Math.floor(promptCoins / 15)} enhancements left)
                     </div>
-                    {usageCount <= 1 && (
+                    {promptCoins < 30 && ( // Show warning when less than 2 enhancements left
                         <button 
-                            onClick={() => setShowUpgradeModal(true)}
+                            onClick={() => setShowBuyCreditsModal(true)}
                             className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer"
                         >
                             <Crown className="w-3 h-3 inline mr-1" />
-                            Upgrade for unlimited
+                            Buy More PromptCoins
                         </button>
                     )}
                 </div>
@@ -300,19 +300,19 @@ export default function PromptBuilder() {
                     Generate Prompt
                 </Button>
                 <Button
-                    onClick={usageCount <= 0 ? () => setShowUpgradeModal(true) : handleEnhancePrompt}
+                    onClick={promptCoins < 15 ? () => setShowBuyCreditsModal(true) : handleEnhancePrompt}
                     variant="secondary"
                     disabled={isEnhancing}
                     className="flex-1 min-w-fit"
                 >
                     {isEnhancing ? (
                         <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    ) : usageCount <= 0 ? (
+                    ) : promptCoins < 15 ? (
                         <Crown className="mr-2 h-4 w-4" />
                     ) : (
                         <Wand2 className="mr-2 h-4 w-4" />
                     )}
-                    {usageCount <= 0 ? 'Upgrade for AI' : 'Enhance with AI'}
+                    {promptCoins < 15 ? 'Buy PromptCoins for AI' : 'Enhance with AI'}
                 </Button>
                 {user && (
                     <Button onClick={handleSave} variant="outline">
@@ -451,7 +451,7 @@ export default function PromptBuilder() {
             )}
 
             {/* Usage Limit Reached - Engagement Strategy */}
-            {usageCount === 0 && (
+            {promptCoins < 15 && (
                 <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
                     <div className="flex items-start gap-3">
                         <Crown className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-1" />
@@ -466,11 +466,11 @@ export default function PromptBuilder() {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <Button
                                     size="sm"
-                                    onClick={() => setShowUpgradeModal(true)}
+                                    onClick={() => setShowBuyCreditsModal(true)}
                                     className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                                 >
                                     <Crown className="w-4 h-4 mr-2" />
-                                    Upgrade Now
+                                    Buy More PromptCoins
                                 </Button>
                                 
                                 <Button
@@ -491,7 +491,7 @@ export default function PromptBuilder() {
                                     variant="outline"
                                     onClick={() => {
                                         track('tomorrow_reminder_set');
-                                        toast.success(`Come back tomorrow for ${limitSettings.prompt_builder_free_daily} more free enhancements!`);
+                                        toast.success(`Come back tomorrow for ${limitSettings.prompt_builder_free_daily * 15} more free PromptCoins!`);
                                     }}
                                     className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
                                 >
@@ -504,9 +504,10 @@ export default function PromptBuilder() {
                 </div>
             )}
             
-            <UpgradeModal
-                isOpen={showUpgradeModal}
-                onClose={() => setShowUpgradeModal(false)}
+            <BuyCreditsModal
+                isOpen={showBuyCreditsModal}
+                onClose={() => setShowBuyCreditsModal(false)}
+                type="enhancement"
                 source="prompt_builder"
             />
         </section>
