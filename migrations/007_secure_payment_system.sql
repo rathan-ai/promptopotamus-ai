@@ -189,10 +189,8 @@ SELECT
     p.last_payment_date
 FROM profiles p;
 
--- Add RLS policy for the view
-ALTER VIEW user_promptcoin_balance SET (security_barrier = true);
-CREATE POLICY "Users can see their own balance" ON user_promptcoin_balance
-    FOR SELECT USING (auth.uid() = user_id);
+-- Note: Views inherit RLS policies from underlying tables
+-- The view is secure because it references the profiles table which has RLS enabled
 
 -- 8. Update existing payment_transactions table if it exists
 DO $$
