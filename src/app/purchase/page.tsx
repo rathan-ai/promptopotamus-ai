@@ -18,6 +18,7 @@ function PurchaseContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [customAmount, setCustomAmount] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -49,18 +50,37 @@ function PurchaseContent() {
   }, [searchParams, supabase.auth]);
 
   const selectedPkg = packages.find(p => p.id === selectedPackage);
+  
+  // Create dynamic package for custom amount
+  const effectivePkg = selectedPkg?.id === 'custom' && customAmount ? {
+    ...selectedPkg,
+    price: parseFloat(customAmount) || 0,
+    promptCoins: `${Math.round((parseFloat(customAmount) || 0) * 100)} PC`
+  } : selectedPkg;
 
   const handlePurchase = async () => {
-    if (!selectedPkg) {
+    if (!effectivePkg) {
       toast.error('Please select a package');
       return;
     }
 
     // Handle free option
-    if (selectedPkg.id === 'free') {
+    if (effectivePkg.id === 'free') {
       toast.success('Continue using Promptopotamus with daily free limits!');
       router.push('/dashboard');
       return;
+    }
+
+    // For custom amount, validate input
+    if (effectivePkg.id === 'custom') {
+      if (!customAmount || parseFloat(customAmount) <= 0) {
+        toast.error('Please enter a valid amount');
+        return;
+      }
+      if (parseFloat(customAmount) > 1000) {
+        toast.error('Maximum amount is $1000');
+        return;
+      }
     }
 
     // For paid options, require user to be logged in
@@ -75,7 +95,7 @@ function PurchaseContent() {
   };
 
   const handlePaymentSuccess = async (transactionId?: string) => {
-    if (!selectedPkg || !user) return;
+    if (!effectivePkg || !user) return;
 
     try {
       // Call the PromptCoin purchase API
@@ -85,19 +105,19 @@ function PurchaseContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          packageId: selectedPkg.id,
+          packageId: effectivePkg.id,
           paymentProvider: 'paypal',
           transactionId: transactionId || `pc_${Date.now()}`,
-          amount: selectedPkg.price
+          amount: effectivePkg.price
         }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        toast.success(`🎉 Successfully purchased ${selectedPkg.promptCoins}!`);
+        toast.success(`🎉 Successfully purchased ${effectivePkg.promptCoins}!`);
         // Redirect to success page
-        router.push(`/purchase/success?package=${selectedPkg.id}`);
+        router.push(`/purchase/success?package=${effectivePkg.id}&amount=${effectivePkg.price}`);
       } else {
         toast.error(data.error || 'Purchase failed. Please contact support.');
       }
@@ -160,7 +180,7 @@ function PurchaseContent() {
                   <div>
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="text-lg font-semibold dark:text-white">
-                        {pkg.id === 'donate' && <Heart className="w-5 h-5 text-red-500 inline mr-2" />}
+                        {pkg.id === 'custom' && <Coins className="w-5 h-5 text-purple-500 inline mr-2" />}
                         {pkg.name}
                       </h3>
                       {pkg.popular && (
@@ -173,9 +193,9 @@ function PurchaseContent() {
                           Free
                         </span>
                       )}
-                      {pkg.id === 'donate' && (
-                        <span className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-2 py-1 rounded-full text-xs font-medium">
-                          Support
+                      {pkg.id === 'custom' && (
+                        <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full text-xs font-medium">
+                          Custom
                         </span>
                       )}
                     </div>
@@ -200,6 +220,31 @@ function PurchaseContent() {
               </button>
             ))}
           </div>
+
+          {/* Custom Amount Input */}
+          {selectedPackage === 'custom' && (
+            <div className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
+              <label className="block text-sm font-medium text-purple-800 dark:text-purple-200 mb-2">
+                Enter Amount (USD)
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                <input
+                  type="number"
+                  min="0.01"
+                  max="1000"
+                  step="0.01"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full pl-8 pr-4 py-2 border border-purple-300 dark:border-purple-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-purple-900/30 dark:text-white"
+                />
+              </div>
+              <p className="text-xs text-purple-600 dark:text-purple-400 mt-2">
+                You'll receive {customAmount ? Math.round(parseFloat(customAmount) * 100) : 0} PromptCoins (100 PC = $1)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Order Summary */}
@@ -210,18 +255,18 @@ function PurchaseContent() {
               
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium dark:text-white">{selectedPkg.name}</span>
+                  <span className="font-medium dark:text-white">{effectivePkg?.name}</span>
                   <span className="font-bold dark:text-white">
-                    {selectedPkg.price === 0 ? 'Free' : `$${selectedPkg.price}`}
+                    {effectivePkg?.price === 0 ? 'Free' : `$${effectivePkg?.price}`}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center text-sm text-neutral-600 dark:text-neutral-400">
                   <span>PromptCoins</span>
-                  <span>{selectedPkg.promptCoins}</span>
+                  <span>{effectivePkg?.promptCoins}</span>
                 </div>
                 
-                {selectedPkg.price > 0 && (
+                {effectivePkg?.price && effectivePkg.price > 0 && (
                   <div className="flex justify-between items-center text-sm text-neutral-600 dark:text-neutral-400">
                     <span>Conversion Rate</span>
                     <span>100 PC = $1</span>
@@ -233,36 +278,36 @@ function PurchaseContent() {
                 <div className="flex justify-between items-center font-bold text-lg">
                   <span className="dark:text-white">Total</span>
                   <span className="text-green-600 dark:text-green-400">
-                    {selectedPkg.price === 0 ? 'Free' : `$${selectedPkg.price}`}
+                    {effectivePkg?.price === 0 ? 'Free' : `$${effectivePkg?.price}`}
                   </span>
                 </div>
               </div>
 
               <Button
                 onClick={handlePurchase}
-                disabled={isProcessing || (selectedPkg.price > 0 && !user)}
+                disabled={isProcessing || (effectivePkg?.price && effectivePkg.price > 0 && !user)}
                 className={`w-full ${
-                  selectedPkg.id === 'free' 
+                  effectivePkg?.id === 'free' 
                     ? 'bg-green-600 hover:bg-green-700'
-                    : selectedPkg.id === 'donate'
-                    ? 'bg-red-600 hover:bg-red-700'
+                    : effectivePkg?.id === 'custom'
+                    ? 'bg-purple-600 hover:bg-purple-700'
                     : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
                 }`}
                 size="lg"
               >
                 {isProcessing ? (
                   'Processing...'
-                ) : selectedPkg.id === 'free' ? (
+                ) : effectivePkg?.id === 'free' ? (
                   <>
                     <Check className="w-4 h-4 mr-2" />
                     Continue Free
                   </>
-                ) : selectedPkg.id === 'donate' ? (
+                ) : effectivePkg?.id === 'custom' ? (
                   <>
-                    <Heart className="w-4 h-4 mr-2" />
-                    Donate & Support
+                    <Coins className="w-4 h-4 mr-2" />
+                    {customAmount ? `Purchase $${customAmount}` : 'Enter Amount'}
                   </>
-                ) : selectedPkg.price > 0 && !user ? (
+                ) : effectivePkg?.price && effectivePkg.price > 0 && !user ? (
                   'Please Login First'
                 ) : (
                   <>
@@ -272,7 +317,7 @@ function PurchaseContent() {
                 )}
               </Button>
               
-              {selectedPkg.price > 0 && !user && (
+              {effectivePkg?.price && effectivePkg.price > 0 && !user && (
                 <p className="text-sm text-neutral-600 dark:text-neutral-400 text-center mt-3">
                   <Link href="/login" className="text-indigo-600 dark:text-indigo-400 hover:underline">
                     Login
@@ -301,14 +346,14 @@ function PurchaseContent() {
       </div>
 
       {/* PayPal Payment Modal */}
-      {showPaymentModal && selectedPkg && (
+      {showPaymentModal && effectivePkg && (
         <PayPalPaymentModal
           isOpen={showPaymentModal}
           onClose={handlePaymentClose}
           onSuccess={handlePaymentSuccess}
-          amount={selectedPkg.price}
-          description={`PromptCoin ${selectedPkg.name}`}
-          itemName={`${selectedPkg.promptCoins} PromptCoins`}
+          amount={effectivePkg.price}
+          description={`PromptCoin ${effectivePkg.name}`}
+          itemName={`${effectivePkg.promptCoins} PromptCoins`}
         />
       )}
     </div>

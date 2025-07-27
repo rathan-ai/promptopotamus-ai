@@ -49,81 +49,20 @@ export const PROMPTCOIN_PACKAGES: PromptCoinPackage[] = [
     bgColor: 'from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20'
   },
   {
-    id: 'donate',
-    name: 'Donate & Support',
-    description: 'Support Promptopotamus development',
-    price: 1,
-    promptCoins: '100 PC + Thank You',
+    id: 'custom',
+    name: 'Custom Amount',
+    description: 'Enter your own amount',
+    price: 0, // Will be set dynamically
+    promptCoins: 'Custom PC',
     features: [
-      'Support platform development',
-      '100 PromptCoins bonus',
-      'Contribution recognition',
-      'Help keep platform free',
-      'Community appreciation'
-    ],
-    popular: false,
-    color: 'from-green-500 to-emerald-500',
-    bgColor: 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20'
-  },
-  {
-    id: 'starter',
-    name: 'Starter Pack',
-    description: 'Perfect for getting started with AI prompting',
-    price: 1,
-    promptCoins: '100 PC',
-    features: [
-      '6 prompt enhancements',
-      '10 prompt analyses', 
-      '2 exam attempts',
-      '20 export operations',
-      'Smart Recipe purchases',
-      'All prompt templates',
-      'Priority email support',
+      'Enter any amount',
+      'Flexible pricing',
+      'Immediate delivery',
       'No expiration on credits'
     ],
     popular: false,
-    color: 'from-blue-500 to-cyan-500',
-    bgColor: 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20'
-  },
-  {
-    id: 'pro',
-    name: 'Pro Pack',
-    description: 'Ideal for professionals and active users',
-    price: 5,
-    promptCoins: '500 PC',
-    features: [
-      '33 prompt enhancements',
-      '50 prompt analyses',
-      '10 exam attempts', 
-      '100 export operations',
-      'Smart Recipe purchases',
-      'All prompt templates',
-      'Priority support',
-      'No expiration on credits'
-    ],
-    popular: true,
-    color: 'from-indigo-500 to-purple-500',
-    bgColor: 'from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20'
-  },
-  {
-    id: 'premium',
-    name: 'Premium Pack',
-    description: 'Perfect for power users and teams',
-    price: 10,
-    promptCoins: '1,000 PC',
-    features: [
-      '66 prompt enhancements',
-      '100 prompt analyses',
-      '20 exam attempts',
-      '200 export operations', 
-      'Smart Recipe purchases',
-      'All prompt templates',
-      'Priority support',
-      'No expiration on credits'
-    ],
-    popular: false,
-    color: 'from-orange-500 to-red-500',
-    bgColor: 'from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20'
+    color: 'from-purple-500 to-pink-500',
+    bgColor: 'from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20'
   }
 ];
 
