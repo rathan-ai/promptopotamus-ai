@@ -8,5 +8,6 @@ export { default as ComplexityGuidance } from './ComplexityGuidance';
 export { default as PromptTypesGuide } from './PromptTypesGuide';
 export { default as VariablesExplainer } from './VariablesExplainer';
 export { default as IssueReportWidget } from './IssueReportWidget';
+export { default as PerformanceOptimizer } from './PerformanceOptimizer';
 export { default as AffiliateRecommendation } from './AffiliateRecommendation';
 export { default as UnsubscribeFlow } from './UnsubscribeFlow';

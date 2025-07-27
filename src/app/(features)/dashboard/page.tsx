@@ -1,14 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { Loader2, CheckCircle, XCircle, History, FileText, Award, Eye, User as UserIcon, ShoppingCart, Brain, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { certificates as certDetails } from '@/lib/data';
-import UserSmartPromptsManager from '@/components/features/prompts/UserSmartPromptsManager';
-import UserIdentityBadge from '@/components/features/profiles/UserIdentityBadge';
 import { createClient } from '@/lib/supabase/client';
+
+// Lazy load heavy components that are not immediately visible
+const UserSmartPromptsManager = dynamic(() => import('@/components/features/prompts/UserSmartPromptsManager'), {
+  loading: () => <LoadingSkeleton lines={6} />,
+  ssr: false
+});
+
+const UserIdentityBadge = dynamic(() => import('@/components/features/profiles/UserIdentityBadge'), {
+  loading: () => <LoadingSpinner size="sm" />,
+  ssr: false
+});
 
 // Define interfaces for our data
 interface Profile {
@@ -98,7 +109,11 @@ export default function DashboardPage() {
     <div className="max-w-5xl mx-auto space-y-12">
       <div className="flex items-center gap-4">
         <h1 className="text-4xl font-bold dark:text-white">Your Dashboard</h1>
-        {user && <UserIdentityBadge user={user} size="lg" />}
+        {user && (
+          <Suspense fallback={<LoadingSpinner size="sm" />}>
+            <UserIdentityBadge user={user} size="lg" />
+          </Suspense>
+        )}
       </div>
 
       {/* Profile Settings Section */}
@@ -240,7 +255,9 @@ export default function DashboardPage() {
           <Brain className="mr-2" /> Smart Prompts Management
         </h2>
         <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
-          <UserSmartPromptsManager certificates={data?.certificates} />
+          <Suspense fallback={<LoadingSkeleton lines={6} />}>
+            <UserSmartPromptsManager certificates={data?.certificates} />
+          </Suspense>
         </div>
       </section>
     </div>

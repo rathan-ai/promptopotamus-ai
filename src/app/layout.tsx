@@ -7,6 +7,7 @@ import Header from "@/components/features/layout/Header";
 import Footer from "@/components/features/layout/Footer";
 import { Analytics } from "@vercel/analytics/react";
 import IssueReportWidget from "@/components/features/shared/IssueReportWidget";
+import PerformanceOptimizer from "@/components/features/shared/PerformanceOptimizer";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
@@ -80,6 +81,9 @@ export default function RootLayout({
           
           {/* Global Issue Report Widget */}
           <IssueReportWidget />
+          
+          {/* Performance Optimization */}
+          <PerformanceOptimizer />
         </Provider>
         <Analytics />
       </body>

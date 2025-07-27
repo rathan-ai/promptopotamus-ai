@@ -1,14 +1,37 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye, ExternalLink, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import SmartPromptsBuilder from '@/components/features/prompts/SmartPromptsBuilder';
-import PromptPreviewModal from '@/components/features/prompts/PromptPreviewModal';
-import PayPalPaymentModal from '@/components/features/payments/PayPalPaymentModal';
-import PromptTypesGuide from '@/components/features/shared/PromptTypesGuide';
-import VariablesExplainer from '@/components/features/shared/VariablesExplainer';
+import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
 import toast from 'react-hot-toast';
+
+// Lazy load heavy components
+const SmartPromptsBuilder = dynamic(() => import('@/components/features/prompts/SmartPromptsBuilder'), {
+  loading: () => <LoadingSkeleton lines={8} />,
+  ssr: false
+});
+
+const PromptPreviewModal = dynamic(() => import('@/components/features/prompts/PromptPreviewModal'), {
+  loading: () => <LoadingSpinner size="lg" />,
+  ssr: false
+});
+
+const PayPalPaymentModal = dynamic(() => import('@/components/features/payments/PayPalPaymentModal'), {
+  loading: () => <LoadingSpinner size="lg" />,
+  ssr: false
+});
+
+const PromptTypesGuide = dynamic(() => import('@/components/features/shared/PromptTypesGuide'), {
+  loading: () => <LoadingSkeleton lines={5} />,
+  ssr: false
+});
+
+const VariablesExplainer = dynamic(() => import('@/components/features/shared/VariablesExplainer'), {
+  loading: () => <LoadingSkeleton lines={4} />,
+  ssr: false
+});
 
 interface Variable {
   name: string;
