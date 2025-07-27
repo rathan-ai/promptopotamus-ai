@@ -69,27 +69,44 @@ const demoPrompt = {
 export default function VariablesExplainer() {
   const [selectedType, setSelectedType] = useState<string>('text');
   const [showDemo, setShowDemo] = useState(false);
-  const [demoValues, setDemoValues] = useState(
-    demoPrompt.variables.reduce((acc, variable) => {
-      acc[variable.name] = variable.value;
-      return acc;
-    }, {} as Record<string, any>)
-  );
+  const [demoValues, setDemoValues] = useState(() => {
+    try {
+      return demoPrompt.variables.reduce((acc, variable) => {
+        acc[variable.name] = variable.value;
+        return acc;
+      }, {} as Record<string, any>);
+    } catch (error) {
+      console.error('Error initializing demo values:', error);
+      return {};
+    }
+  });
 
   const generateFinalPrompt = () => {
-    let finalPrompt = demoPrompt.template;
-    Object.entries(demoValues).forEach(([key, value]) => {
-      finalPrompt = finalPrompt.replace(new RegExp(`{${key}}`, 'g'), String(value));
-    });
-    return finalPrompt;
+    try {
+      let finalPrompt = demoPrompt.template || '';
+      Object.entries(demoValues || {}).forEach(([key, value]) => {
+        if (key && value !== undefined && value !== null) {
+          finalPrompt = finalPrompt.replace(new RegExp(`{${key}}`, 'g'), String(value));
+        }
+      });
+      return finalPrompt;
+    } catch (error) {
+      console.error('Error generating final prompt:', error);
+      return 'Error generating prompt preview';
+    }
   };
 
   const renderVariableInput = (variable: any) => {
-    const type = variableTypes.find(t => t.name === variable.type);
-    const Icon = type?.icon || Type;
+    try {
+      if (!variable || !variable.name || !variable.type) {
+        return null;
+      }
 
-    return (
-      <div key={variable.name} className="space-y-2">
+      const type = variableTypes.find(t => t.name === variable.type);
+      const Icon = type?.icon || Type;
+
+      return (
+        <div key={variable.name} className="space-y-2">
         <div className="flex items-center gap-2">
           <Icon className={`w-4 h-4 ${type?.color || 'text-neutral-500'}`} />
           <label className="text-sm font-medium dark:text-white capitalize">
@@ -140,6 +157,14 @@ export default function VariablesExplainer() {
         )}
       </div>
     );
+    } catch (error) {
+      console.error('Error rendering variable input:', error);
+      return (
+        <div className="p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-600 dark:text-red-400">
+          Error loading variable: {variable?.name || 'unknown'}
+        </div>
+      );
+    }
   };
 
   return (
@@ -301,7 +326,7 @@ export default function VariablesExplainer() {
               <div>
                 <h5 className="font-medium dark:text-white mb-4">Customize Variables</h5>
                 <div className="space-y-4">
-                  {demoPrompt.variables.map(renderVariableInput)}
+                  {(demoPrompt.variables || []).map(renderVariableInput).filter(Boolean)}
                 </div>
               </div>
 
@@ -311,12 +336,20 @@ export default function VariablesExplainer() {
                   <h5 className="font-medium dark:text-white">Generated Prompt</h5>
                   <Button
                     size="sm"
-                    onClick={() => setDemoValues(
-                      demoPrompt.variables.reduce((acc, variable) => {
-                        acc[variable.name] = variable.value;
-                        return acc;
-                      }, {} as Record<string, any>)
-                    )}
+                    onClick={() => {
+                      try {
+                        setDemoValues(
+                          (demoPrompt.variables || []).reduce((acc, variable) => {
+                            if (variable?.name && variable?.value !== undefined) {
+                              acc[variable.name] = variable.value;
+                            }
+                            return acc;
+                          }, {} as Record<string, any>)
+                        );
+                      } catch (error) {
+                        console.error('Error resetting demo values:', error);
+                      }
+                    }}
                     className="flex items-center gap-1"
                   >
                     <RefreshCw className="w-3 h-3" />

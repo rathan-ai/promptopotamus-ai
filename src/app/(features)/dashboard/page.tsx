@@ -67,7 +67,9 @@ export default function DashboardPage() {
         
         const res = await fetch('/api/profiles/dashboard');
         if (res.ok) {
-          const dashboardData = await res.json();
+          const response = await res.json();
+          // Handle new API response format
+          const dashboardData = response.success ? response.data : response;
           setData(dashboardData);
           setProfile(dashboardData.profile);
         } else {
