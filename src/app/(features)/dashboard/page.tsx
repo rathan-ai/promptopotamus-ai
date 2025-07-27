@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { Loader2, CheckCircle, XCircle, History, FileText, Award, Eye, User as UserIcon, ShoppingCart, Brain, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
+import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ui/ErrorBoundary';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { certificates as certDetails } from '@/lib/data';
@@ -53,22 +54,35 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      const res = await fetch('/api/profiles/dashboard');
-      if (res.ok) {
-        const dashboardData = await res.json();
-        setData(dashboardData);
-        setProfile(dashboardData.profile);
-      } else {
-        toast.error('Could not load your dashboard data.');
+      try {
+        // Get current user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error('Auth error:', userError);
+          toast.error('Authentication error. Please refresh the page.');
+          setLoading(false);
+          return;
+        }
+        setUser(user);
+        
+        const res = await fetch('/api/profiles/dashboard');
+        if (res.ok) {
+          const dashboardData = await res.json();
+          setData(dashboardData);
+          setProfile(dashboardData.profile);
+        } else {
+          const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+          toast.error(errorData.error || 'Could not load your dashboard data.');
+        }
+      } catch (error) {
+        console.error('Dashboard fetch error:', error);
+        toast.error('Network error loading dashboard. Please check your connection.');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [supabase.auth]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,7 +120,8 @@ export default function DashboardPage() {
   const purchaseHistory = data?.profile.purchased_attempts ? Object.entries(data.profile.purchased_attempts) : [];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-12">
+    <PageErrorBoundary>
+      <div className="max-w-5xl mx-auto space-y-12">
       <div className="flex items-center gap-4">
         <h1 className="text-4xl font-bold dark:text-white">Your Dashboard</h1>
         {user && (
@@ -256,10 +271,13 @@ export default function DashboardPage() {
         </h2>
         <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
           <Suspense fallback={<LoadingSkeleton lines={6} />}>
-            <UserSmartPromptsManager certificates={data?.certificates} />
+            <ComponentErrorBoundary componentName="UserSmartPromptsManager">
+              <UserSmartPromptsManager certificates={data?.certificates} />
+            </ComponentErrorBoundary>
           </Suspense>
         </div>
       </section>
     </div>
+    </PageErrorBoundary>
   );
 }

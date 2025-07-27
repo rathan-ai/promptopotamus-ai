@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye, ExternalLink, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
+import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ui/ErrorBoundary';
 import toast from 'react-hot-toast';
 
 // Lazy load heavy components
@@ -126,19 +127,20 @@ export default function SmartPromptsPage() {
           tags: Array.isArray(prompt.tags) ? prompt.tags : [],
           use_cases: Array.isArray(prompt.use_cases) ? prompt.use_cases : [],
           ai_model_compatibility: Array.isArray(prompt.ai_model_compatibility) ? prompt.ai_model_compatibility : [],
-          example_inputs: typeof prompt.example_inputs === 'object' ? prompt.example_inputs : {},
-          rating_average: prompt.rating_average || 0,
-          rating_count: prompt.rating_count || 0,
-          downloads_count: prompt.downloads_count || 0,
-          price: prompt.price || 0
+          example_inputs: typeof prompt.example_inputs === 'object' && prompt.example_inputs !== null ? prompt.example_inputs : {},
+          rating_average: Number(prompt.rating_average) || 0,
+          rating_count: Number(prompt.rating_count) || 0,
+          downloads_count: Number(prompt.downloads_count) || 0,
+          price: Number(prompt.price) || 0
         }));
         setPrompts(normalizedPrompts);
       } else {
-        toast.error('Failed to load smart prompts');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        toast.error(errorData.error || 'Failed to load smart prompts');
       }
     } catch (error) {
       console.error('Error fetching prompts:', error);
-      toast.error('Error loading prompts');
+      toast.error('Network error loading prompts. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -152,6 +154,13 @@ export default function SmartPromptsPage() {
         setCertificationStatus({
           hasValidCertificate: data.canCreateMarketplace || false,
           certificates: data.certificationStatus?.certificates || []
+        });
+      } else {
+        // Handle non-200 responses gracefully
+        console.warn('Failed to check certification status:', response.status);
+        setCertificationStatus({
+          hasValidCertificate: false,
+          certificates: []
         });
       }
     } catch (error) {
@@ -348,7 +357,8 @@ export default function SmartPromptsPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <PageErrorBoundary>
+      <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex-1">
@@ -402,15 +412,17 @@ export default function SmartPromptsPage() {
       </div>
 
       {activeView === 'builder' ? (
-        <SmartPromptsBuilder 
-          canCreateMarketplace={certificationStatus.hasValidCertificate}
-          initialComplexityType={selectedComplexityType as 'simple' | 'smart' | 'recipe' | undefined}
-          onSave={() => {
-            setActiveView('marketplace');
-            fetchPrompts();
-            setSelectedComplexityType(''); // Reset after save
-          }}
-        />
+        <ComponentErrorBoundary componentName="SmartPromptsBuilder">
+          <SmartPromptsBuilder 
+            canCreateMarketplace={certificationStatus.hasValidCertificate}
+            initialComplexityType={selectedComplexityType as 'simple' | 'smart' | 'recipe' | undefined}
+            onSave={() => {
+              setActiveView('marketplace');
+              fetchPrompts();
+              setSelectedComplexityType(''); // Reset after save
+            }}
+          />
+        </ComponentErrorBoundary>
       ) : activeView === 'learn' ? (
         <div className="space-y-8">
           {/* Learning Path Header */}
@@ -442,16 +454,20 @@ export default function SmartPromptsPage() {
           </div>
 
           {/* Prompt Types Guide */}
-          <PromptTypesGuide 
-            onTypeSelect={(type) => {
-              setSelectedComplexityType(type);
-              setActiveView('builder');
-            }}
-            selectedType={selectedComplexityType}
-          />
+          <ComponentErrorBoundary componentName="PromptTypesGuide">
+            <PromptTypesGuide 
+              onTypeSelect={(type) => {
+                setSelectedComplexityType(type);
+                setActiveView('builder');
+              }}
+              selectedType={selectedComplexityType}
+            />
+          </ComponentErrorBoundary>
 
           {/* Variables Explainer */}
-          <VariablesExplainer />
+          <ComponentErrorBoundary componentName="VariablesExplainer">
+            <VariablesExplainer />
+          </ComponentErrorBoundary>
 
           {/* Quick Start CTA */}
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-6 text-center">
@@ -643,5 +659,6 @@ export default function SmartPromptsPage() {
         />
       )}
     </div>
+    </PageErrorBoundary>
   );
 }

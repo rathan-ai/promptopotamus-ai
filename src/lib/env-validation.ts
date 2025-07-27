@@ -104,7 +104,13 @@ export function validateEnvironmentVariables(): void {
 export function getRequiredEnv(key: keyof RequiredEnvVars): string {
   const value = process.env[key];
   if (!value) {
-    throw new EnvironmentValidationError(`Missing required environment variable: ${key}`);
+    // Only throw in server environment, log warning on client
+    if (typeof window === 'undefined') {
+      throw new EnvironmentValidationError(`Missing required environment variable: ${key}`);
+    } else {
+      console.warn(`Missing environment variable on client: ${key}`);
+      return '';
+    }
   }
   return value;
 }
