@@ -24,7 +24,7 @@ export default function TemplateCard({ template }: TemplateCardProps) {
         template_tier: tier,
         template_category: template.category
       });
-      toast.error('Premium templates require subscription!');
+      toast.error('Premium templates require PromptCoins! Purchase credits to access.');
       return;
     }
     
@@ -41,9 +41,9 @@ export default function TemplateCard({ template }: TemplateCardProps) {
     toast.success('Prompt copied to clipboard!');
   };
 
-  const handleUpgrade = () => {
-    // Track upgrade button click
-    track('template_upgrade_clicked', {
+  const handlePurchaseCredits = () => {
+    // Track PromptCoin purchase button click
+    track('template_promptcoin_purchase_clicked', {
       template_id: template.id,
       template_name: title,
       template_tier: tier,
@@ -65,13 +65,13 @@ export default function TemplateCard({ template }: TemplateCardProps) {
         return { 
           icon: Star, 
           color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-          label: 'Pro' 
+          label: 'PromptCoins' 
         };
       case 'premium':
         return { 
           icon: Crown, 
           color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-          label: 'Premium' 
+          label: 'PromptCoins' 
         };
       default:
         return { 
@@ -145,9 +145,9 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       {/* Actions */}
       <div className="flex gap-2">
         {isPremium ? (
-          <Button onClick={handleUpgrade} size="sm" className="flex-1">
+          <Button onClick={handlePurchaseCredits} size="sm" className="flex-1">
             <Crown className="mr-2 h-4 w-4" />
-            Upgrade to Access
+            Buy PromptCoins
           </Button>
         ) : (
           <Button onClick={handleCopy} variant="secondary" size="sm" className="flex-1">

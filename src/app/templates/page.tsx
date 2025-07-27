@@ -50,41 +50,41 @@ export default function TemplatesPage() {
           A library of powerful, ready-to-use prompts to supercharge your workflow.
         </p>
         
-        {/* Upgrade Banner */}
+        {/* PromptCoin Banner */}
         <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-6 text-white mb-8">
           <div className="flex items-center justify-center gap-3 mb-2">
             <Crown className="w-6 h-6" />
             <h2 className="text-xl font-bold">Unlock Premium Templates</h2>
           </div>
           <p className="text-purple-100 mb-4">
-            Get access to advanced prompt engineering templates and exclusive content
+            Purchase PromptCoins to access advanced prompt engineering templates and exclusive content
           </p>
           <div className="flex gap-3 justify-center">
             <button 
               onClick={() => {
-                track('template_upgrade_banner_clicked', {
-                  plan: 'pro',
-                  price: '$9/mo',
+                track('template_promptcoin_banner_clicked', {
+                  package: 'starter',
+                  price: '$5',
                   location: 'templates_page'
                 });
                 setShowUpgradeModal(true);
               }}
               className="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-purple-50 transition-colors"
             >
-              Upgrade to Pro - $9/mo
+              Starter Pack - $5
             </button>
             <button 
               onClick={() => {
-                track('template_upgrade_banner_clicked', {
-                  plan: 'premium',
-                  price: '$19/mo',
+                track('template_promptcoin_banner_clicked', {
+                  package: 'pro',
+                  price: '$20',
                   location: 'templates_page'
                 });
                 setShowUpgradeModal(true);
               }}
               className="bg-purple-700 px-6 py-2 rounded-lg font-semibold hover:bg-purple-800 transition-colors"
             >
-              Premium - $19/mo
+              Pro Pack - $20
             </button>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function TemplatesPage() {
                 <div className="flex items-center gap-1">
                   {tier === 'pro' && <Star className="w-3 h-3" />}
                   {tier === 'premium' && <Crown className="w-3 h-3" />}
-                  <span className="capitalize">{tier}</span>
+                  <span className="capitalize">{tier === 'pro' ? 'PromptCoins' : tier === 'premium' ? 'PromptCoins+' : tier}</span>
                   <span className="text-xs opacity-75">({count})</span>
                 </div>
               </button>
