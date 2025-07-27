@@ -159,7 +159,7 @@ function CancelContent() {
         <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
           Having trouble with payments?
         </p>
-        <Link href="mailto:support@promptopotamus.com" className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
+        <Link href="mailto:contact@innorag.com" className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
           Contact our support team
         </Link>
       </div>

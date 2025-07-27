@@ -6,8 +6,8 @@ export const APP_CONFIG = {
   version: '1.0.0',
   author: 'Innorag Technologies Private Limited',
   url: 'https://promptopotamus.com',
-  supportEmail: 'support@promptopotamus.com',
-  enterpriseEmail: 'enterprise@promptopotamus.com'
+  supportEmail: 'contact@innorag.com',
+  enterpriseEmail: 'contact@innorag.com'
 };
 
 export const ROUTES = {

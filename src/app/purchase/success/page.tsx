@@ -147,7 +147,7 @@ function SuccessContent() {
             PromptCoin Help
           </Link>
           <span className="text-neutral-300 dark:text-neutral-600">•</span>
-          <Link href="mailto:support@promptopotamus.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+          <Link href="mailto:contact@innorag.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">
             Contact Support
           </Link>
           <span className="text-neutral-300 dark:text-neutral-600">•</span>

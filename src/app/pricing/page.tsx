@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Check, Star, Crown, Zap, Users, ArrowRight, HelpCircle, Coins } from 'lucide-react';
+import { Check, Star, Crown, Zap, ArrowRight, HelpCircle, Coins } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 
@@ -119,7 +119,7 @@ const faqs = [
   },
   {
     question: 'Can I get a refund?',
-    answer: 'We offer a 30-day money-back guarantee for all PromptCoin purchases. Unused credits can be refunded within 30 days of purchase.'
+    answer: 'All PromptCoin purchases are final. Please carefully consider your needs before purchasing.'
   },
   {
     question: 'How much does each action cost?',
@@ -221,50 +221,6 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Enterprise Section */}
-      <section className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 py-24 rounded-2xl mx-6">
-        <div className="max-w-4xl mx-auto text-center px-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Users className="w-10 h-10 text-white" />
-          </div>
-          <h2 className="text-h1 text-neutral-900 dark:text-white mb-6">
-            Enterprise Solutions
-          </h2>
-          <p className="text-body-large text-neutral-600 dark:text-neutral-400 mb-8 max-w-2xl mx-auto">
-            Custom PromptCoin packages for large teams and organizations. Get dedicated support, 
-            volume discounts, and tailored training programs.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {[
-              'Volume PromptCoin discounts',
-              'Dedicated account manager',
-              'Custom integrations',
-              'Advanced analytics',
-              'Team training programs',
-              'SLA guarantees'
-            ].map((feature, index) => (
-              <div key={index} className="flex items-center gap-2 justify-center">
-                <Check className="w-5 h-5 text-green-500" />
-                <span className="text-neutral-700 dark:text-neutral-300">{feature}</span>
-              </div>
-            ))}
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="mailto:enterprise@promptopotamus.com">
-              <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-                Contact Sales
-              </Button>
-            </Link>
-            <Link href="/demo">
-              <Button size="lg" variant="outline">
-                Request Demo
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* FAQ Section */}
       <section className="max-w-4xl mx-auto px-6">
@@ -301,7 +257,7 @@ export default function PricingPage() {
                 PromptCoin Help Center
               </Button>
             </Link>
-            <Link href="mailto:support@promptopotamus.com">
+            <Link href="mailto:contact@innorag.com">
               <Button variant="outline">
                 Contact Support
               </Button>
@@ -314,10 +270,6 @@ export default function PricingPage() {
       <section className="text-center py-12">
         <div className="max-w-4xl mx-auto px-6">
           <div className="flex flex-wrap items-center justify-center gap-8 text-neutral-500 dark:text-neutral-400">
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>30-day money-back guarantee</span>
-            </div>
             <div className="flex items-center gap-2">
               <Check className="w-5 h-5 text-green-500" />
               <span>Credits never expire</span>

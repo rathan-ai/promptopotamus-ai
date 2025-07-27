@@ -58,21 +58,6 @@ export default function Introduction() {
           </div>
         </div>
 
-        {/* Trust Indicators */}
-        <div className="flex flex-wrap items-center justify-center gap-8 mb-12 text-small text-neutral-500 dark:text-neutral-400">
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            <span>10,000+ Active Users</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            <span>50,000+ Prompts Created</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-yellow-500" />
-            <span>4.9/5 User Rating</span>
-          </div>
-        </div>
       </div>
 
       {/* Enhanced CTA Section */}

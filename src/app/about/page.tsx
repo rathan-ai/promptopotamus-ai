@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Brain, Target, Users, Award, Heart, Lightbulb, Rocket, Shield } from 'lucide-react';
+import { Brain, Target, Award, Heart, Rocket, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 
@@ -8,32 +8,6 @@ export const metadata: Metadata = {
   description: 'Learn about Promptopotamus, our mission to democratize AI prompt engineering, and the team behind the platform.',
 };
 
-const teamMembers = [
-  {
-    name: 'Alex Chen',
-    role: 'CEO & Founder',
-    bio: 'Former AI researcher at Google, passionate about making AI accessible to everyone.',
-    image: '/team/alex.jpg'
-  },
-  {
-    name: 'Sarah Johnson',
-    role: 'Head of Product',
-    bio: 'Product leader with 10+ years building developer tools and educational platforms.',
-    image: '/team/sarah.jpg'
-  },
-  {
-    name: 'Marcus Rodriguez',
-    role: 'Lead Engineer',
-    bio: 'Full-stack engineer specializing in AI/ML applications and scalable systems.',
-    image: '/team/marcus.jpg'
-  },
-  {
-    name: 'Dr. Emily Watson',
-    role: 'Head of Education',
-    bio: 'Former Stanford professor, expert in AI education and curriculum development.',
-    image: '/team/emily.jpg'
-  }
-];
 
 const values = [
   {
@@ -42,7 +16,7 @@ const values = [
     description: 'We continuously push the boundaries of what\'s possible with AI prompting and education.'
   },
   {
-    icon: Users,
+    icon: Heart,
     title: 'Community Driven',
     description: 'Our platform is built by and for the prompt engineering community.'
   },
@@ -176,56 +150,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team */}
-      <section className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-h1 text-neutral-900 dark:text-white mb-6">Meet Our Team</h2>
-          <p className="text-body-large text-neutral-600 dark:text-neutral-400 max-w-3xl mx-auto">
-            We're a diverse team of AI researchers, educators, and engineers passionate about 
-            making AI accessible to everyone.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {teamMembers.map((member, index) => (
-            <div key={index} className="text-center group">
-              <div className="w-32 h-32 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full mx-auto mb-6 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                <Users className="w-16 h-16 text-white" />
-              </div>
-              <h3 className="text-h4 text-neutral-900 dark:text-white mb-2">{member.name}</h3>
-              <p className="text-small font-medium text-indigo-600 dark:text-indigo-400 mb-3">{member.role}</p>
-              <p className="text-small text-neutral-600 dark:text-neutral-400 leading-relaxed">{member.bio}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Join Us */}
-      <section className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 py-24 rounded-2xl mx-6">
-        <div className="max-w-4xl mx-auto text-center px-6">
-          <h2 className="text-h1 text-neutral-900 dark:text-white mb-6">
-            Join Our Mission
-          </h2>
-          <p className="text-body-large text-neutral-600 dark:text-neutral-400 mb-8 max-w-2xl mx-auto">
-            Ready to become part of the AI revolution? Whether you're just starting out or looking to 
-            advance your career, we have the tools and community to help you succeed.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/smart-prompts">
-              <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-                Start Learning Today
-              </Button>
-            </Link>
-            <Link href="mailto:careers@promptopotamus.com">
-              <Button size="lg" variant="outline">
-                <Lightbulb className="w-5 h-5 mr-2" />
-                Join Our Team
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

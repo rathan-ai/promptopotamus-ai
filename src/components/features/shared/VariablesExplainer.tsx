@@ -66,33 +66,63 @@ const demoPrompt = {
   ]
 };
 
-export default function VariablesExplainer() {
+function VariablesExplainerComponent() {
   const [selectedType, setSelectedType] = useState<string>('text');
   const [showDemo, setShowDemo] = useState(false);
   const [demoValues, setDemoValues] = useState(() => {
     try {
+      if (!demoPrompt?.variables || !Array.isArray(demoPrompt.variables)) {
+        console.warn('Demo prompt variables not available, using defaults');
+        return {
+          tone: 'professional',
+          product_name: 'Smart Fitness Tracker Pro',
+          audience: 'Health-conscious professionals aged 25-40 who work from home',
+          key_benefit: '24/7 heart rate monitoring with AI insights',
+          cta_type: 'free trial',
+          word_limit: 150
+        };
+      }
+      
       return demoPrompt.variables.reduce((acc, variable) => {
-        acc[variable.name] = variable.value;
+        if (variable?.name && variable?.value !== undefined) {
+          acc[variable.name] = variable.value;
+        }
         return acc;
       }, {} as Record<string, any>);
     } catch (error) {
       console.error('Error initializing demo values:', error);
-      return {};
+      return {
+        tone: 'professional',
+        product_name: 'Smart Fitness Tracker Pro',
+        audience: 'Health-conscious professionals',
+        key_benefit: '24/7 monitoring',
+        cta_type: 'free trial',
+        word_limit: 150
+      };
     }
   });
 
   const generateFinalPrompt = () => {
     try {
-      let finalPrompt = demoPrompt.template || '';
-      Object.entries(demoValues || {}).forEach(([key, value]) => {
-        if (key && value !== undefined && value !== null) {
-          finalPrompt = finalPrompt.replace(new RegExp(`{${key}}`, 'g'), String(value));
-        }
-      });
+      const template = demoPrompt?.template || 'Write a {tone} marketing email for {product_name} targeting {audience}. The email should highlight {key_benefit} and include a {cta_type} call-to-action. Keep it under {word_limit} words.';
+      let finalPrompt = template;
+      
+      if (demoValues && typeof demoValues === 'object') {
+        Object.entries(demoValues).forEach(([key, value]) => {
+          if (key && value !== undefined && value !== null) {
+            try {
+              finalPrompt = finalPrompt.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value));
+            } catch (replaceError) {
+              console.warn('Error replacing variable:', key, replaceError);
+            }
+          }
+        });
+      }
+      
       return finalPrompt;
     } catch (error) {
       console.error('Error generating final prompt:', error);
-      return 'Error generating prompt preview';
+      return 'Write a professional marketing email for Smart Fitness Tracker Pro targeting health-conscious professionals. The email should highlight 24/7 heart rate monitoring with AI insights and include a free trial call-to-action. Keep it under 150 words.';
     }
   };
 
@@ -326,7 +356,14 @@ export default function VariablesExplainer() {
               <div>
                 <h5 className="font-medium dark:text-white mb-4">Customize Variables</h5>
                 <div className="space-y-4">
-                  {(demoPrompt.variables || []).map(renderVariableInput).filter(Boolean)}
+                  {(demoPrompt?.variables || []).map((variable, index) => {
+                    try {
+                      return renderVariableInput(variable);
+                    } catch (error) {
+                      console.error('Error rendering variable at index', index, error);
+                      return null;
+                    }
+                  }).filter(Boolean)}
                 </div>
               </div>
 
@@ -338,8 +375,20 @@ export default function VariablesExplainer() {
                     size="sm"
                     onClick={() => {
                       try {
+                        if (!demoPrompt?.variables) {
+                          setDemoValues({
+                            tone: 'professional',
+                            product_name: 'Smart Fitness Tracker Pro',
+                            audience: 'Health-conscious professionals aged 25-40 who work from home',
+                            key_benefit: '24/7 heart rate monitoring with AI insights',
+                            cta_type: 'free trial',
+                            word_limit: 150
+                          });
+                          return;
+                        }
+                        
                         setDemoValues(
-                          (demoPrompt.variables || []).reduce((acc, variable) => {
+                          demoPrompt.variables.reduce((acc, variable) => {
                             if (variable?.name && variable?.value !== undefined) {
                               acc[variable.name] = variable.value;
                             }
@@ -348,6 +397,14 @@ export default function VariablesExplainer() {
                         );
                       } catch (error) {
                         console.error('Error resetting demo values:', error);
+                        setDemoValues({
+                          tone: 'professional',
+                          product_name: 'Smart Fitness Tracker Pro',
+                          audience: 'Health-conscious professionals',
+                          key_benefit: '24/7 monitoring',
+                          cta_type: 'free trial',
+                          word_limit: 150
+                        });
                       }
                     }}
                     className="flex items-center gap-1"
@@ -398,4 +455,29 @@ export default function VariablesExplainer() {
       </div>
     </div>
   );
+}
+
+// Error boundary wrapper
+export default function VariablesExplainer() {
+  try {
+    return <VariablesExplainerComponent />;
+  } catch (error) {
+    console.error('VariablesExplainer component error:', error);
+    return (
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+        <h3 className="text-red-800 dark:text-red-200 font-semibold mb-2">
+          Variables Explainer
+        </h3>
+        <p className="text-red-700 dark:text-red-300 text-sm mb-4">
+          Variables are placeholders in prompts that get replaced with actual values, making prompts reusable and customizable.
+        </p>
+        <div className="space-y-2 text-sm text-red-600 dark:text-red-400">
+          <p><strong>Text:</strong> Single-line input for names, titles</p>
+          <p><strong>Textarea:</strong> Multi-line input for descriptions</p>
+          <p><strong>Select:</strong> Dropdown with predefined options</p>
+          <p><strong>Number:</strong> Numeric input for quantities</p>
+        </div>
+      </div>
+    );
+  }
 }

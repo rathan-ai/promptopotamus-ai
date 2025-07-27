@@ -5,10 +5,17 @@ import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown, Calendar, Bell, BookOpen } from 'lucide-react';
+import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown, Calendar, Bell, BookOpen, Zap } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import BuyCreditsModal from '../payments/BuyCreditsModal';
 import { getSettings, type LimitSettings } from '@/lib/admin-settings';
+import dynamic from 'next/dynamic';
+
+// Lazy load the PromptCrafterWizard
+const PromptCrafterWizard = dynamic(() => import('./PromptCrafterWizard'), {
+  loading: () => <div className="flex justify-center p-8"><div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div></div>,
+  ssr: false
+});
 
 const promptSuggestions = [
     { persona: "Marketing Expert", task: "Create a compelling email campaign", context: "For a new product launch targeting millennials", format: "Subject line and 3-paragraph email" },
@@ -32,6 +39,7 @@ export default function PromptBuilder() {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [promptCoins, setPromptCoins] = useState(45); // Free tier limit (45 PC = 3 enhancements, will be updated from settings)
     const [showBuyCreditsModal, setShowBuyCreditsModal] = useState(false);
+    const [showWizardMode, setShowWizardMode] = useState(false);
     const [limitSettings, setLimitSettings] = useState<LimitSettings>({
         prompt_builder_free_daily: 3,
         prompt_analyzer_free_daily: 5,
@@ -174,6 +182,24 @@ export default function PromptBuilder() {
         toast.success('Suggestion applied! Click Generate to create your prompt.');
     };
 
+    const handleWizardComplete = (craftedPrompt: string, metadata: any) => {
+        setGeneratedPrompt(craftedPrompt);
+        setEnhancedPrompt(craftedPrompt); // Treat wizard output as enhanced
+        setShowWizardMode(false);
+        
+        // Track wizard completion
+        track('prompt_crafter_used', {
+            framework: metadata.framework,
+            model: metadata.model?.id,
+            output_format: metadata.outputFormat,
+            prompt_length: craftedPrompt.length
+        });
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(craftedPrompt);
+        toast.success('Crafted prompt copied to clipboard!');
+    };
+
     const handleSave = async () => {
         const title = (document.getElementById('prompt-title') as HTMLInputElement)?.value;
         const task = (document.getElementById('generic-task') as HTMLInputElement)?.value;
@@ -215,31 +241,49 @@ export default function PromptBuilder() {
     };
 
     return (
-        <section id="generator" className="bg-white dark:bg-neutral-800/50 p-6 md:p-8 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-                <div>
-                    <h2 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Interactive Prompt Builder</h2>
-                    <p className="text-neutral-600 dark:text-neutral-300">Construct detailed prompts with AI assistance.</p>
-                </div>
-                <div className="text-right">
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                        PromptCoins: {promptCoins} ({Math.floor(promptCoins / 15)} enhancements left)
+        <>
+            {showWizardMode ? (
+                <PromptCrafterWizard
+                    onComplete={handleWizardComplete}
+                    onCancel={() => setShowWizardMode(false)}
+                    promptCoins={promptCoins}
+                    onUseCoins={(amount) => setPromptCoins(prev => prev - amount)}
+                />
+            ) : (
+                <section id="generator" className="bg-white dark:bg-neutral-800/50 p-6 md:p-8 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Interactive Prompt Builder</h2>
+                            <p className="text-neutral-600 dark:text-neutral-300">Construct detailed prompts with AI assistance.</p>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                                PromptCoins: {promptCoins} ({Math.floor(promptCoins / 15)} enhancements left)
+                            </div>
+                            {promptCoins < 30 && ( // Show warning when less than 2 enhancements left
+                                <button 
+                                    onClick={() => setShowBuyCreditsModal(true)}
+                                    className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer"
+                                >
+                                    <Crown className="w-3 h-3 inline mr-1" />
+                                    Buy More PromptCoins
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    {promptCoins < 30 && ( // Show warning when less than 2 enhancements left
-                        <button 
-                            onClick={() => setShowBuyCreditsModal(true)}
-                            className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer"
-                        >
-                            <Crown className="w-3 h-3 inline mr-1" />
-                            Buy More PromptCoins
-                        </button>
-                    )}
-                </div>
-            </div>
 
-            {/* Suggestions Toggle */}
-            <div className="mb-6">
+            {/* Mode Toggle and Suggestions */}
+            <div className="mb-6 flex gap-3">
+                <Button
+                    onClick={() => setShowWizardMode(true)}
+                    variant="secondary"
+                    size="sm"
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Guided Crafting
+                </Button>
                 <Button
                     onClick={() => setShowSuggestions(!showSuggestions)}
                     variant="outline"
@@ -504,12 +548,14 @@ export default function PromptBuilder() {
                 </div>
             )}
             
-            <BuyCreditsModal
-                isOpen={showBuyCreditsModal}
-                onClose={() => setShowBuyCreditsModal(false)}
-                type="enhancement"
-                source="prompt_builder"
-            />
-        </section>
+                    <BuyCreditsModal
+                        isOpen={showBuyCreditsModal}
+                        onClose={() => setShowBuyCreditsModal(false)}
+                        type="enhancement"
+                        source="prompt_builder"
+                    />
+                </section>
+            )}
+        </>
     );
 }

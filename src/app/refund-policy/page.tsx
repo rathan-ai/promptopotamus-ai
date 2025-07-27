@@ -83,7 +83,7 @@ export default function RefundPolicy() {
                 </div>
                 <div>
                   <h3 className="font-medium text-neutral-900 dark:text-white">Contact Support</h3>
-                  <p className="text-neutral-600 dark:text-neutral-400 text-sm">Email support@promptopotamus.com with your refund request</p>
+                  <p className="text-neutral-600 dark:text-neutral-400 text-sm">Email contact@innorag.com with your refund request</p>
                 </div>
               </div>
 
@@ -180,8 +180,8 @@ export default function RefundPolicy() {
           <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-6">
             <h3 className="font-semibold text-indigo-900 dark:text-indigo-200 mb-3">Get Help With Refunds</h3>
             <div className="space-y-2 text-indigo-800 dark:text-indigo-300">
-              <p>📧 Email: <a href="mailto:support@promptopotamus.com" className="underline">support@promptopotamus.com</a></p>
-              <p>📧 Billing Issues: <a href="mailto:billing@promptopotamus.com" className="underline">billing@promptopotamus.com</a></p>
+              <p>📧 Email: <a href="mailto:contact@innorag.com" className="underline">contact@innorag.com</a></p>
+              <p>📧 Billing Issues: <a href="mailto:contact@innorag.com" className="underline">contact@innorag.com</a></p>
               <p>⏰ Response Time: Within 24 hours</p>
               <p>🕒 Business Hours: Monday-Friday, 9 AM - 6 PM EST</p>
             </div>
@@ -199,7 +199,7 @@ export default function RefundPolicy() {
             We're here to help clarify any questions about refunds or PromptCoins.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="mailto:support@promptopotamus.com">
+            <Link href="mailto:contact@innorag.com">
               <Button>
                 Contact Support
                 <ArrowRight className="w-4 h-4 ml-2" />

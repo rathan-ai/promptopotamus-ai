@@ -111,49 +111,6 @@ const HowItWorks = () => {
           })}
         </div>
 
-        {/* Success Stories */}
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-8 text-center">
-          <h3 className="text-h3 text-neutral-900 dark:text-white mb-4">
-            Join Thousands of Successful Prompt Engineers
-          </h3>
-          <p className="text-body-large text-neutral-600 dark:text-neutral-400 mb-8 max-w-2xl mx-auto">
-            Our community has created over 50,000 prompts and earned 1,200+ certifications. 
-            Start your journey today and become part of the AI revolution.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/smart-prompts">
-              <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg">
-                Start Exploring
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
-            <Link href="/certificates">
-              <Button size="lg" variant="outline" className="shadow-lg">
-                View Certifications
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { number: "10,000+", label: "Active Users" },
-            { number: "50,000+", label: "Prompts Created" },
-            { number: "1,200+", label: "Certifications Earned" },
-            { number: "4.9/5", label: "User Satisfaction" }
-          ].map((stat, index) => (
-            <div key={index} className="group">
-              <div className="text-h2 font-bold text-indigo-600 dark:text-indigo-400 mb-2 group-hover:scale-110 transition-transform">
-                {stat.number}
-              </div>
-              <div className="text-small text-neutral-600 dark:text-neutral-400 font-medium">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );

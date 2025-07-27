@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Mail, Heart, ExternalLink, Shield, FileText, HelpCircle, BookOpen } from 'lucide-react';
+import { Mail, Heart, ExternalLink, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 const Footer = () => {
@@ -29,7 +29,7 @@ const Footer = () => {
       links: [
         { href: '/about', label: 'About Us', internal: true },
         { href: '/pricing', label: 'Pricing', internal: true },
-        { href: 'mailto:info@innorag.com', label: 'Contact', internal: false },
+        { href: 'mailto:contact@innorag.com', label: 'Contact', internal: false },
       ]
     },
     {
@@ -37,7 +37,7 @@ const Footer = () => {
       links: [
         { href: '/help/promptcoins', label: 'PromptCoin Help', internal: true },
         { href: '/refund-policy', label: 'Refund Policy', internal: true },
-        { href: 'mailto:support@promptopotamus.com', label: 'Contact Support', internal: false },
+        { href: 'mailto:contact@innorag.com', label: 'Contact Support', internal: false },
       ]
     },
     {
@@ -52,33 +52,6 @@ const Footer = () => {
 
   return (
     <footer className="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 mt-24">
-      {/* Newsletter Section */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">
-              Stay Updated with AI Prompt Tips
-            </h3>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-              Get weekly insights, new prompts, and exclusive tips delivered to your inbox.
-            </p>
-            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <Button type="submit" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-                <Mail className="w-4 h-4 mr-2" />
-                Subscribe
-              </Button>
-            </form>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-3">
-              No spam, unsubscribe anytime. By subscribing, you agree to our Privacy Policy.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -149,32 +122,6 @@ const Footer = () => {
               Built by <a href="https://innorag.com" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">innorag.com</a>
             </p>
             
-            {/* Quick Actions */}
-            <div className="flex items-center gap-6">
-              <Link
-                href="/help"
-                className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 inline-flex items-center gap-1"
-              >
-                <HelpCircle className="w-4 h-4" />
-                Help Center
-              </Link>
-              <Link
-                href="/docs"
-                className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 inline-flex items-center gap-1"
-              >
-                <BookOpen className="w-4 h-4" />
-                Documentation
-              </Link>
-              <a
-                href="https://status.promptopotamus.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 inline-flex items-center gap-1"
-              >
-                <FileText className="w-4 h-4" />
-                Status
-              </a>
-            </div>
           </div>
 
           {/* Fun Tagline */}

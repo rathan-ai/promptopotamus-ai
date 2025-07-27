@@ -213,7 +213,7 @@ export default function PromptCoinHelp() {
           Our support team is here to help you make the most of your PromptCoins.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="mailto:support@promptopotamus.com">
+          <Link href="mailto:contact@innorag.com">
             <Button variant="outline">
               Email Support
             </Button>
