@@ -30,10 +30,8 @@ const PromptTypesGuide = dynamic(() => import('@/components/features/shared/Prom
   ssr: false
 });
 
-const VariablesExplainer = dynamic(() => import('@/components/features/shared/VariablesExplainer'), {
-  loading: () => <LoadingSkeleton lines={4} />,
-  ssr: false
-});
+// Import VariableGuide to replace problematic VariablesExplainer
+import VariableGuide from '@/components/features/shared/VariableGuide';
 
 interface Variable {
   name: string;
@@ -498,9 +496,9 @@ export default function SmartPromptsPage() {
             />
           </ComponentErrorBoundary>
 
-          {/* Variables Explainer */}
-          <ComponentErrorBoundary componentName="VariablesExplainer">
-            <VariablesExplainer />
+          {/* Variable Guide */}
+          <ComponentErrorBoundary componentName="VariableGuide">
+            <VariableGuide />
           </ComponentErrorBoundary>
 
           {/* Quick Start CTA */}
