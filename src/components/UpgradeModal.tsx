@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Crown, Star, Check, CreditCard } from 'lucide-react';
+import { X, Coins, Star, Check, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { track } from '@vercel/analytics';
 import PayPalPaymentModal from './PayPalPaymentModal';
-import { updateSubscriptionFromPayment } from '@/lib/subscription';
+import { addPromptCoinsFromPayment } from '@/lib/subscription';
 import toast from 'react-hot-toast';
 
 interface UpgradeModalProps {
@@ -14,83 +14,80 @@ interface UpgradeModalProps {
   source?: string;
 }
 
-const plans = [
+const packages = [
   {
-    id: 'pro',
-    name: 'Pro',
-    price: '$9',
-    period: '/month',
+    id: 'starter',
+    name: 'Starter Pack',
+    price: '$5',
+    promptCoins: '500 PC',
     icon: Star,
     color: 'border-blue-500 bg-blue-50 dark:bg-blue-900/20',
     buttonColor: 'bg-blue-600 hover:bg-blue-700',
     popular: true,
     features: [
-      'Unlimited prompt analysis',
-      'Access to Pro templates',
-      'Enhanced AI suggestions',
-      'Priority support',
-      'Export prompts to PDF',
-      '5 exam attempts per level',
-      'Extra retry after failure'
+      '33 prompt enhancements',
+      '50 prompt analyses',
+      '10 exam attempts',
+      '100 export operations',
+      'Smart Recipe purchases',
+      'Credits never expire'
     ]
   },
   {
-    id: 'premium',
-    name: 'Premium',
-    price: '$19',
-    period: '/month',
-    icon: Crown,
+    id: 'pro',
+    name: 'Pro Pack',
+    price: '$20',
+    promptCoins: '2,000 PC',
+    icon: Coins,
     color: 'border-purple-500 bg-purple-50 dark:bg-purple-900/20',
     buttonColor: 'bg-purple-600 hover:bg-purple-700',
     popular: false,
     features: [
-      'Everything in Pro',
-      'Access to Premium templates',
-      'Custom prompt templates',
-      'Advanced analytics dashboard',
-      'Team collaboration features',
-      '1-on-1 expert consultation',
-      'Unlimited exam attempts',
-      'Unlimited exam retries'
+      '133 prompt enhancements',
+      '200 prompt analyses',
+      '40 exam attempts',
+      '400 export operations',
+      'Smart Recipe purchases',
+      'Credits never expire'
     ]
   }
 ];
 
 export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: UpgradeModalProps) {
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPayPalModal, setShowPayPalModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState(0);
 
   if (!isOpen) return null;
 
-  const handlePlanSelect = (planId: string) => {
-    setSelectedPlan(planId);
-    track('upgrade_plan_selected', {
-      plan: planId,
+  const handlePackageSelect = (packageId: string) => {
+    setSelectedPackage(packageId);
+    track('promptcoin_package_selected', {
+      package: packageId,
       source: source,
-      price: plans.find(p => p.id === planId)?.price || 'unknown'
+      price: packages.find(p => p.id === packageId)?.price || 'unknown'
     });
   };
 
-  const handleUpgrade = async (planId: string) => {
+  const handlePurchase = async (packageId: string) => {
     setIsProcessing(true);
     
-    track('upgrade_attempt', {
-      plan: planId,
+    track('promptcoin_purchase_attempt', {
+      package: packageId,
       source: source,
-      price: plans.find(p => p.id === planId)?.price || 'unknown'
+      price: packages.find(p => p.id === packageId)?.price || 'unknown'
     });
 
-    // Get the selected plan details
-    const plan = plans.find(p => p.id === planId);
-    if (!plan) {
+    // Get the selected package details
+    const pkg = packages.find(p => p.id === packageId);
+    if (!pkg) {
       setIsProcessing(false);
       return;
     }
 
-    // Extract numeric price from string (e.g., "$9" -> 9)
-    const price = parseFloat(plan.price.replace('$', ''));
+    // Extract numeric price from string (e.g., "$5" -> 5)
+    const price = parseFloat(pkg.price.replace('$', ''));
     setPaymentAmount(price);
     
     // Show PayPal payment modal
@@ -99,35 +96,50 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
   };
 
   const handlePaymentSuccess = async () => {
-    track('upgrade_payment_success', {
-      plan: selectedPlan,
+    track('promptcoin_payment_success', {
+      package: selectedPackage,
       source: source,
       amount: paymentAmount
     });
     
     try {
       // Get user ID from auth context or session
-      // For now, we'll need to implement proper user authentication
-      // This is a placeholder that would work with actual authentication
       const response = await fetch('/api/profile');
       const { user } = await response.json();
       
-      if (user && selectedPlan) {
-        const success = await updateSubscriptionFromPayment(
+      if (user && selectedPackage) {
+        // Calculate PromptCoins to add based on package
+        const pkg = packages.find(p => p.id === selectedPackage);
+        if (!pkg) return;
+        
+        const promptCoinsAmount = paymentAmount * 100; // Convert USD to PC (100 PC = $1)
+        
+        // Distribute PromptCoins evenly across categories
+        const perCategory = Math.floor(promptCoinsAmount / 4);
+        const promptCoinsToAdd = {
+          analysis: perCategory,
+          enhancement: perCategory,
+          exam: perCategory,
+          export: promptCoinsAmount - (perCategory * 3) // remainder goes to export
+        };
+        
+        const success = await addPromptCoinsFromPayment(
           user.id,
-          selectedPlan as 'pro' | 'premium',
-          'paypal'
+          promptCoinsToAdd,
+          'paypal',
+          `pc_${Date.now()}`,
+          paymentAmount
         );
         
         if (success) {
-          toast.success(`🎉 Successfully upgraded to ${selectedPlan} plan!`);
+          toast.success(`🎉 Successfully purchased ${pkg.promptCoins}!`);
         } else {
-          toast.error('Payment successful but subscription update failed. Please contact support.');
+          toast.error('Payment successful but PromptCoin credit failed. Please contact support.');
         }
       }
     } catch (error) {
-      console.error('Error updating subscription:', error);
-      toast.error('Payment successful but subscription update failed. Please contact support.');
+      console.error('Error adding PromptCoins:', error);
+      toast.error('Payment successful but PromptCoin credit failed. Please contact support.');
     }
     
     setShowPayPalModal(false);
@@ -146,10 +158,10 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-neutral-900 dark:text-white">
-                Upgrade Your Experience
+                Buy PromptCoins
               </h2>
               <p className="text-neutral-600 dark:text-neutral-400 mt-1">
-                Unlock premium features and unlimited access
+                Credits that never expire - pay only for what you use
               </p>
             </div>
             <button
@@ -161,24 +173,24 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
           </div>
         </div>
 
-        {/* Plans */}
+        {/* Packages */}
         <div className="p-6">
           <div className="grid md:grid-cols-2 gap-6">
-            {plans.map((plan) => {
-              const Icon = plan.icon;
-              const isSelected = selectedPlan === plan.id;
+            {packages.map((pkg) => {
+              const Icon = pkg.icon;
+              const isSelected = selectedPackage === pkg.id;
               
               return (
                 <div
-                  key={plan.id}
+                  key={pkg.id}
                   className={`relative p-6 rounded-xl border-2 transition-all cursor-pointer hover:shadow-lg ${
                     isSelected 
-                      ? plan.color + ' border-opacity-100' 
+                      ? pkg.color + ' border-opacity-100' 
                       : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600'
                   }`}
-                  onClick={() => handlePlanSelect(plan.id)}
+                  onClick={() => handlePackageSelect(pkg.id)}
                 >
-                  {plan.popular && (
+                  {pkg.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                         Most Popular
@@ -187,24 +199,26 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
                   )}
 
                   <div className="text-center mb-6">
-                    <div className={`inline-flex p-3 rounded-full mb-3 ${plan.color}`}>
+                    <div className={`inline-flex p-3 rounded-full mb-3 ${pkg.color}`}>
                       <Icon className="w-6 h-6" />
                     </div>
                     <h3 className="text-xl font-bold text-neutral-900 dark:text-white">
-                      {plan.name}
+                      {pkg.name}
                     </h3>
                     <div className="mt-2">
                       <span className="text-3xl font-bold text-neutral-900 dark:text-white">
-                        {plan.price}
+                        {pkg.price}
                       </span>
-                      <span className="text-neutral-600 dark:text-neutral-400">
-                        {plan.period}
+                    </div>
+                    <div className="mt-1">
+                      <span className="text-lg font-semibold text-indigo-600 dark:text-indigo-400">
+                        {pkg.promptCoins}
                       </span>
                     </div>
                   </div>
 
                   <ul className="space-y-3 mb-6">
-                    {plan.features.map((feature, index) => (
+                    {pkg.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                         <span className="text-neutral-700 dark:text-neutral-300">
@@ -215,16 +229,16 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
                   </ul>
 
                   <Button
-                    onClick={() => handleUpgrade(plan.id)}
+                    onClick={() => handlePurchase(pkg.id)}
                     disabled={isProcessing}
-                    className={`w-full ${plan.buttonColor}`}
+                    className={`w-full ${pkg.buttonColor}`}
                   >
-                    {isProcessing && selectedPlan === plan.id ? (
+                    {isProcessing && selectedPackage === pkg.id ? (
                       'Processing...'
                     ) : (
                       <>
                         <CreditCard className="w-4 h-4 mr-2" />
-                        Pay with PayPal
+                        Buy with PayPal
                       </>
                     )}
                   </Button>
@@ -250,21 +264,21 @@ export default function UpgradeModal({ isOpen, onClose, source = 'unknown' }: Up
           {/* Money Back Guarantee */}
           <div className="mt-4 text-center">
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              💰 30-day money-back guarantee • Cancel anytime • Secure payments
+              💰 30-day money-back guarantee • Credits never expire • Secure payments
             </p>
           </div>
         </div>
       </div>
       
       {/* PayPal Payment Modal */}
-      {showPayPalModal && selectedPlan && (
+      {showPayPalModal && selectedPackage && (
         <PayPalPaymentModal
           isOpen={showPayPalModal}
           onClose={handlePaymentClose}
           onSuccess={handlePaymentSuccess}
-          promptId={-1} // Using -1 to indicate subscription payment
+          promptId={-1} // Using -1 to indicate PromptCoin purchase
           amount={paymentAmount}
-          promptTitle={`${plans.find(p => p.id === selectedPlan)?.name} Plan Subscription`}
+          promptTitle={`${packages.find(p => p.id === selectedPackage)?.name} Purchase`}
           sellerName="Promptopotamus"
         />
       )}

@@ -345,14 +345,24 @@ export class ClaudeIntegrationService {
         - Add appropriate constraints
         
         **Existing Tables to Consider:**
-        - profiles (user data with promptcoins, credits, subscription info)
-        - smart_prompt_purchases (purchase history)
-        - promptcoin_transactions (audit trail)
-        - payment_security_events (security logging)
-        - affiliate_resources (admin-managed resources)
-        - smart_prompt_reviews (user reviews and ratings)
-        - user_follows (social features)
-        - learning_sessions (analytics)
+        - profiles (core user data with subscription, credits, payments)
+        - saved_prompts (smart prompts/recipes with marketplace features)
+        - smart_prompt_purchases (purchase history and transactions)
+        - smart_prompt_reviews (user reviews and ratings system)
+        - user_achievements & achievement_definitions (gamification system)
+        - user_experience (XP, levels, category progression)
+        - user_certificates (certification and credential system)
+        - affiliate_partners, affiliate_clicks, affiliate_conversions (affiliate tracking)
+        - email_campaigns, email_sends, user_email_preferences (email marketing)
+        - promptcoin_transactions (PromptCoin economy audit trail)
+        - payment_security_events (security monitoring and logging)
+        - subscription_transactions (payment processing)
+        - user_follows, user_profiles_extended (social networking features)
+        - user_prompt_collections, user_streaks (engagement features)
+        - prompt_comments (community interaction)
+        - quiz_attempts, quizzes (assessment system)
+        - admin_settings, admin_users (administration)
+        - newsletter_subscribers (marketing)
         
         Generate clean, production-ready SQL migration code.
       `;
@@ -397,7 +407,18 @@ export class ClaudeIntegrationService {
    */
   private async getSchemaInfo(tableNames?: string[]) {
     try {
-      const tables = tableNames || ['profiles', 'smart_prompt_purchases', 'promptcoin_transactions'];
+      // Updated to match actual production schema with 26 tables
+      const defaultTables = [
+        'profiles', 'saved_prompts', 'smart_prompt_purchases', 'smart_prompt_reviews',
+        'user_achievements', 'achievement_definitions', 'user_experience', 'user_certificates',
+        'affiliate_partners', 'affiliate_clicks', 'affiliate_conversions', 'affiliate_resources',
+        'email_campaigns', 'email_sends', 'user_email_preferences', 'newsletter_subscribers',
+        'promptcoin_transactions', 'payment_security_events', 'subscription_transactions',
+        'user_follows', 'user_profiles_extended', 'user_prompt_collections', 'user_streaks',
+        'prompt_comments', 'quiz_attempts', 'quizzes', 'admin_settings', 'admin_users'
+      ];
+      
+      const tables = tableNames || defaultTables;
       const schemaInfo: any = {};
 
       for (const table of tables) {
@@ -480,6 +501,166 @@ export class ClaudeIntegrationService {
     }
 
     return warnings;
+  }
+
+  /**
+   * Analyze user engagement and platform metrics
+   */
+  async analyzeUserEngagement(timeRange: string = '30 days') {
+    try {
+      const since = new Date(Date.now() - this.parseTimeRange(timeRange));
+      
+      // Get comprehensive engagement metrics
+      const metrics = await Promise.all([
+        // User activity metrics
+        this.supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        this.supabase.from('saved_prompts').select('*', { count: 'exact', head: true }),
+        this.supabase.from('smart_prompt_purchases').select('*', { count: 'exact', head: true }),
+        this.supabase.from('user_achievements').select('*', { count: 'exact', head: true }),
+        this.supabase.from('user_certificates').select('*', { count: 'exact', head: true }),
+        
+        // Recent activity
+        this.supabase.from('smart_prompt_purchases')
+          .select('*', { count: 'exact', head: true })
+          .gte('purchased_at', since.toISOString()),
+        this.supabase.from('quiz_attempts')
+          .select('*', { count: 'exact', head: true })
+          .gte('attempted_at', since.toISOString()),
+      ]);
+
+      const [totalUsers, totalPrompts, totalPurchases, totalAchievements, totalCertificates, recentPurchases, recentQuizzes] = metrics;
+
+      const engagementData = {
+        users: {
+          total: totalUsers.count || 0,
+          engagement_period: timeRange
+        },
+        content: {
+          total_prompts: totalPrompts.count || 0,
+          total_purchases: totalPurchases.count || 0,
+          recent_purchases: recentPurchases.count || 0
+        },
+        gamification: {
+          total_achievements: totalAchievements.count || 0,
+          total_certificates: totalCertificates.count || 0
+        },
+        learning: {
+          recent_quiz_attempts: recentQuizzes.count || 0
+        }
+      };
+
+      const prompt = `
+        Analyze this user engagement data for Promptopotamus platform:
+        
+        ${JSON.stringify(engagementData, null, 2)}
+        
+        Please provide:
+        1. Overall platform health assessment
+        2. User engagement trends and insights
+        3. Content performance analysis
+        4. Gamification effectiveness
+        5. Recommendations for improving engagement
+        6. Potential growth opportunities
+        7. Areas needing attention
+        
+        Focus on actionable insights for platform growth.
+      `;
+
+      const response = await this.anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 2500,
+        messages: [{ role: 'user', content: prompt }]
+      });
+
+      return {
+        success: true,
+        analysis: response.content[0].type === 'text' ? response.content[0].text : 'Analysis completed',
+        metrics: engagementData,
+        timeRange
+      };
+    } catch (error) {
+      console.error('User engagement analysis error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Analyze business metrics and revenue
+   */
+  async analyzeBusinessMetrics(timeRange: string = '30 days') {
+    try {
+      const since = new Date(Date.now() - this.parseTimeRange(timeRange));
+      
+      // Get business metrics
+      const [purchases, subscriptions, affiliateClicks, affiliateConversions] = await Promise.all([
+        this.supabase.from('smart_prompt_purchases')
+          .select('purchase_price, payment_provider, purchased_at')
+          .gte('purchased_at', since.toISOString()),
+        this.supabase.from('subscription_transactions')
+          .select('amount, status, created_at')
+          .gte('created_at', since.toISOString()),
+        this.supabase.from('affiliate_clicks')
+          .select('partner_id, clicked_at')
+          .gte('clicked_at', since.toISOString()),
+        this.supabase.from('affiliate_conversions')
+          .select('conversion_value, commission_earned, converted_at')
+          .gte('converted_at', since.toISOString())
+      ]);
+
+      const businessData = {
+        revenue: {
+          prompt_sales: purchases.data?.reduce((sum, p) => sum + (Number(p.purchase_price) || 0), 0) || 0,
+          subscription_revenue: subscriptions.data?.reduce((sum, s) => sum + (Number(s.amount) || 0), 0) || 0,
+          affiliate_commissions: affiliateConversions.data?.reduce((sum, c) => sum + (Number(c.commission_earned) || 0), 0) || 0
+        },
+        transactions: {
+          prompt_purchases: purchases.data?.length || 0,
+          subscriptions: subscriptions.data?.length || 0,
+          affiliate_clicks: affiliateClicks.data?.length || 0,
+          affiliate_conversions: affiliateConversions.data?.length || 0
+        },
+        timeRange
+      };
+
+      const prompt = `
+        Analyze this business performance data for Promptopotamus:
+        
+        ${JSON.stringify(businessData, null, 2)}
+        
+        Please provide:
+        1. Revenue analysis and trends
+        2. Transaction volume insights
+        3. Affiliate program performance
+        4. Revenue optimization opportunities
+        5. Business health indicators
+        6. Recommendations for growth
+        7. Risk areas and mitigation strategies
+        
+        Focus on actionable business insights.
+      `;
+
+      const response = await this.anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 2500,
+        messages: [{ role: 'user', content: prompt }]
+      });
+
+      return {
+        success: true,
+        analysis: response.content[0].type === 'text' ? response.content[0].text : 'Analysis completed',
+        metrics: businessData,
+        timeRange
+      };
+    } catch (error) {
+      console.error('Business metrics analysis error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
   }
 
   /**

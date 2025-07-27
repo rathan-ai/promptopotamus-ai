@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import Introduction from "@/components/guides/Introduction";
-import SubscriptionStatusBanner from "@/components/SubscriptionStatusBanner";
+import PromptCoinStatusBanner from "@/components/SubscriptionStatusBanner";
 import FeaturedPromptsShowcase from "@/components/FeaturedPromptsShowcase";
 import HowItWorks from "@/components/HowItWorks";
 import PromptBuilder from "@/components/PromptBuilder";
@@ -39,10 +39,10 @@ export default function Home() {
         <Introduction />
       </div>
 
-      {/* Subscription Status Banner */}
+      {/* PromptCoin Status Banner */}
       {user && (
         <div className="max-w-4xl mx-auto">
-          <SubscriptionStatusBanner user={user} />
+          <PromptCoinStatusBanner user={user} />
         </div>
       )}
       
