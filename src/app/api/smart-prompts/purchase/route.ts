@@ -3,21 +3,45 @@ import { NextResponse } from 'next/server';
 import { paymentAdapter } from '@/lib/payment-adapter';
 
 export async function POST(req: Request) {
-  const supabase = await createServerClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  let supabase;
+  let user: any = null;
+  
+  try {
+    supabase = await createServerClient();
+    
+    // Get user with more error handling
+    let authError: any = null;
+    
+    try {
+      const authResult = await supabase.auth.getUser();
+      user = authResult.data?.user;
+      authError = authResult.error;
+    } catch (e) {
+      console.error('Smart Prompts Purchase - Auth error:', e);
+      authError = e;
+    }
 
-  console.log('Smart Prompts Purchase - Auth check:', { 
-    hasUser: !!user, 
-    userId: user?.id,
-    authError: authError?.message 
-  });
+    console.log('Smart Prompts Purchase - Auth check:', { 
+      hasUser: !!user, 
+      userId: user?.id,
+      authError: authError?.message,
+      fullAuthError: authError
+    });
 
-  if (!user) {
-    console.error('Smart Prompts Purchase - Unauthorized access attempt');
+    if (!user) {
+      console.error('Smart Prompts Purchase - Unauthorized access attempt:', authError);
+      return NextResponse.json({ 
+        error: 'Please log in to download Smart Prompts',
+        authRequired: true,
+        details: authError?.message
+      }, { status: 401 });
+    }
+  } catch (setupError) {
+    console.error('Smart Prompts Purchase - Setup error:', setupError);
     return NextResponse.json({ 
-      error: 'Please log in to download Smart Prompts',
-      authRequired: true 
-    }, { status: 401 });
+      error: 'Authentication setup failed',
+      details: setupError instanceof Error ? setupError.message : 'Unknown error'
+    }, { status: 500 });
   }
 
   try {
@@ -103,11 +127,28 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Failed to record free purchase' }, { status: 500 });
       }
 
-      // Update download count
-      await supabase
-        .from('saved_prompts')
-        .update({ downloads_count: supabase.sql`downloads_count + 1` })
-        .eq('id', promptId);
+      // Update download count - use simple increment
+      try {
+        // First get current count
+        const { data: currentPrompt } = await supabase
+          .from('saved_prompts')
+          .select('downloads_count')
+          .eq('id', promptId)
+          .single();
+        
+        const newCount = (currentPrompt?.downloads_count || 0) + 1;
+        
+        const { error: updateError } = await supabase
+          .from('saved_prompts')
+          .update({ downloads_count: newCount })
+          .eq('id', promptId);
+        
+        if (updateError) {
+          console.warn('Failed to update download count:', updateError);
+        }
+      } catch (updateErr) {
+        console.warn('Download count update failed:', updateErr);
+      }
 
       return NextResponse.json({ 
         success: true, 
@@ -275,11 +316,23 @@ export async function PUT(req: Request) {
         return NextResponse.json({ error: 'Failed to record purchase' }, { status: 500 });
       }
 
-      // Update download count
-      await supabase
-        .from('saved_prompts')
-        .update({ downloads_count: supabase.sql`downloads_count + 1` })
-        .eq('id', promptId);
+      // Update download count - use simple increment  
+      try {
+        const { data: currentPrompt } = await supabase
+          .from('saved_prompts')
+          .select('downloads_count')
+          .eq('id', promptId)
+          .single();
+        
+        const newCount = (currentPrompt?.downloads_count || 0) + 1;
+        
+        await supabase
+          .from('saved_prompts')
+          .update({ downloads_count: newCount })
+          .eq('id', promptId);
+      } catch (updateErr) {
+        console.warn('Download count update failed:', updateErr);
+      }
 
       return NextResponse.json({ 
         success: true, 
