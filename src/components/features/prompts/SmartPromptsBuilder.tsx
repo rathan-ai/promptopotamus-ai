@@ -457,33 +457,35 @@ export default function SmartPromptsBuilder({
         </p>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-between mb-8 border-b dark:border-neutral-700 pb-4">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            const isActive = index === currentStep;
-            const isCompleted = index < currentStep;
-            
-            return (
-              <div key={step.id} className="flex items-center">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                  isCompleted ? 'bg-green-500 border-green-500 text-white' :
-                  isActive ? 'border-blue-500 text-blue-500' : 
-                  'border-neutral-300 text-neutral-400'
-                }`}>
-                  <Icon className="w-5 h-5" />
+        <div className="mb-8 border-b dark:border-neutral-700 pb-4">
+          <div className="flex items-center justify-between overflow-x-auto">
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+              const isActive = index === currentStep;
+              const isCompleted = index < currentStep;
+              
+              return (
+                <div key={step.id} className="flex items-center flex-shrink-0 min-w-0">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                    isCompleted ? 'bg-green-500 border-green-500 text-white' :
+                    isActive ? 'border-blue-500 text-blue-500' : 
+                    'border-neutral-300 text-neutral-400'
+                  }`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <span className={`ml-2 text-xs sm:text-sm font-medium whitespace-nowrap ${
+                    isActive ? 'text-blue-600 dark:text-blue-400' : 
+                    'text-neutral-600 dark:text-neutral-400'
+                  }`}>
+                    {step.title}
+                  </span>
+                  {index < steps.length - 1 && (
+                    <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 mx-2 sm:mx-4 text-neutral-300 flex-shrink-0" />
+                  )}
                 </div>
-                <span className={`ml-2 text-sm font-medium ${
-                  isActive ? 'text-blue-600 dark:text-blue-400' : 
-                  'text-neutral-600 dark:text-neutral-400'
-                }`}>
-                  {step.title}
-                </span>
-                {index < steps.length - 1 && (
-                  <ChevronRight className="w-4 h-4 mx-4 text-neutral-300" />
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {/* Step Content */}
