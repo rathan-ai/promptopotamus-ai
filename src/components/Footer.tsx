@@ -33,11 +33,18 @@ const Footer = () => {
       ]
     },
     {
+      title: 'Support',
+      links: [
+        { href: '/help/promptcoins', label: 'PromptCoin Help', internal: true },
+        { href: '/refund-policy', label: 'Refund Policy', internal: true },
+        { href: 'mailto:support@promptopotamus.com', label: 'Contact Support', internal: false },
+      ]
+    },
+    {
       title: 'Legal',
       links: [
         { href: '/privacy-policy', label: 'Privacy Policy', internal: true },
         { href: '/terms-of-service', label: 'Terms of Service', internal: true },
-        { href: '/refund-policy', label: 'Refund Policy', internal: true },
       ]
     }
   ];

@@ -295,11 +295,18 @@ export default function PricingPage() {
           <p className="text-body text-neutral-600 dark:text-neutral-400 mb-4">
             Need help with PromptCoins?
           </p>
-          <Link href="mailto:support@promptopotamus.com">
-            <Button variant="outline">
-              Contact Support
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/help/promptcoins">
+              <Button>
+                PromptCoin Help Center
+              </Button>
+            </Link>
+            <Link href="mailto:support@promptopotamus.com">
+              <Button variant="outline">
+                Contact Support
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
