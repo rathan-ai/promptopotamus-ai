@@ -10,7 +10,7 @@ import {
   Eye, 
   AlertTriangle, 
   Settings, 
-  DollarSign,
+  Coins,
   Tag,
   FileText,
   Zap,
@@ -43,6 +43,8 @@ import {
 } from '@/lib/ai-assistant';
 import ComplexityGuidance from '../shared/ComplexityGuidance';
 import RecipeFlowVisualizer from './RecipeFlowVisualizer';
+import { PromptCoinDisplay } from '@/components/ui/PromptCoinDisplay';
+import { validatePromptCoinAmount, PROMPTCOIN_COSTS } from '@/lib/promptcoin-utils';
 
 interface Variable {
   name: string;
@@ -140,8 +142,8 @@ export default function SmartPromptsBuilder({
     pro_commission_rate: 0.15,
     premium_commission_rate: 0.10,
     allow_user_pricing: true,
-    min_price: 1.00,
-    max_price: 99.99,
+    min_price: PROMPTCOIN_COSTS.smart_prompt_min, // 1 PC
+    max_price: PROMPTCOIN_COSTS.smart_prompt_max, // 9999 PC
   });
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -201,7 +203,7 @@ export default function SmartPromptsBuilder({
     { id: 'basic', title: 'Basic Info', icon: FileText },
     { id: 'content', title: 'Prompt Content', icon: Brain },
     { id: 'advanced', title: 'Advanced Features', icon: Zap },
-    { id: 'marketplace', title: 'Marketplace Settings', icon: DollarSign }
+    { id: 'marketplace', title: 'Marketplace Settings', icon: Coins }
   ];
 
   // AI Assistant Functions
@@ -1063,30 +1065,30 @@ export default function SmartPromptsBuilder({
                     <>
                       {/* Pricing */}
                       <div>
-                        <label className="block text-sm font-medium mb-2 dark:text-white">Price (USD)</label>
+                        <label className="block text-sm font-medium mb-2 dark:text-white">Price (PromptCoins)</label>
                         <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                          <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-amber-500" />
                           <input
                             type="number"
                             min="0"
                             max={pricingSettings.max_price}
-                            step="0.01"
+                            step="1"
                             value={formData.price}
                             onChange={(e) => {
-                              const price = parseFloat(e.target.value) || 0;
+                              const price = parseInt(e.target.value) || 0;
                               const clampedPrice = Math.min(Math.max(price, 0), pricingSettings.max_price);
                               setFormData(prev => ({ ...prev, price: clampedPrice }));
                             }}
-                            placeholder="0.00"
+                            placeholder="0"
                             className="w-full pl-10 pr-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
                           />
                         </div>
                         <div className="flex justify-between items-center">
                           <p className="text-sm text-neutral-500 mt-1">
-                            Set to $0.00 for free prompts. You&apos;ll earn {Math.round((1 - pricingSettings.default_commission_rate) * 100)}% of paid sales.
+                            Set to 0 for free prompts. You&apos;ll earn {Math.round((1 - pricingSettings.default_commission_rate) * 100)}% of paid sales.
                           </p>
                           <p className="text-xs text-neutral-400 mt-1">
-                            Max: ${pricingSettings.max_price.toFixed(2)}
+                            Range: {pricingSettings.min_price}-{pricingSettings.max_price.toLocaleString()} PC
                           </p>
                         </div>
                       </div>
@@ -1142,7 +1144,13 @@ export default function SmartPromptsBuilder({
                                 <p className="text-sm text-neutral-600 dark:text-neutral-400">{formData.category}</p>
                               </div>
                               <div className="text-right">
-                                <span className="text-2xl font-bold text-green-600">${formData.price.toFixed(2)}</span>
+                                <div className="text-2xl font-bold">
+                                  <PromptCoinDisplay 
+                                    amount={formData.price} 
+                                    size="xl" 
+                                    variant={formData.price === 0 ? 'success' : 'default'}
+                                  />
+                                </div>
                                 <div className="flex gap-1 mt-1">
                                   {formData.tags.slice(0, 3).map(tag => (
                                     <span key={tag} className="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">

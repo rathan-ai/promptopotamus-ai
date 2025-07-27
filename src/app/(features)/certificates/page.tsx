@@ -5,6 +5,8 @@ import { certificates, type Certificate } from '@/lib/data';
 import { Button } from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { CheckCircle, Lock, ArrowRight, AlertTriangle, Award, Users } from 'lucide-react';
+import { PromptCoinCost } from '@/components/ui/PromptCoinDisplay';
+import { PROMPTCOIN_COSTS } from '@/lib/promptcoin-utils';
 
 interface UserCertificate {
   certificate_slug: string;
@@ -117,7 +119,7 @@ const EnhancedCertificateCard = ({
       )}
 
       {/* Skills & Benefits */}
-      <div className="mb-6">
+      <div className="mb-4">
         <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
           Skills You&apos;ll Validate:
         </h4>
@@ -130,6 +132,18 @@ const EnhancedCertificateCard = ({
           ))}
         </ul>
       </div>
+
+      {/* Exam Cost */}
+      {status !== 'completed' && (
+        <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              Exam Cost:
+            </span>
+            <PromptCoinCost amount={PROMPTCOIN_COSTS.exam} />
+          </div>
+        </div>
+      )}
 
       {/* Action Button */}
       <Link href={

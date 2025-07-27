@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Loader2, CheckCircle, AlertTriangle, Info, ExternalLink, Crown, Lightbulb, BookOpen, TrendingUp, Users, Calendar } from 'lucide-react';
 import { track } from '@vercel/analytics';
-import BuyCreditsModal from '../payments/BuyCreditsModal';
-import { getSettings, type LimitSettings } from '@/lib/admin-settings';
+import { PromptCoinDisplay, PromptCoinCost } from '@/components/ui/PromptCoinDisplay';
+import { PROMPTCOIN_COSTS } from '@/lib/promptcoin-utils';
+import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface AnalysisResult {
     score: number;
@@ -25,9 +27,9 @@ const samplePrompts = [
 export default function PromptAnalyzer() {
     const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [promptCoins, setPromptCoins] = useState(50); // Will be updated from settings (50 PC = 5 analyses)
+    const [userBalance, setUserBalance] = useState(0);
     const [currentPrompt, setCurrentPrompt] = useState('');
-    const [showBuyCreditsModal, setShowBuyCreditsModal] = useState(false);
+    const [balanceLoading, setBalanceLoading] = useState(true);
     const [limitSettings, setLimitSettings] = useState<LimitSettings>({
         prompt_builder_free_daily: 3,
         prompt_analyzer_free_daily: 5,
@@ -37,21 +39,26 @@ export default function PromptAnalyzer() {
         prompt_analyzer_premium_daily: -1,
     });
 
-    // Load limit settings from admin configuration
+    // Load user's PromptCoin balance
     useEffect(() => {
-        const loadLimitSettings = async () => {
+        const fetchUserBalance = async () => {
             try {
-                const settings = await getSettings('limits') as LimitSettings;
-                setLimitSettings(settings);
-                // Update initial PromptCoins based on settings (assuming free tier for now)
-                setPromptCoins(settings.prompt_analyzer_free_daily * 10); // 10 PC per analysis
-            } catch (error) {
-                console.error('Failed to load limit settings:', error);
-                // Keep default values if loading fails
+                setBalanceLoading(true);
+                const response = await fetch('/api/user/balance');
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserBalance(data.total || 0);
+                } else {
+                    console.error('Failed to load balance');
+                }
+            } catch (err) {
+                console.error('Failed to load balance:', err);
+            } finally {
+                setBalanceLoading(false);
             }
         };
         
-        loadLimitSettings();
+        fetchUserBalance();
     }, []);
 
     const analyzePrompt = (prompt: string): AnalysisResult => {
@@ -96,44 +103,61 @@ export default function PromptAnalyzer() {
     const handleAnalyze = async () => {
         const userPrompt = (document.getElementById('analyzer-input') as HTMLTextAreaElement).value;
         if (!userPrompt.trim()) {
-            alert('Please enter a prompt to analyze');
+            toast.error('Please enter a prompt to analyze');
             return;
         }
         
-        if (promptCoins < 10) { // Need 10 PC for analysis
+        if (userBalance < PROMPTCOIN_COSTS.analysis) {
             track('prompt_analysis_limit_reached', {
                 source: 'prompt_analyzer'
             });
-            setShowBuyCreditsModal(true);
+            toast.error(`You need ${PROMPTCOIN_COSTS.analysis} PromptCoins to analyze this prompt`);
             return;
         }
         
         setCurrentPrompt(userPrompt);
         setIsLoading(true);
-        setPromptCoins(prev => prev - 10); // Deduct 10 PC for analysis
 
         // Track analysis start
         track('prompt_analysis_started', {
             prompt_length: userPrompt.length,
-            remaining_promptcoins: promptCoins - 10
+            remaining_promptcoins: userBalance - PROMPTCOIN_COSTS.analysis
         });
 
-        // Simulate API delay
-        setTimeout(() => {
-            const result = analyzePrompt(userPrompt);
-            
-            // Track analysis completion with results
-            track('prompt_analysis_completed', {
-                score: result.score,
-                category: result.category,
-                strengths_count: result.strengths.length,
-                suggestions_count: result.suggestions.length,
-                prompt_length: userPrompt.length
+        try {
+            // Call the API to deduct PromptCoins and perform analysis
+            const response = await fetch('/api/prompts/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: userPrompt })
             });
             
-            setAnalysis(result);
+            if (response.ok) {
+                const result = analyzePrompt(userPrompt);
+                
+                // Update balance after successful analysis
+                setUserBalance(prev => prev - PROMPTCOIN_COSTS.analysis);
+                
+                // Track analysis completion with results
+                track('prompt_analysis_completed', {
+                    score: result.score,
+                    category: result.category,
+                    strengths_count: result.strengths.length,
+                    suggestions_count: result.suggestions.length,
+                    prompt_length: userPrompt.length
+                });
+                
+                setAnalysis(result);
+                toast.success('Analysis complete!');
+            } else {
+                const data = await response.json();
+                toast.error(data.error || 'Analysis failed');
+            }
+        } catch (error) {
+            toast.error('Network error. Please try again.');
+        } finally {
             setIsLoading(false);
-        }, 1500);
+        }
     };
 
     const tryWithAI = (platform: string, prompt: string) => {
@@ -190,17 +214,28 @@ export default function PromptAnalyzer() {
                     <p className="text-neutral-600 dark:text-neutral-300">Get AI-powered feedback on your prompts</p>
                 </div>
                 <div className="text-right">
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                        PromptCoins: {promptCoins} ({Math.floor(promptCoins / 10)} analyses left)
-                    </div>
-                    {promptCoins < 20 && ( // Show warning when less than 2 analyses left
-                        <button 
-                            onClick={() => setShowBuyCreditsModal(true)}
-                            className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer"
-                        >
-                            <Crown className="w-3 h-3 inline mr-1" />
-                            Buy More PromptCoins
-                        </button>
+                    {balanceLoading ? (
+                        <div className="animate-pulse">
+                            <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-24 mb-1"></div>
+                            <div className="h-3 bg-neutral-200 dark:bg-neutral-700 rounded w-20"></div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                                <PromptCoinDisplay amount={userBalance} size="sm" showLabel />
+                                <div className="text-xs mt-1">
+                                    ({Math.floor(userBalance / PROMPTCOIN_COSTS.analysis)} analyses left)
+                                </div>
+                            </div>
+                            {userBalance < (PROMPTCOIN_COSTS.analysis * 2) && (
+                                <Link href="/pricing">
+                                    <button className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer">
+                                        <Crown className="w-3 h-3 inline mr-1" />
+                                        Buy More PromptCoins
+                                    </button>
+                                </Link>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
@@ -242,8 +277,8 @@ export default function PromptAnalyzer() {
                         💡 Tip: Better prompts include persona, task, context, and format
                     </div>
                     <Button 
-                        onClick={promptCoins < 10 ? () => setShowBuyCreditsModal(true) : handleAnalyze} 
-                        disabled={isLoading}
+                        onClick={userBalance < PROMPTCOIN_COSTS.analysis ? () => window.open('/pricing', '_blank') : handleAnalyze} 
+                        disabled={isLoading || balanceLoading}
                         className="px-6"
                     >
                         {isLoading ? (
@@ -251,14 +286,14 @@ export default function PromptAnalyzer() {
                                 <Loader2 className="animate-spin mr-2 h-4 w-4" />
                                 Analyzing...
                             </>
-                        ) : promptCoins < 10 ? (
+                        ) : userBalance < PROMPTCOIN_COSTS.analysis ? (
                             <>
                                 <Crown className="mr-2 h-4 w-4" />
                                 Buy PromptCoins to Analyze
                             </>
                         ) : (
                             <>
-                                🔬 Analyze Prompt
+                                🔬 Analyze Prompt (<PromptCoinCost amount={PROMPTCOIN_COSTS.analysis} />)
                             </>
                         )}
                     </Button>
@@ -422,28 +457,29 @@ export default function PromptAnalyzer() {
                 </div>
             )}
 
-            {/* Usage Limit Reached - Engagement Strategy */}
-            {promptCoins < 10 && !analysis && (
+            {/* Insufficient PromptCoins */}
+            {userBalance < PROMPTCOIN_COSTS.analysis && !analysis && (
                 <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-700 rounded-lg">
                     <div className="flex items-start gap-3">
                         <Crown className="w-6 h-6 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-1" />
                         <div className="flex-1">
                             <h3 className="font-semibold text-rose-800 dark:text-rose-200 mb-2">
-                                You've reached your daily analysis limit!
+                                Insufficient PromptCoins for Analysis
                             </h3>
                             <p className="text-rose-700 dark:text-rose-300 text-sm mb-4">
-                                Keep improving your prompts with these options:
+                                You need <PromptCoinCost amount={PROMPTCOIN_COSTS.analysis} /> to analyze your prompt.
                             </p>
                             
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <Button
-                                    size="sm"
-                                    onClick={() => setShowBuyCreditsModal(true)}
-                                    className="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700"
-                                >
-                                    <Crown className="w-4 h-4 mr-2" />
-                                    Get Unlimited
-                                </Button>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <Link href="/pricing">
+                                    <Button
+                                        size="sm"
+                                        className="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700"
+                                    >
+                                        <Crown className="w-4 h-4 mr-2" />
+                                        Buy PromptCoins
+                                    </Button>
+                                </Link>
                                 
                                 <Button
                                     size="sm"
@@ -457,31 +493,11 @@ export default function PromptAnalyzer() {
                                     <Lightbulb className="w-4 h-4 mr-2" />
                                     Learn Manual Analysis
                                 </Button>
-                                
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                        track('tomorrow_reminder_analyzer');
-                                        toast.success(`Come back tomorrow for ${limitSettings.prompt_analyzer_free_daily * 10} more free PromptCoins!`);
-                                    }}
-                                    className="border-rose-300 text-rose-700 hover:bg-rose-100 dark:hover:bg-rose-900/30"
-                                >
-                                    <Calendar className="w-4 h-4 mr-2" />
-                                    Reminder Set
-                                </Button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-            
-            <BuyCreditsModal
-                isOpen={showBuyCreditsModal}
-                onClose={() => setShowBuyCreditsModal(false)}
-                type="analysis"
-                source="prompt_analyzer"
-            />
         </section>
     );
 }

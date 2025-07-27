@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, Play, RefreshCw, Code, Type, List, Hash, FileText, Eye, Lightbulb, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -69,6 +69,7 @@ const demoPrompt = {
 function VariablesExplainerComponent() {
   const [selectedType, setSelectedType] = useState<string>('text');
   const [showDemo, setShowDemo] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [demoValues, setDemoValues] = useState(() => {
     try {
       if (!demoPrompt?.variables || !Array.isArray(demoPrompt.variables)) {
@@ -101,6 +102,26 @@ function VariablesExplainerComponent() {
       };
     }
   });
+
+  // Ensure client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Don't render complex interactions until client-side
+  if (!isClient) {
+    return (
+      <div className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Settings className="w-6 h-6 text-blue-500" />
+          <h3 className="text-xl font-bold dark:text-white">Understanding Variables</h3>
+        </div>
+        <p className="text-neutral-600 dark:text-neutral-400">
+          Variables are placeholders in prompts that get replaced with actual values, making prompts reusable and customizable.
+        </p>
+      </div>
+    );
+  }
 
   const generateFinalPrompt = () => {
     try {
@@ -457,27 +478,84 @@ function VariablesExplainerComponent() {
   );
 }
 
-// Error boundary wrapper
+// Error boundary wrapper with more detailed error handling
 export default function VariablesExplainer() {
+  // Safe fallback component
+  const FallbackComponent = () => (
+    <div className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <Settings className="w-6 h-6 text-blue-500" />
+        <h3 className="text-xl font-bold dark:text-white">Understanding Variables</h3>
+      </div>
+      <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+        Variables are placeholders in prompts that get replaced with actual values, making prompts reusable and customizable.
+      </p>
+      
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <div className="p-3 bg-white dark:bg-neutral-700 rounded border">
+            <div className="flex items-center gap-2 mb-2">
+              <Type className="w-4 h-4 text-blue-600" />
+              <span className="font-medium text-sm">Text Variables</span>
+            </div>
+            <p className="text-xs text-neutral-600 dark:text-neutral-400">
+              Single-line inputs for names, titles, or short phrases
+            </p>
+          </div>
+          
+          <div className="p-3 bg-white dark:bg-neutral-700 rounded border">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-4 h-4 text-green-600" />
+              <span className="font-medium text-sm">Textarea Variables</span>
+            </div>
+            <p className="text-xs text-neutral-600 dark:text-neutral-400">
+              Multi-line inputs for longer content and descriptions
+            </p>
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          <div className="p-3 bg-white dark:bg-neutral-700 rounded border">
+            <div className="flex items-center gap-2 mb-2">
+              <List className="w-4 h-4 text-purple-600" />
+              <span className="font-medium text-sm">Select Variables</span>
+            </div>
+            <p className="text-xs text-neutral-600 dark:text-neutral-400">
+              Dropdown menus with predefined options to choose from
+            </p>
+          </div>
+          
+          <div className="p-3 bg-white dark:bg-neutral-700 rounded border">
+            <div className="flex items-center gap-2 mb-2">
+              <Hash className="w-4 h-4 text-orange-600" />
+              <span className="font-medium text-sm">Number Variables</span>
+            </div>
+            <p className="text-xs text-neutral-600 dark:text-neutral-400">
+              Numeric inputs for quantities, percentages, or measurements
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-400">
+        <div className="flex items-start gap-2">
+          <Lightbulb className="w-5 h-5 text-blue-600 mt-0.5" />
+          <div>
+            <h4 className="font-medium text-blue-900 dark:text-blue-100 text-sm">How Variables Work</h4>
+            <p className="text-xs text-blue-800 dark:text-blue-200 mt-1">
+              Instead of writing "Write an email about Product X", you write "Write an email about {product_name}". 
+              Then you can reuse this prompt for any product by changing the variable value.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   try {
     return <VariablesExplainerComponent />;
   } catch (error) {
     console.error('VariablesExplainer component error:', error);
-    return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-        <h3 className="text-red-800 dark:text-red-200 font-semibold mb-2">
-          Variables Explainer
-        </h3>
-        <p className="text-red-700 dark:text-red-300 text-sm mb-4">
-          Variables are placeholders in prompts that get replaced with actual values, making prompts reusable and customizable.
-        </p>
-        <div className="space-y-2 text-sm text-red-600 dark:text-red-400">
-          <p><strong>Text:</strong> Single-line input for names, titles</p>
-          <p><strong>Textarea:</strong> Multi-line input for descriptions</p>
-          <p><strong>Select:</strong> Dropdown with predefined options</p>
-          <p><strong>Number:</strong> Numeric input for quantities</p>
-        </div>
-      </div>
-    );
+    return <FallbackComponent />;
   }
 }

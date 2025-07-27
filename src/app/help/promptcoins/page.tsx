@@ -16,7 +16,7 @@ const faqs = [
   },
   {
     question: 'How much do features cost?',
-    answer: 'Our features cost: Prompt Analysis (10 PC), Prompt Enhancement (15 PC), Exam Attempts (50 PC), Export Features (5 PC). Smart Recipe purchases vary from 100-1000 PC ($1-$10) based on complexity.',
+    answer: 'Our features cost: Prompt Analysis (10 PC), Prompt Enhancement (15 PC), Exam Attempts (50 PC), Export Features (5 PC). Smart Prompt purchases vary from 1-9999 PC based on complexity and creator pricing.',
     category: 'pricing'
   },
   {
@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     question: 'Can I get a refund?',
-    answer: 'Yes! We offer a 30-day money-back guarantee for all PromptCoin purchases. Unused credits can be refunded within 30 days of purchase.',
+    answer: 'All PromptCoin purchases are final. No refunds are available for PromptCoin transactions. Please review all purchases carefully before completing your transaction.',
     category: 'refunds'
   },
   {
@@ -98,8 +98,8 @@ export default function PromptCoinHelp() {
           PromptCoin Help Center
         </h1>
         <p className="text-body-large text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-3xl mx-auto">
-          Everything you need to know about our flexible pay-per-use credit system. 
-          No subscriptions, no commitments - just pay for what you use.
+          Everything you need to know about our PromptCoin-only economy. 
+          All platform features use PromptCoins - no USD pricing, just simple PC transactions.
         </p>
       </div>
 
@@ -117,8 +117,8 @@ export default function PromptCoinHelp() {
         </div>
         <div className="p-6 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700/50 text-center">
           <Shield className="w-8 h-8 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
-          <h3 className="font-semibold text-purple-900 dark:text-purple-200 mb-2">30-Day Guarantee</h3>
-          <p className="text-purple-700 dark:text-purple-300 text-sm">Full refund on unused credits within 30 days.</p>
+          <h3 className="font-semibold text-purple-900 dark:text-purple-200 mb-2">Secure Transactions</h3>
+          <p className="text-purple-700 dark:text-purple-300 text-sm">Safe and secure PromptCoin purchases with instant delivery.</p>
         </div>
       </div>
 

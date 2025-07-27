@@ -2,10 +2,11 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye, ExternalLink, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
+import { Plus, Search, Grid, List, Star, Download, Coins, Eye, ExternalLink, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
 import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { PromptCoinPrice } from '@/components/ui/PromptCoinDisplay';
 import toast from 'react-hot-toast';
 
 // Lazy load heavy components
@@ -19,7 +20,7 @@ const PromptPreviewModal = dynamic(() => import('@/components/features/prompts/P
   ssr: false
 });
 
-const PayPalPaymentModal = dynamic(() => import('@/components/features/payments/PayPalPaymentModal'), {
+const PromptCoinPurchaseModal = dynamic(() => import('@/components/features/payments/PromptCoinPurchaseModal'), {
   loading: () => <LoadingSpinner size="lg" />,
   ssr: false
 });
@@ -105,7 +106,7 @@ export default function SmartPromptsPage() {
   });
   const [previewPrompt, setPreviewPrompt] = useState<SmartPrompt | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [selectedPromptForPurchase, setSelectedPromptForPurchase] = useState<SmartPrompt | null>(null);
   const [selectedComplexityType, setSelectedComplexityType] = useState<string>('');
 
@@ -246,9 +247,8 @@ export default function SmartPromptsPage() {
           // Refresh the prompts to update download count
           fetchPrompts();
         } else {
-          // Handle paid prompts with Stripe (to be implemented)
-          toast.success('Redirecting to payment...');
-          // TODO: Integrate Stripe payment flow
+          // This shouldn't happen anymore since paid prompts use the modal
+          toast.error('Please use the purchase button for paid prompts');
         }
       } else {
         console.error('Purchase failed:', { status: response.status, data });
@@ -274,15 +274,14 @@ export default function SmartPromptsPage() {
       if (previewPrompt.price === 0) {
         handlePurchase(previewPrompt.id);
       } else {
-        // For paid prompts, show payment modal
-        setShowPaymentModal(true);
+        // For paid prompts, show PromptCoin purchase modal
+        setShowPurchaseModal(true);
       }
     }
   };
 
-  const handlePaymentSuccess = () => {
-    toast.success('🎉 Smart Prompt purchased successfully!');
-    setShowPaymentModal(false);
+  const handlePurchaseSuccess = () => {
+    setShowPurchaseModal(false);
     setSelectedPromptForPurchase(null);
     // Refresh prompts to update purchase status
     fetchPrompts();
@@ -316,8 +315,12 @@ export default function SmartPromptsPage() {
           </p>
         </div>
         <div className="text-right ml-4">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {prompt.price > 0 ? `$${prompt.price.toFixed(2)}` : 'Free'}
+          <div className="text-2xl font-bold">
+            {prompt.price > 0 ? (
+              <PromptCoinPrice amount={prompt.price} />
+            ) : (
+              <span className="text-green-600 dark:text-green-400">Free</span>
+            )}
           </div>
           <div className="text-sm text-neutral-500">
             <Download className="w-3 h-3 inline mr-1" />
@@ -364,7 +367,14 @@ export default function SmartPromptsPage() {
           </Button>
           <Button 
             size="sm" 
-            onClick={() => handlePurchase(prompt.id)}
+            onClick={() => {
+              if (prompt.price > 0) {
+                setSelectedPromptForPurchase(prompt);
+                setShowPurchaseModal(true);
+              } else {
+                handlePurchase(prompt.id);
+              }
+            }}
             className="min-w-20"
           >
             {prompt.price > 0 ? 'Buy' : 'Get'}
@@ -580,8 +590,8 @@ export default function SmartPromptsPage() {
                 >
                   <option value="all">All Prices</option>
                   <option value="free">Free</option>
-                  <option value="paid">Paid ($1-$25)</option>
-                  <option value="premium">Premium ($25+)</option>
+                  <option value="paid">Paid (1-99 PC)</option>
+                  <option value="premium">Premium (100+ PC)</option>
                 </select>
 
                 <select
@@ -667,15 +677,15 @@ export default function SmartPromptsPage() {
         />
       )}
 
-      {/* PayPal Payment Modal */}
-      {selectedPromptForPurchase && showPaymentModal && (
-        <PayPalPaymentModal
-          isOpen={showPaymentModal}
+      {/* PromptCoin Purchase Modal */}
+      {selectedPromptForPurchase && showPurchaseModal && (
+        <PromptCoinPurchaseModal
+          isOpen={showPurchaseModal}
           onClose={() => {
-            setShowPaymentModal(false);
+            setShowPurchaseModal(false);
             setSelectedPromptForPurchase(null);
           }}
-          onSuccess={handlePaymentSuccess}
+          onSuccess={handlePurchaseSuccess}
           promptId={selectedPromptForPurchase.id}
           amount={selectedPromptForPurchase.price}
           promptTitle={selectedPromptForPurchase.title}
