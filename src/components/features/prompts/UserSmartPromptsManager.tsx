@@ -91,9 +91,14 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
       const response = await fetch('/api/smart-prompts/my-prompts');
       if (response.ok) {
         const result = await response.json();
+        console.log('Smart Prompts Manager - API Response:', result);
+        console.log('Purchased prompts count:', result.purchased?.length || 0);
+        console.log('Created prompts count:', result.created?.length || 0);
         setData(result);
       } else {
-        toast.error('Failed to load Smart Prompts data');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Smart Prompts Manager - API Error:', errorData);
+        toast.error(errorData.error || 'Failed to load Smart Prompts data');
       }
     } catch (error) {
       console.error('Error fetching Smart Prompts:', error);

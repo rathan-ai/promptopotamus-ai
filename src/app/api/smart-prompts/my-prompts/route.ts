@@ -62,13 +62,14 @@ export async function GET(req: NextRequest) {
 
     // Get purchased prompts
     if (type === 'purchased' || type === 'all') {
-      const { data: purchased } = await supabase
+      const { data: purchased, error: purchaseError } = await supabase
         .from('smart_prompt_purchases')
         .select(`
           id,
           purchase_price,
           purchased_at,
-          saved_prompts!smart_prompt_purchases_prompt_id_fkey (
+          prompt_id,
+          saved_prompts!prompt_id (
             id,
             title,
             description,
@@ -84,33 +85,48 @@ export async function GET(req: NextRequest) {
             instructions,
             example_inputs,
             example_outputs,
-            user_id,
-            profiles!saved_prompts_user_id_fkey(full_name)
+            user_id
           )
         `)
         .eq('buyer_id', user.id)
         .order('purchased_at', { ascending: false });
 
-      purchasedPrompts = purchased?.map(purchase => ({
-        ...purchase.saved_prompts,
-        purchase_info: {
-          purchase_price: purchase.purchase_price,
-          purchased_at: purchase.purchased_at
+      if (purchaseError) {
+        console.error('Error fetching purchased prompts:', purchaseError);
+      }
+
+      purchasedPrompts = purchased?.map(purchase => {
+        if (!purchase.saved_prompts) {
+          console.warn('Purchase missing saved_prompts data:', purchase);
+          return null;
         }
-      })) || [];
+        return {
+          ...purchase.saved_prompts,
+          purchase_info: {
+            purchase_price: purchase.purchase_price,
+            purchased_at: purchase.purchased_at
+          }
+        };
+      }).filter(Boolean) || [];
+
+      console.log('Purchased prompts processed:', purchasedPrompts.length, 'from', purchased?.length || 0, 'raw purchases');
     }
 
     // Get sales analytics for created marketplace prompts
-    const { data: salesData } = await supabase
+    const { data: salesData, error: salesError } = await supabase
       .from('smart_prompt_purchases')
       .select(`
         prompt_id,
         purchase_price,
         purchased_at,
-        saved_prompts!smart_prompt_purchases_prompt_id_fkey(title)
+        saved_prompts!prompt_id(title)
       `)
       .eq('seller_id', user.id)
       .order('purchased_at', { ascending: false });
+
+    if (salesError) {
+      console.error('Error fetching sales data:', salesError);
+    }
 
     // Calculate sales statistics
     const salesStats = {
