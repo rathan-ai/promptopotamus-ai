@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye, ExternalLink, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import SmartPromptsBuilder from '@/components/SmartPromptsBuilder';
-import PromptPreviewModal from '@/components/PromptPreviewModal';
-import PayPalPaymentModal from '@/components/PayPalPaymentModal';
-import PromptTypesGuide from '@/components/PromptTypesGuide';
-import VariablesExplainer from '@/components/VariablesExplainer';
+import SmartPromptsBuilder from '@/components/features/prompts/SmartPromptsBuilder';
+import PromptPreviewModal from '@/components/features/prompts/PromptPreviewModal';
+import PayPalPaymentModal from '@/components/features/payments/PayPalPaymentModal';
+import PromptTypesGuide from '@/components/features/shared/PromptTypesGuide';
+import VariablesExplainer from '@/components/features/shared/VariablesExplainer';
 import toast from 'react-hot-toast';
 
 interface Variable {

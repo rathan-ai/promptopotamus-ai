@@ -1,30 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { addPromptCoinsFromPayment } from '@/lib/subscription';
-
-const PROMPTCOIN_PACKAGES = {
-  starter: {
-    id: 'starter',
-    name: 'Starter Pack',
-    price: 5,
-    promptCoins: 500,
-    description: 'Perfect for getting started with AI prompting'
-  },
-  pro: {
-    id: 'pro',
-    name: 'Pro Pack',
-    price: 20,
-    promptCoins: 2000,
-    description: 'Ideal for professionals and active users'
-  },
-  premium: {
-    id: 'premium',
-    name: 'Premium Pack',
-    price: 50,
-    promptCoins: 5000,
-    description: 'Perfect for power users and teams'
-  }
-};
+import { serverPaymentService } from '@/features/payments/services/payment-service';
 
 // Create PromptCoin package purchase
 export async function POST(req: Request) {
@@ -42,7 +18,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Package ID is required' }, { status: 400 });
     }
 
-    const pkg = PROMPTCOIN_PACKAGES[packageId as keyof typeof PROMPTCOIN_PACKAGES];
+    const pkg = serverPaymentService.getPackageById(packageId);
     if (!pkg) {
       return NextResponse.json({ error: 'Invalid package ID' }, { status: 400 });
     }
@@ -52,8 +28,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Amount mismatch' }, { status: 400 });
     }
 
-    // Distribute PromptCoins evenly across categories
-    const promptCoinsAmount = pkg.promptCoins;
+    // Extract PromptCoins from package string (e.g., "500 PC" -> 500)
+    const promptCoinsAmount = parseInt(pkg.promptCoins.replace(/[^\d]/g, ''));
     const perCategory = Math.floor(promptCoinsAmount / 4);
     const promptCoinsToAdd = {
       analysis: perCategory,
@@ -62,8 +38,8 @@ export async function POST(req: Request) {
       export: promptCoinsAmount - (perCategory * 3) // remainder goes to export
     };
 
-    // Add PromptCoins to user account
-    const success = await addPromptCoinsFromPayment(
+    // Add PromptCoins to user account using the service
+    const success = await serverPaymentService.addPromptCoinsFromPayment(
       user.id,
       promptCoinsToAdd,
       paymentProvider,
@@ -77,26 +53,7 @@ export async function POST(req: Request) {
       }, { status: 500 });
     }
 
-    // Log the purchase for analytics
-    try {
-      await supabase
-        .from('promptcoin_transactions')
-        .insert({
-          user_id: user.id,
-          type: 'purchase',
-          analysis_amount: promptCoinsToAdd.analysis,
-          enhancement_amount: promptCoinsToAdd.enhancement,
-          exam_amount: promptCoinsToAdd.exam,
-          export_amount: promptCoinsToAdd.export,
-          description: `${pkg.name} purchase`,
-          transaction_id: transactionId || `pc_${Date.now()}`,
-          payment_amount: pkg.price,
-          payment_provider: paymentProvider
-        });
-    } catch (logError) {
-      // Log error but don't fail the request since PromptCoins were added
-      console.error('Error logging transaction:', logError);
-    }
+    // Transaction logging is handled by the payment service
 
     return NextResponse.json({
       success: true,
@@ -104,7 +61,7 @@ export async function POST(req: Request) {
       package: {
         id: pkg.id,
         name: pkg.name,
-        promptCoins: pkg.promptCoins,
+        promptCoins: promptCoinsAmount,
         price: pkg.price
       },
       promptCoinsAdded: promptCoinsToAdd,
@@ -122,7 +79,7 @@ export async function POST(req: Request) {
 // Get available PromptCoin packages
 export async function GET() {
   return NextResponse.json({
-    packages: Object.values(PROMPTCOIN_PACKAGES),
+    packages: serverPaymentService.getPromptCoinPackages(),
     conversionRate: {
       description: '100 PromptCoins = $1 USD',
       rate: 100

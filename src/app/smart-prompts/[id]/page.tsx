@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
-import PayPalPaymentModal from '@/components/PayPalPaymentModal';
-import ReviewsList from '@/components/ReviewsList';
+import PayPalPaymentModal from '@/components/features/payments/PayPalPaymentModal';
+import ReviewsList from '@/components/features/prompts/ReviewsList';
 
 interface SmartPromptDetail {
   id: number;

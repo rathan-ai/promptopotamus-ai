@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { aiTemplates, type AITemplate } from '@/lib/data';
-import TemplateCard from '@/components/TemplateCard';
-import UpgradeModal from '@/components/UpgradeModal';
+import TemplateCard from '@/components/features/shared/TemplateCard';
+import UpgradeModal from '@/components/features/payments/UpgradeModal';
 import { Filter, Search, Crown, Star } from 'lucide-react';
 import { track } from '@vercel/analytics';
 

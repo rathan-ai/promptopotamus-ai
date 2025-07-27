@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import { Provider } from 'jotai';
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Sidebar from "@/components/features/layout/Sidebar";
+import Header from "@/components/features/layout/Header";
+import Footer from "@/components/features/layout/Footer";
 import { Analytics } from "@vercel/analytics/react";
-import IssueReportWidget from "@/components/IssueReportWidget";
+import IssueReportWidget from "@/components/features/shared/IssueReportWidget";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });

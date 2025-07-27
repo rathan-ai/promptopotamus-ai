@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { certificates } from "@/lib/data";
-import CertificateDisplay from "@/components/CertificateDisplay";
+import CertificateDisplay from "@/components/features/certificates/CertificateDisplay";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";

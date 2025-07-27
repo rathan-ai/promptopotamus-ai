@@ -1,4 +1,4 @@
-import Quiz from '@/components/Quiz';
+import Quiz from '@/components/features/certificates/Quiz';
 import type { Metadata } from 'next';
 
 const levelTitleMap: Record<string, string> = {
