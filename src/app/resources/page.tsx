@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ExternalLink, Star, Zap, Brain, Sparkles, TrendingUp, Users, Award } from 'lucide-react';
+import { ExternalLink, Star, Zap, Brain, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { track } from '@vercel/analytics';
 
@@ -24,11 +24,6 @@ interface AffiliateResource {
 }
 
 
-const stats = [
-  { label: 'Active Users', value: '50K+', icon: Users },
-  { label: 'Success Rate', value: '94%', icon: TrendingUp },
-  { label: 'Certifications Issued', value: '12K+', icon: Award }
-];
 
 export default function ResourcesPage() {
   const [affiliateResources, setAffiliateResources] = useState<AffiliateResource[]>([]);
@@ -69,25 +64,11 @@ export default function ResourcesPage() {
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-          Premium AI Resources
+          AI Tools & Resources
         </h1>
         <p className="text-xl text-neutral-600 dark:text-neutral-300 max-w-3xl mx-auto">
-          Hand-picked AI tools and platforms recommended by our certified prompt engineers. 
-          Get the best tools to practice and master your prompt engineering skills.
+          Curated AI tools and platforms to enhance your prompt engineering workflow.
         </p>
-        
-        {/* Stats */}
-        <div className="flex justify-center gap-8 mt-8">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg mx-auto mb-2">
-                <stat.icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stat.value}</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">{stat.label}</div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Featured Banner */}
