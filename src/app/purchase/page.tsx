@@ -3,12 +3,13 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Metadata } from 'next';
-import { Coins, Check, ArrowLeft, Shield, Clock, CreditCard } from 'lucide-react';
+import { Coins, Check, ArrowLeft, Shield, Clock, CreditCard, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import PayPalPaymentModal from '@/components/features/payments/PayPalPaymentModal';
 import toast from 'react-hot-toast';
 import { PROMPTCOIN_PACKAGES } from '@/features/payments/constants';
+import { createClient } from '@/lib/supabase/client';
 
 const packages = PROMPTCOIN_PACKAGES;
 
@@ -20,6 +21,7 @@ function PurchaseContent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     // Get package from URL params
@@ -27,17 +29,16 @@ function PurchaseContent() {
     if (packageParam && packages.find(p => p.id === packageParam)) {
       setSelectedPackage(packageParam);
     } else {
-      // Default to pro package
-      setSelectedPackage('pro');
+      // Default to free package
+      setSelectedPackage('free');
     }
 
-    // Get user info
+    // Get user info using Supabase
     const fetchUser = async () => {
       try {
-        const response = await fetch('/api/profile');
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (!error && user) {
+          setUser(user);
         }
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -45,13 +46,27 @@ function PurchaseContent() {
     };
 
     fetchUser();
-  }, [searchParams]);
+  }, [searchParams, supabase.auth]);
 
   const selectedPkg = packages.find(p => p.id === selectedPackage);
 
   const handlePurchase = async () => {
-    if (!selectedPkg || !user) {
-      toast.error('Please select a package and make sure you are logged in');
+    if (!selectedPkg) {
+      toast.error('Please select a package');
+      return;
+    }
+
+    // Handle free option
+    if (selectedPkg.id === 'free') {
+      toast.success('Continue using Promptopotamus with daily free limits!');
+      router.push('/dashboard');
+      return;
+    }
+
+    // For paid options, require user to be logged in
+    if (!user) {
+      toast.error('Please log in to purchase PromptCoins');
+      router.push('/login');
       return;
     }
 
@@ -144,17 +159,32 @@ function PurchaseContent() {
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-lg font-semibold dark:text-white">{pkg.name}</h3>
+                      <h3 className="text-lg font-semibold dark:text-white">
+                        {pkg.id === 'donate' && <Heart className="w-5 h-5 text-red-500 inline mr-2" />}
+                        {pkg.name}
+                      </h3>
                       {pkg.popular && (
                         <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2 py-1 rounded-full text-xs font-medium">
                           Most Popular
+                        </span>
+                      )}
+                      {pkg.id === 'free' && (
+                        <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded-full text-xs font-medium">
+                          Free
+                        </span>
+                      )}
+                      {pkg.id === 'donate' && (
+                        <span className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-2 py-1 rounded-full text-xs font-medium">
+                          Support
                         </span>
                       )}
                     </div>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400">{pkg.description}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">${pkg.price}</div>
+                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">
+                      {pkg.price === 0 ? 'Free' : `$${pkg.price}`}
+                    </div>
                     <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{pkg.promptCoins}</div>
                   </div>
                 </div>
@@ -181,7 +211,9 @@ function PurchaseContent() {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="font-medium dark:text-white">{selectedPkg.name}</span>
-                  <span className="font-bold dark:text-white">${selectedPkg.price}</span>
+                  <span className="font-bold dark:text-white">
+                    {selectedPkg.price === 0 ? 'Free' : `$${selectedPkg.price}`}
+                  </span>
                 </div>
                 
                 <div className="flex justify-between items-center text-sm text-neutral-600 dark:text-neutral-400">
@@ -189,28 +221,48 @@ function PurchaseContent() {
                   <span>{selectedPkg.promptCoins}</span>
                 </div>
                 
-                <div className="flex justify-between items-center text-sm text-neutral-600 dark:text-neutral-400">
-                  <span>Conversion Rate</span>
-                  <span>100 PC = $1</span>
-                </div>
+                {selectedPkg.price > 0 && (
+                  <div className="flex justify-between items-center text-sm text-neutral-600 dark:text-neutral-400">
+                    <span>Conversion Rate</span>
+                    <span>100 PC = $1</span>
+                  </div>
+                )}
                 
                 <hr className="border-neutral-200 dark:border-neutral-700" />
                 
                 <div className="flex justify-between items-center font-bold text-lg">
                   <span className="dark:text-white">Total</span>
-                  <span className="text-green-600 dark:text-green-400">${selectedPkg.price}</span>
+                  <span className="text-green-600 dark:text-green-400">
+                    {selectedPkg.price === 0 ? 'Free' : `$${selectedPkg.price}`}
+                  </span>
                 </div>
               </div>
 
               <Button
                 onClick={handlePurchase}
-                disabled={isProcessing || !user}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                disabled={isProcessing || (selectedPkg.price > 0 && !user)}
+                className={`w-full ${
+                  selectedPkg.id === 'free' 
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : selectedPkg.id === 'donate'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
+                }`}
                 size="lg"
               >
                 {isProcessing ? (
                   'Processing...'
-                ) : !user ? (
+                ) : selectedPkg.id === 'free' ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Continue Free
+                  </>
+                ) : selectedPkg.id === 'donate' ? (
+                  <>
+                    <Heart className="w-4 h-4 mr-2" />
+                    Donate & Support
+                  </>
+                ) : selectedPkg.price > 0 && !user ? (
                   'Please Login First'
                 ) : (
                   <>
@@ -220,7 +272,7 @@ function PurchaseContent() {
                 )}
               </Button>
               
-              {!user && (
+              {selectedPkg.price > 0 && !user && (
                 <p className="text-sm text-neutral-600 dark:text-neutral-400 text-center mt-3">
                   <Link href="/login" className="text-indigo-600 dark:text-indigo-400 hover:underline">
                     Login
@@ -241,7 +293,7 @@ function PurchaseContent() {
               </div>
               <div className="flex items-center gap-3 text-sm text-neutral-600 dark:text-neutral-400">
                 <Check className="w-4 h-4 text-green-500" />
-                <span>30-day money-back guarantee</span>
+                <span>Instant PromptCoin delivery</span>
               </div>
             </div>
           </div>
