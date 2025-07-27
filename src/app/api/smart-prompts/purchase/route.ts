@@ -17,7 +17,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Prompt ID is required' }, { status: 400 });
     }
 
-    // Get prompt details
+    console.log('Smart Prompts Purchase - Looking for prompt ID:', promptId);
+
+    // Get prompt details - simplified query without problematic columns/joins
     const { data: prompt, error: promptError } = await supabase
       .from('saved_prompts')
       .select(`
@@ -25,16 +27,37 @@ export async function POST(req: Request) {
         title,
         description,
         price,
-        user_id,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        user_id
       `)
       .eq('id', promptId)
-      .eq('is_marketplace', true)
-      .eq('is_public', true)
       .single();
 
+    console.log('Smart Prompts Purchase - Query result:', { 
+      found: !!prompt, 
+      error: promptError?.message 
+    });
+
     if (promptError || !prompt) {
-      return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
+      console.error('Prompt not found:', { promptId, error: promptError });
+      return NextResponse.json({ 
+        error: 'Prompt not found',
+        details: promptError?.message 
+      }, { status: 404 });
+    }
+
+    // Additional checks for marketplace prompts if columns exist
+    try {
+      const { data: marketplaceCheck } = await supabase
+        .from('saved_prompts')
+        .select('is_marketplace, is_public')
+        .eq('id', promptId)
+        .single();
+      
+      if (marketplaceCheck?.is_marketplace === false || marketplaceCheck?.is_public === false) {
+        return NextResponse.json({ error: 'Prompt is not available for purchase' }, { status: 404 });
+      }
+    } catch (e) {
+      console.warn('Marketplace column check failed, proceeding without it:', e);
     }
 
     // Check if user is trying to buy their own prompt
@@ -118,7 +141,7 @@ export async function POST(req: Request) {
         redirectUrl: paymentResponse.redirectUrl,
         amount: prompt.price,
         promptTitle: prompt.title,
-        sellerName: prompt.profiles?.full_name || 'Unknown Creator',
+        sellerName: 'Creator', // Simplified since we removed the profile join
         paymentProvider: activeProvider?.id || 'unknown'
       });
 

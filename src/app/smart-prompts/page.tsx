@@ -228,11 +228,12 @@ export default function SmartPromptsPage() {
           // TODO: Integrate Stripe payment flow
         }
       } else {
-        toast.error(data.error);
+        console.error('Purchase failed:', { status: response.status, data });
+        toast.error(data.error || `Purchase failed (${response.status})`);
       }
     } catch (error) {
       console.error('Error purchasing prompt:', error);
-      toast.error('Error processing purchase');
+      toast.error('Network error processing purchase. Please check your connection.');
     }
   };
 
