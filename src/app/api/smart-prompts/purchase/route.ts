@@ -4,10 +4,20 @@ import { paymentAdapter } from '@/lib/payment-adapter';
 
 export async function POST(req: Request) {
   const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  console.log('Smart Prompts Purchase - Auth check:', { 
+    hasUser: !!user, 
+    userId: user?.id,
+    authError: authError?.message 
+  });
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    console.error('Smart Prompts Purchase - Unauthorized access attempt');
+    return NextResponse.json({ 
+      error: 'Please log in to download Smart Prompts',
+      authRequired: true 
+    }, { status: 401 });
   }
 
   try {

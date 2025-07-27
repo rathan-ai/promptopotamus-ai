@@ -121,18 +121,31 @@ export default function SmartPromptsPage() {
       if (response.ok) {
         const data = await response.json();
         // Normalize the data to ensure all fields are in the expected format
-        const normalizedPrompts = (data.prompts || []).map((prompt: any) => ({
-          ...prompt,
-          variables: Array.isArray(prompt.variables) ? prompt.variables : [],
-          tags: Array.isArray(prompt.tags) ? prompt.tags : [],
-          use_cases: Array.isArray(prompt.use_cases) ? prompt.use_cases : [],
-          ai_model_compatibility: Array.isArray(prompt.ai_model_compatibility) ? prompt.ai_model_compatibility : [],
-          example_inputs: typeof prompt.example_inputs === 'object' && prompt.example_inputs !== null ? prompt.example_inputs : {},
-          rating_average: Number(prompt.rating_average) || 0,
-          rating_count: Number(prompt.rating_count) || 0,
-          downloads_count: Number(prompt.downloads_count) || 0,
-          price: Number(prompt.price) || 0
-        }));
+        const normalizedPrompts = (data.prompts || []).map((prompt: any, index: number) => {
+          console.log(`Frontend - Prompt ${index}:`, { 
+            id: prompt.id, 
+            title: prompt.title, 
+            price: prompt.price,
+            hasId: !!prompt.id,
+            idType: typeof prompt.id
+          });
+          
+          return {
+            ...prompt,
+            id: Number(prompt.id), // Ensure ID is a number
+            variables: Array.isArray(prompt.variables) ? prompt.variables : [],
+            tags: Array.isArray(prompt.tags) ? prompt.tags : [],
+            use_cases: Array.isArray(prompt.use_cases) ? prompt.use_cases : [],
+            ai_model_compatibility: Array.isArray(prompt.ai_model_compatibility) ? prompt.ai_model_compatibility : [],
+            example_inputs: typeof prompt.example_inputs === 'object' && prompt.example_inputs !== null ? prompt.example_inputs : {},
+            rating_average: Number(prompt.rating_average) || 0,
+            rating_count: Number(prompt.rating_count) || 0,
+            downloads_count: Number(prompt.downloads_count) || 0,
+            price: Number(prompt.price) || 0
+          };
+        });
+        
+        console.log('Frontend - Total prompts loaded:', normalizedPrompts.length);
         setPrompts(normalizedPrompts);
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
@@ -208,14 +221,24 @@ export default function SmartPromptsPage() {
   }, [prompts, searchQuery, sortBy]);
 
   const handlePurchase = async (promptId: number) => {
+    console.log('Frontend - Attempting to purchase prompt:', { promptId, type: typeof promptId });
+    
     try {
+      const requestBody = { promptId };
+      console.log('Frontend - Sending request:', requestBody);
+      
       const response = await fetch('/api/smart-prompts/purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ promptId })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
+      console.log('Frontend - Purchase response:', { 
+        status: response.status, 
+        ok: response.ok, 
+        data 
+      });
       
       if (response.ok) {
         if (data.free) {
