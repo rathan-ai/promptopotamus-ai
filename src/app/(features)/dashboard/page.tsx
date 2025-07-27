@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2, CheckCircle, XCircle, History, FileText, Award, Eye, User as UserIcon, ShoppingCart, Brain, Plus } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, History, FileText, Award, Eye, User as UserIcon, ShoppingCart, Brain, Plus, Coins, TrendingDown, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
 import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ui/ErrorBoundary';
@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { certificates as certDetails } from '@/lib/data';
 import { createClient } from '@/lib/supabase/client';
+import { PromptCoinBalance } from '@/components/ui/PromptCoinDisplay';
 
 // Lazy load heavy components that are not immediately visible
 const UserSmartPromptsManager = dynamic(() => import('@/components/features/prompts/UserSmartPromptsManager'), {
@@ -36,6 +37,14 @@ interface Profile {
 interface QuizAttempt { id: number; quiz_level: string; attempted_at: string; score: number; passed: boolean; }
 interface SavedPrompt { id: number; title: string; prompt_text: string; created_at: string; }
 interface UserCertificate { id: number; certificate_slug: string; earned_at: string; credential_id: string; }
+interface PromptCoinTransaction { 
+  id: number; 
+  transaction_type: string; 
+  amount: number; 
+  balance_after: number; 
+  description: string; 
+  created_at: string; 
+}
 
 interface DashboardData {
   attempts: QuizAttempt[];
@@ -44,10 +53,17 @@ interface DashboardData {
   profile: Profile;
 }
 
+interface PromptCoinData {
+  balance: number;
+  transactions: PromptCoinTransaction[];
+}
+
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [promptCoinData, setPromptCoinData] = useState<PromptCoinData>({ balance: 0, transactions: [] });
+  const [promptCoinLoading, setPromptCoinLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
   const supabase = createClient();
@@ -61,10 +77,12 @@ export default function DashboardPage() {
           console.error('Auth error:', userError);
           toast.error('Authentication error. Please refresh the page.');
           setLoading(false);
+          setPromptCoinLoading(false);
           return;
         }
         setUser(user);
         
+        // Fetch dashboard data
         const res = await fetch('/api/profiles/dashboard');
         if (res.ok) {
           const response = await res.json();
@@ -76,11 +94,28 @@ export default function DashboardPage() {
           const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
           toast.error(errorData.error || 'Could not load your dashboard data.');
         }
+
+        // Fetch PromptCoin data
+        try {
+          const [balanceRes, transactionsRes] = await Promise.all([
+            fetch('/api/user/balance'),
+            fetch('/api/user/promptcoin-transactions')
+          ]);
+          
+          const balance = balanceRes.ok ? (await balanceRes.json()).balance || 0 : 0;
+          const transactions = transactionsRes.ok ? (await transactionsRes.json()).transactions || [] : [];
+          
+          setPromptCoinData({ balance, transactions });
+        } catch (pcError) {
+          console.error('PromptCoin data fetch error:', pcError);
+          // Don't show error toast for PC data, just use defaults
+        }
       } catch (error) {
         console.error('Dashboard fetch error:', error);
         toast.error('Network error loading dashboard. Please check your connection.');
       } finally {
         setLoading(false);
+        setPromptCoinLoading(false);
       }
     };
     fetchData();
@@ -263,6 +298,131 @@ export default function DashboardPage() {
               ))}
             </ul>
           ) : ( <p className="text-neutral-500">You haven&apos;t saved any prompts yet. Use the Prompt Builder to create and save one!</p> )}
+        </div>
+      </section>
+
+      {/* PromptCoin Dashboard Section */}
+      <section id="promptcoins">
+        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white">
+          <Coins className="mr-2 text-amber-500" /> PromptCoin Dashboard
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Balance Card */}
+          <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 p-6 rounded-lg shadow-md border border-amber-200 dark:border-amber-700">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200">Current Balance</h3>
+              <Coins className="w-8 h-8 text-amber-500" />
+            </div>
+            {promptCoinLoading ? (
+              <div className="flex items-center">
+                <Loader2 className="h-6 w-6 animate-spin text-amber-500 mr-2" />
+                <span className="text-amber-700 dark:text-amber-300">Loading...</span>
+              </div>
+            ) : (
+              <div className="text-3xl font-bold text-amber-900 dark:text-amber-100">
+                <PromptCoinBalance amount={promptCoinData.balance} size="xl" />
+              </div>
+            )}
+            <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+              Use PromptCoins to purchase Smart Prompts, take exams, and enhance prompts
+            </p>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="lg:col-span-2 bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">Recent Transactions</h3>
+            {promptCoinLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="animate-pulse flex space-x-4">
+                    <div className="rounded-full bg-neutral-200 dark:bg-neutral-700 h-10 w-10"></div>
+                    <div className="flex-1 space-y-2 py-1">
+                      <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4"></div>
+                      <div className="h-3 bg-neutral-200 dark:bg-neutral-700 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : promptCoinData.transactions.length > 0 ? (
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {promptCoinData.transactions.slice(0, 10).map((transaction) => (
+                  <div key={transaction.id} className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-full ${
+                        transaction.amount > 0 
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                      }`}>
+                        {transaction.amount > 0 ? 
+                          <TrendingUp className="w-4 h-4" /> : 
+                          <TrendingDown className="w-4 h-4" />
+                        }
+                      </div>
+                      <div>
+                        <p className="font-medium dark:text-white">{transaction.description}</p>
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                          {new Date(transaction.created_at).toLocaleDateString()} at {new Date(transaction.created_at).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-semibold ${
+                        transaction.amount > 0 
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {transaction.amount > 0 ? '+' : ''}{transaction.amount} PC
+                      </p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                        Balance: {transaction.balance_after} PC
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Coins className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
+                <p className="text-neutral-500 dark:text-neutral-400">No transactions yet</p>
+                <p className="text-sm text-neutral-400 dark:text-neutral-500 mt-1">
+                  Your PromptCoin activity will appear here
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link href="/purchase">
+            <Button className="w-full h-16 text-left flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+              <div>
+                <div className="font-semibold">Buy PromptCoins</div>
+                <div className="text-sm opacity-75">Top up your balance</div>
+              </div>
+              <Plus className="w-6 h-6" />
+            </Button>
+          </Link>
+          
+          <Link href="/smart-prompts">
+            <Button variant="outline" className="w-full h-16 text-left flex items-center justify-between">
+              <div>
+                <div className="font-semibold">Browse Smart Prompts</div>
+                <div className="text-sm opacity-75">Discover marketplace prompts</div>
+              </div>
+              <Brain className="w-6 h-6" />
+            </Button>
+          </Link>
+          
+          <Link href="/certificates">
+            <Button variant="outline" className="w-full h-16 text-left flex items-center justify-between">
+              <div>
+                <div className="font-semibold">Take Certification</div>
+                <div className="text-sm opacity-75">Enhance your skills</div>
+              </div>
+              <Award className="w-6 h-6" />
+            </Button>
+          </Link>
         </div>
       </section>
 
