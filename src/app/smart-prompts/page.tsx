@@ -96,7 +96,20 @@ export default function SmartPromptsPage() {
       const response = await fetch(`/api/smart-prompts?${params}`);
       if (response.ok) {
         const data = await response.json();
-        setPrompts(data.prompts || []);
+        // Normalize the data to ensure all fields are in the expected format
+        const normalizedPrompts = (data.prompts || []).map((prompt: any) => ({
+          ...prompt,
+          variables: Array.isArray(prompt.variables) ? prompt.variables : [],
+          tags: Array.isArray(prompt.tags) ? prompt.tags : [],
+          use_cases: Array.isArray(prompt.use_cases) ? prompt.use_cases : [],
+          ai_model_compatibility: Array.isArray(prompt.ai_model_compatibility) ? prompt.ai_model_compatibility : [],
+          example_inputs: typeof prompt.example_inputs === 'object' ? prompt.example_inputs : {},
+          rating_average: prompt.rating_average || 0,
+          rating_count: prompt.rating_count || 0,
+          downloads_count: prompt.downloads_count || 0,
+          price: prompt.price || 0
+        }));
+        setPrompts(normalizedPrompts);
       } else {
         toast.error('Failed to load smart prompts');
       }
@@ -114,12 +127,17 @@ export default function SmartPromptsPage() {
       if (response.ok) {
         const data = await response.json();
         setCertificationStatus({
-          hasValidCertificate: data.canCreateMarketplace,
-          certificates: data.certificationStatus.certificates
+          hasValidCertificate: data.canCreateMarketplace || false,
+          certificates: data.certificationStatus?.certificates || []
         });
       }
     } catch (error) {
       console.error('Error checking certification:', error);
+      // Set safe defaults on error
+      setCertificationStatus({
+        hasValidCertificate: false,
+        certificates: []
+      });
     }
   };
 
@@ -131,9 +149,9 @@ export default function SmartPromptsPage() {
   useEffect(() => {
     const filtered = prompts.filter(prompt => {
       const matchesSearch = searchQuery === '' || 
-        prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prompt.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prompt.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        (prompt.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (prompt.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (prompt.tags || []).some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
       return matchesSearch;
     });
@@ -142,13 +160,13 @@ export default function SmartPromptsPage() {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'rating':
-          return b.rating_average - a.rating_average;
+          return (b.rating_average || 0) - (a.rating_average || 0);
         case 'downloads':
-          return b.downloads_count - a.downloads_count;
+          return (b.downloads_count || 0) - (a.downloads_count || 0);
         case 'price':
-          return a.price - b.price;
+          return (a.price || 0) - (b.price || 0);
         case 'newest':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
         default:
           return 0;
       }
@@ -265,14 +283,14 @@ export default function SmartPromptsPage() {
       </div>
 
       <div className="flex flex-wrap gap-1 mb-4">
-        {prompt.tags.slice(0, 3).map(tag => (
+        {(prompt.tags || []).slice(0, 3).map(tag => (
           <span key={tag} className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded">
             {tag}
           </span>
         ))}
-        {prompt.tags.length > 3 && (
+        {(prompt.tags || []).length > 3 && (
           <span className="px-2 py-1 bg-neutral-50 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400 text-xs rounded">
-            +{prompt.tags.length - 3} more
+            +{(prompt.tags || []).length - 3} more
           </span>
         )}
       </div>

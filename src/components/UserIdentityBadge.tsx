@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { getUserSubscription, type UserSubscription } from '@/lib/subscription';
+import { getUserProfile } from '@/lib/subscription';
 import { Gift, Zap, Crown, User } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -49,37 +49,35 @@ export default function UserIdentityBadge({
   size = 'md',
   user 
 }: UserIdentityBadgeProps) {
-  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
-    const fetchSubscription = async () => {
+    const fetchProfile = async () => {
       if (!user?.id) {
         setLoading(false);
         return;
       }
 
       try {
-        const subscriptionData = await getUserSubscription(user.id);
-        setSubscription(subscriptionData);
+        const profileData = await getUserProfile(user.id);
+        setProfile(profileData);
       } catch (error) {
-        console.error('Failed to fetch subscription:', error);
-        // Default to free tier
-        setSubscription({
-          tier: 'free',
-          status: 'inactive',
-          isActive: false
+        console.error('Failed to fetch profile:', error);
+        // Default profile
+        setProfile({
+          tier: 'free'
         });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSubscription();
+    fetchProfile();
   }, [user?.id]);
 
-  if (loading || !subscription || !user) {
+  if (loading || !profile || !user) {
     return (
       <div className={clsx(
         'animate-pulse bg-gray-200 dark:bg-gray-700 rounded-full',
@@ -93,7 +91,7 @@ export default function UserIdentityBadge({
     );
   }
 
-  const config = TIER_CONFIG[subscription.tier];
+  const config = TIER_CONFIG[profile.tier || 'free'];
   const IconComponent = config.icon;
 
   const sizeClasses = {
@@ -130,7 +128,7 @@ export default function UserIdentityBadge({
         title={`${config.name} • ${config.tagline}`}
       >
         <IconComponent className={clsx(sizes.icon, config.color)} />
-        {subscription.tier === 'premium' && (
+        {(profile.tier || 'free') === 'premium' && (
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full border border-white dark:border-gray-900 animate-pulse" />
         )}
       </div>
@@ -151,7 +149,7 @@ export default function UserIdentityBadge({
     >
       <div className="relative">
         <IconComponent className={sizes.icon} />
-        {subscription.tier === 'premium' && (
+        {(profile.tier || 'free') === 'premium' && (
           <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse" />
         )}
       </div>
@@ -164,7 +162,7 @@ export default function UserIdentityBadge({
       </div>
 
       {/* Subtle gradient border effect for premium */}
-      {subscription.tier === 'premium' && (
+      {(profile.tier || 'free') === 'premium' && (
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400/20 via-orange-400/20 to-red-400/20 blur-sm -z-10" />
       )}
     </div>
@@ -173,37 +171,35 @@ export default function UserIdentityBadge({
 
 // Hook for getting user identity
 export function useUserIdentity(userId?: string) {
-  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSubscription = async () => {
+    const fetchProfile = async () => {
       if (!userId) {
         setLoading(false);
         return;
       }
 
       try {
-        const subscriptionData = await getUserSubscription(userId);
-        setSubscription(subscriptionData);
+        const profileData = await getUserProfile(userId);
+        setProfile(profileData);
       } catch (error) {
-        console.error('Failed to fetch subscription:', error);
-        setSubscription({
-          tier: 'free',
-          status: 'inactive',
-          isActive: false
+        console.error('Failed to fetch profile:', error);
+        setProfile({
+          tier: 'free'
         });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSubscription();
+    fetchProfile();
   }, [userId]);
 
   return {
-    subscription,
+    profile,
     loading,
-    tierConfig: subscription ? TIER_CONFIG[subscription.tier] : null
+    tierConfig: profile ? TIER_CONFIG[profile.tier || 'free'] : null
   };
 }
