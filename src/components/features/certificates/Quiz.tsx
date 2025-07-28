@@ -67,17 +67,36 @@ export default function Quiz({ level }: { level: string }) {
 
     useEffect(() => {
         const startQuiz = async () => {
-            const res = await fetch(`/api/quiz/start/${level}`);
-            if (!res.ok) {
+            try {
+                console.log(`Starting quiz for level: ${level}`);
+                const res = await fetch(`/api/quiz/start/${level}`);
+                console.log(`Quiz API response status: ${res.status}`);
+                
+                if (!res.ok) {
+                    const data = await res.json();
+                    console.error('Quiz API error:', data);
+                    setError(data.error || 'Failed to start the exam. You may not be eligible.');
+                    setQuizState('loading');
+                    return;
+                }
+                
                 const data = await res.json();
-                setError(data.error || 'Failed to start the exam. You may not be eligible.');
+                console.log('Quiz data received:', data);
+                
+                if (!data.questions || data.questions.length === 0) {
+                    setError('No questions available for this exam level.');
+                    setQuizState('loading');
+                    return;
+                }
+                
+                setQuestions(data.questions);
+                setTimeLeft(data.timeLimit);
+                setQuizState('active');
+            } catch (error) {
+                console.error('Quiz fetch error:', error);
+                setError('Network error while starting the exam. Please try again.');
                 setQuizState('loading');
-                return;
             }
-            const data = await res.json();
-            setQuestions(data.questions);
-            setTimeLeft(data.timeLimit);
-            setQuizState('active');
         };
         startQuiz();
     }, [level]);
