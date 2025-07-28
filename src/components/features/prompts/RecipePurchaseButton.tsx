@@ -142,7 +142,7 @@ export default function RecipePurchaseButton({
 
   return (
     <div className={`space-y-3 ${className}`}>
-      {/* Purchase with PromptCoins */}
+      {/* Purchase with PromptCoins - Primary option */}
       <Button
         onClick={handlePromptCoinPurchase}
         disabled={isLoading || !hasEnoughPromptCoins}
@@ -171,39 +171,12 @@ export default function RecipePurchaseButton({
         )}
       </Button>
 
-      {/* Or divider */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 border-t border-neutral-200 dark:border-neutral-700"></div>
-        <span className="text-xs text-neutral-500 dark:text-neutral-400">or</span>
-        <div className="flex-1 border-t border-neutral-200 dark:border-neutral-700"></div>
-      </div>
-
-      {/* Purchase with USD */}
-      <Button
-        onClick={handleUsdPurchase}
-        disabled={isLoading}
-        variant="outline"
-        className="w-full"
-      >
-        {isLoading && purchaseMethod === 'usd' ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Processing...
-          </>
-        ) : (
-          <>
-            <DollarSign className="w-4 h-4 mr-2" />
-            Buy with ${price} USD
-          </>
-        )}
-      </Button>
-
       {/* User's PromptCoin balance info */}
       <div className="text-xs text-center text-neutral-500 dark:text-neutral-400">
         Your balance: {userPromptCoins} PromptCoins
         {!hasEnoughPromptCoins && (
           <span className="block text-amber-600 dark:text-amber-400 mt-1">
-            Need {promptCoinPrice - userPromptCoins} more PromptCoins
+            Need {promptCoinPrice - userPromptCoins} more PromptCoins • <a href="/purchase" className="underline hover:text-amber-500">Buy More</a>
           </span>
         )}
       </div>

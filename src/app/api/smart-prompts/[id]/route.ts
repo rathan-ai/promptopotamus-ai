@@ -43,9 +43,26 @@ export async function GET(
     // User has access if it's free, they own it, or they've purchased it
     const hasAccess = prompt.price === 0 || prompt.user_id === user?.id || hasPurchased;
 
+    // Create preview text for non-purchased prompts
+    let promptPreview = '';
+    if (!hasAccess && prompt.prompt_text) {
+      // Show first 200 characters with ellipsis
+      const fullText = prompt.prompt_text;
+      if (fullText.length > 200) {
+        promptPreview = fullText.substring(0, 200) + '...';
+      } else {
+        // If less than 200 chars, show first half
+        const halfLength = Math.floor(fullText.length / 2);
+        promptPreview = fullText.substring(0, halfLength) + '...';
+      }
+    }
+
     return NextResponse.json({
       prompt: {
         ...prompt,
+        // Only include full prompt_text if user has access
+        prompt_text: hasAccess ? prompt.prompt_text : undefined,
+        prompt_preview: !hasAccess ? promptPreview : undefined,
         has_access: hasAccess,
         has_purchased: hasPurchased,
         is_owner: prompt.user_id === user?.id,

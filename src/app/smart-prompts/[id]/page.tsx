@@ -22,7 +22,8 @@ interface SmartPromptDetail {
   id: number;
   title: string;
   description: string;
-  prompt_text: string;
+  prompt_text?: string; // Optional - only available if user has access
+  prompt_preview?: string; // Preview text for non-purchased prompts
   complexity_level: 'simple' | 'smart' | 'recipe';
   category: string;
   difficulty_level: 'beginner' | 'intermediate' | 'advanced';
@@ -147,16 +148,24 @@ export default function SmartPromptDetailPage() {
   const generatePreview = () => {
     if (!prompt) return;
     
-    let preview = prompt.prompt_text;
-    
-    // Replace variables with user values
-    prompt.variables?.forEach(variable => {
-      const placeholder = `{${variable.name}}`;
-      const value = variableValues[variable.name] || `[${variable.name}]`;
-      preview = preview.replace(new RegExp(placeholder, 'g'), value);
-    });
-    
-    setPreviewText(preview);
+    // If user has access, use full prompt_text with variables replaced
+    if (hasAccess && prompt.prompt_text) {
+      let preview = prompt.prompt_text;
+      
+      // Replace variables with user values
+      prompt.variables?.forEach(variable => {
+        const placeholder = `{${variable.name}}`;
+        const value = variableValues[variable.name] || `[${variable.name}]`;
+        preview = preview.replace(new RegExp(placeholder, 'g'), value);
+      });
+      
+      setPreviewText(preview);
+    } else if (prompt.prompt_preview) {
+      // Show truncated preview for non-purchased prompts
+      setPreviewText(prompt.prompt_preview);
+    } else {
+      setPreviewText('');
+    }
   };
 
   const handleVariableChange = (variableName: string, value: string | number) => {
@@ -434,26 +443,69 @@ export default function SmartPromptDetailPage() {
                       </div>
                     </>
                   ) : (
-                    <div className="text-center py-8">
-                      <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <AlertCircle className="w-8 h-8 text-amber-500" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
-                        Purchase Required
-                      </h3>
-                      <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-                        Get this smart prompt to unlock the interactive preview and customization features.
-                      </p>
-                      <Button onClick={handlePurchase} disabled={isPurchasing}>
-                        {prompt.price > 0 ? (
-                          <span className="flex items-center gap-2">
-                            Purchase for {prompt.price}
-                            <PromptCoinSymbol className="w-4 h-4" />
-                          </span>
-                        ) : (
-                          'Get for Free'
-                        )}
-                      </Button>
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold dark:text-white">Preview</h3>
+                      
+                      {/* Show truncated preview with blur effect */}
+                      {previewText && (
+                        <div className="relative">
+                          <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4 border border-neutral-200 dark:border-neutral-600">
+                            <pre className="whitespace-pre-wrap text-sm font-mono dark:text-neutral-300 filter blur-sm">
+                              {previewText}
+                            </pre>
+                          </div>
+                          
+                          {/* Overlay with purchase prompt */}
+                          <div className="absolute inset-0 bg-white/80 dark:bg-neutral-900/80 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                            <div className="text-center p-6">
+                              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <AlertCircle className="w-6 h-6 text-amber-500" />
+                              </div>
+                              <h4 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
+                                Full Prompt Locked
+                              </h4>
+                              <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
+                                Purchase this prompt to see the complete template and use interactive features.
+                              </p>
+                              <Button onClick={handlePurchase} disabled={isPurchasing} size="sm">
+                                {prompt.price > 0 ? (
+                                  <span className="flex items-center gap-2">
+                                    Unlock for {prompt.price}
+                                    <PromptCoinSymbol className="w-4 h-4" />
+                                  </span>
+                                ) : (
+                                  'Get for Free'
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Fallback if no preview available */}
+                      {!previewText && (
+                        <div className="text-center py-8">
+                          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <AlertCircle className="w-8 h-8 text-amber-500" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
+                            Purchase Required
+                          </h3>
+                          <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                            Get this smart prompt to unlock the interactive preview and customization features.
+                          </p>
+                          <Button onClick={handlePurchase} disabled={isPurchasing}>
+                            {prompt.price > 0 ? (
+                              <span className="flex items-center gap-2">
+                                Purchase for {prompt.price}
+                                <PromptCoinSymbol className="w-4 h-4" />
+                              </span>
+                            ) : (
+                              'Get for Free'
+                            )}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
