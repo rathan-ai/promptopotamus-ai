@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { QuizLevel } from '@/lib/data';
 import { QUIZ_CONFIG } from '@/config/constants';
 import { PROMPTCOIN_COSTS } from '@/lib/promptcoin-utils';
+import { shuffleQuestions, randomizeQuizQuestions, type QuizQuestion } from '@/lib/quiz-randomization';
 
 // The change is in the function signature below
 export async function GET(req: NextRequest, { params: paramsPromise }: { params: Promise<{ level: QuizLevel }> }) {
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
     
     const { data: allQuestions, error } = await supabase
         .from('quizzes')
-        .select('id, question, options')
+        .select('id, question, options, answer')
         .eq('difficulty', params.level); // Use the resolved params
 
     if (error || !allQuestions || allQuestions.length === 0) {
@@ -70,11 +71,15 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
         return NextResponse.json({ error: `Not enough questions in the database for this level. Found ${allQuestions.length}, need ${QUIZ_CONFIG.QUIZ_LENGTH}.` }, { status: 500 });
     }
 
-    const shuffled = allQuestions.sort(() => 0.5 - Math.random());
-    const selectedQuestions = shuffled.slice(0, QUIZ_CONFIG.QUIZ_LENGTH);
+    // Use proper Fisher-Yates shuffle instead of biased Math.random() sort
+    const shuffledQuestions = shuffleQuestions(allQuestions as QuizQuestion[]);
+    const selectedQuestions = shuffledQuestions.slice(0, QUIZ_CONFIG.QUIZ_LENGTH);
+    
+    // Randomize option order for each question while preserving correct answers
+    const randomizedQuestions = randomizeQuizQuestions(selectedQuestions);
     
     return NextResponse.json({ 
-        questions: selectedQuestions, 
+        questions: randomizedQuestions, 
         timeLimit: QUIZ_CONFIG.TIME_LIMIT_IN_MINUTES * 60 
     });
 }
