@@ -64,6 +64,7 @@ interface RecipeStep {
 }
 
 interface SmartPromptData {
+  id?: number; // Optional ID for edit operations
   title: string;
   description: string;
   prompt_text: string;
@@ -380,8 +381,13 @@ export default function SmartPromptsBuilder({
 
     setIsSaving(true);
     try {
-      const response = await fetch('/api/smart-prompts', {
-        method: 'POST',
+      // Determine if this is an update or create operation
+      const isUpdate = formData.id;
+      const url = isUpdate ? `/api/smart-prompts/${formData.id}` : '/api/smart-prompts';
+      const method = isUpdate ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
@@ -389,7 +395,7 @@ export default function SmartPromptsBuilder({
       const result = await response.json();
       
       if (response.ok) {
-        toast.success(result.message);
+        toast.success(result.message || (isUpdate ? 'Smart Prompt updated successfully!' : 'Smart Prompt created successfully!'));
         if (onSave) onSave(formData);
         
         // Reset form for new prompt

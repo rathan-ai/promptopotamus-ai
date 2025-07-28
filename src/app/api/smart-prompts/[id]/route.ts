@@ -115,3 +115,71 @@ export async function GET(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const promptId = parseInt(params.id);
+    const updateData = await req.json();
+
+    // First verify the user owns this prompt
+    const { data: existingPrompt, error: fetchError } = await supabase
+      .from('saved_prompts')
+      .select('id, user_id, title')
+      .eq('id', promptId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (fetchError || !existingPrompt) {
+      return NextResponse.json({ error: 'Prompt not found or access denied' }, { status: 404 });
+    }
+
+    // Update the prompt
+    const { error: updateError } = await supabase
+      .from('saved_prompts')
+      .update({
+        title: updateData.title,
+        description: updateData.description,
+        prompt_text: updateData.prompt_text,
+        complexity_level: updateData.complexity_level,
+        category: updateData.category,
+        difficulty_level: updateData.difficulty_level,
+        tags: updateData.tags || [],
+        use_cases: updateData.use_cases || [],
+        ai_model_compatibility: updateData.ai_model_compatibility || [],
+        variables: updateData.variables || [],
+        recipe_steps: updateData.recipe_steps || [],
+        instructions: updateData.instructions || '',
+        example_inputs: updateData.example_inputs || {},
+        example_outputs: updateData.example_outputs || [],
+        price: updateData.price || 0,
+        is_marketplace: updateData.is_marketplace || false,
+        is_public: updateData.is_public || false,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', promptId);
+
+    if (updateError) {
+      console.error('Error updating prompt:', updateError);
+      return NextResponse.json({ error: 'Failed to update prompt' }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      message: 'Smart Prompt updated successfully!',
+      id: promptId
+    });
+
+  } catch (error) {
+    console.error('Error updating prompt:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

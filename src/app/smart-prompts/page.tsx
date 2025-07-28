@@ -88,6 +88,7 @@ const difficultyColors = {
 
 export default function SmartPromptsPage() {
   const [activeView, setActiveView] = useState<'marketplace' | 'builder' | 'learn' | 'my-prompts'>('marketplace');
+  const [editingPrompt, setEditingPrompt] = useState<SmartPrompt | null>(null);
   const [prompts, setPrompts] = useState<SmartPrompt[]>([]);
   const [filteredPrompts, setFilteredPrompts] = useState<SmartPrompt[]>([]);
   const [userCreatedPrompts, setUserCreatedPrompts] = useState<SmartPrompt[]>([]);
@@ -264,6 +265,21 @@ export default function SmartPromptsPage() {
       fetchMyPrompts();
     }
   }, [activeView]);
+
+  // Handle edit mode from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    if (editId && userCreatedPrompts.length > 0) {
+      const promptToEdit = userCreatedPrompts.find(p => p.id.toString() === editId);
+      if (promptToEdit) {
+        setEditingPrompt(promptToEdit);
+        setActiveView('builder');
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [userCreatedPrompts]);
 
   useEffect(() => {
     const filtered = prompts.filter(prompt => {
@@ -459,8 +475,9 @@ export default function SmartPromptsPage() {
               size="sm"
               variant="outline" 
               onClick={() => {
-                // Navigate to edit or manage this prompt
-                window.location.href = `/smart-prompts/${prompt.id}`;
+                // Set up edit mode
+                setEditingPrompt(prompt);
+                setActiveView('builder');
               }}
               className="min-w-20"
             >
@@ -672,9 +689,37 @@ export default function SmartPromptsPage() {
           <SmartPromptsBuilder 
             canCreateMarketplace={certificationStatus.hasValidCertificate}
             initialComplexityType={selectedComplexityType as 'simple' | 'smart' | 'recipe' | undefined}
+            initialData={editingPrompt ? {
+              id: editingPrompt.id, // Include ID for edit operations
+              title: editingPrompt.title,
+              description: editingPrompt.description,
+              prompt_text: editingPrompt.prompt_text,
+              complexity_level: editingPrompt.complexity_level,
+              category: editingPrompt.category,
+              difficulty_level: editingPrompt.difficulty_level,
+              tags: editingPrompt.tags || [],
+              use_cases: editingPrompt.use_cases || [],
+              ai_model_compatibility: editingPrompt.ai_model_compatibility || [],
+              variables: editingPrompt.variables || [],
+              recipe_steps: editingPrompt.recipe_steps || [],
+              instructions: editingPrompt.instructions || '',
+              example_inputs: editingPrompt.example_inputs || {},
+              example_outputs: editingPrompt.example_outputs || [],
+              price: editingPrompt.price,
+              is_marketplace: editingPrompt.is_marketplace || false,
+              is_public: editingPrompt.is_public || false
+            } : undefined}
             onSave={() => {
-              setActiveView('marketplace');
-              fetchPrompts();
+              if (editingPrompt) {
+                // After editing, go back to My Prompts
+                setActiveView('my-prompts');
+                setEditingPrompt(null);
+                fetchMyPrompts();
+              } else {
+                // After creating, go to marketplace
+                setActiveView('marketplace');
+                fetchPrompts();
+              }
               setSelectedComplexityType(''); // Reset after save
             }}
           />
