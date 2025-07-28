@@ -66,14 +66,36 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
             return NextResponse.json({ error: `Not enough questions in the database for this level. Found ${allQuestions.length}, need ${QUIZ_CONFIG.QUIZ_LENGTH}.` }, { status: 500 });
         }
 
-        // Use proper Fisher-Yates shuffle instead of biased Math.random() sort (but keep original format for now)
+        // Shuffle questions AND randomize answer positions
         console.log('Shuffling questions...');
         const shuffledQuestions = shuffleQuestions(allQuestions);
         const selectedQuestions = shuffledQuestions.slice(0, QUIZ_CONFIG.QUIZ_LENGTH);
         
+        // Randomize answer positions within each question
+        console.log('Randomizing answer positions...');
+        const randomizedQuestions = selectedQuestions.map(question => {
+            // Store the correct answer text before shuffling
+            const correctAnswer = question.answer;
+            
+            // Create a copy of options array and shuffle it
+            const shuffledOptions = [...question.options];
+            for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+            }
+            
+            // Return question with shuffled options (but don't include the answer to prevent cheating)
+            return {
+                id: question.id,
+                question: question.question,
+                options: shuffledOptions
+                // Don't send the answer to the client
+            };
+        });
+        
         console.log('Returning quiz data...');
         return NextResponse.json({ 
-            questions: selectedQuestions, 
+            questions: randomizedQuestions, 
             timeLimit: QUIZ_CONFIG.TIME_LIMIT_IN_MINUTES * 60 
         });
         
