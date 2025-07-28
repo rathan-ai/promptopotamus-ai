@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { DollarSign, Coins, Loader2, ShoppingCart } from 'lucide-react';
-import { usdToPromptCoins } from '@/lib/subscription';
 import toast from 'react-hot-toast';
 
 interface RecipePurchaseButtonProps {
@@ -28,7 +27,7 @@ export default function RecipePurchaseButton({
   const [isLoading, setIsLoading] = useState(false);
   const [purchaseMethod, setPurchaseMethod] = useState<'usd' | 'promptcoins' | null>(null);
 
-  const promptCoinPrice = usdToPromptCoins(price);
+  const promptCoinPrice = price; // Price is already in PromptCoins
   const hasEnoughPromptCoins = userPromptCoins >= promptCoinPrice;
 
   const handlePromptCoinPurchase = async () => {

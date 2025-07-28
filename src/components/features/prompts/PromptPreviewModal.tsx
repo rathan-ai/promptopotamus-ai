@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { X, Play, Copy, RefreshCw, Eye, Wand2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { PromptCoinDisplay } from '@/components/ui/PromptCoinDisplay';
 
 interface Variable {
   name: string;
@@ -320,7 +321,11 @@ export default function PromptPreviewModal({
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {prompt.price > 0 ? `$${prompt.price.toFixed(2)}` : 'Free'}
+                        {prompt.price > 0 ? (
+                          <PromptCoinDisplay amount={prompt.price} size="lg" />
+                        ) : (
+                          'Free'
+                        )}
                       </div>
                     </div>
                   </div>

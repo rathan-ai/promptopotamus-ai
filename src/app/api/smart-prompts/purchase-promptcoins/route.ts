@@ -209,8 +209,8 @@ export async function POST(req: Request) {
       });
     }
 
-    // Convert USD price to PromptCoins
-    const promptCoinPrice = usdToPromptCoins(prompt.price);
+    // Price is already stored in PromptCoins
+    const promptCoinPrice = prompt.price;
 
     // Fraud detection
     const fraudCheck = detectFraudulentActivity(user.id, promptCoinPrice);

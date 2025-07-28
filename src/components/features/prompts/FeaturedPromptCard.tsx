@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Star, Download, DollarSign, User, Brain, Zap, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { usdToPromptCoins } from '@/lib/subscription';
 
 interface FeaturedPrompt {
   id: number;
@@ -77,14 +76,9 @@ export default function FeaturedPromptCard({
             </div>
             <div className="text-right">
               {prompt.price > 0 ? (
-                <div className="flex flex-col items-end gap-0.5">
-                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                    ${prompt.price}
-                  </span>
-                  <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-                    <Coins className="w-3 h-3" />
-                    <span>{usdToPromptCoins(prompt.price)} PC</span>
-                  </div>
+                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                  <Coins className="w-4 h-4" />
+                  <span className="text-sm font-semibold">{prompt.price} PC</span>
                 </div>
               ) : (
                 <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
@@ -153,15 +147,9 @@ export default function FeaturedPromptCard({
           </div>
           <div className="text-right">
             {prompt.price > 0 ? (
-              <div className="space-y-1">
-                <div className="flex items-center text-green-600 dark:text-green-400">
-                  <DollarSign className="w-4 h-4 mr-1" />
-                  <span className="font-semibold">{prompt.price}</span>
-                </div>
-                <div className="flex items-center text-amber-600 dark:text-amber-400">
-                  <Coins className="w-4 h-4 mr-1" />
-                  <span className="font-semibold">{usdToPromptCoins(prompt.price)} PC</span>
-                </div>
+              <div className="flex items-center text-amber-600 dark:text-amber-400">
+                <Coins className="w-4 h-4 mr-1" />
+                <span className="font-semibold">{prompt.price} PC</span>
               </div>
             ) : (
               <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
