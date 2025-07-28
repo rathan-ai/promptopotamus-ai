@@ -306,89 +306,97 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white">
           <Coins className="mr-2 text-amber-500" /> PromptCoin Dashboard
         </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Balance Card */}
-          <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 p-6 rounded-lg shadow-md border border-amber-200 dark:border-amber-700">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200">Current Balance</h3>
-              <Coins className="w-8 h-8 text-amber-500" />
+          <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 p-8 rounded-lg shadow-md border border-amber-200 dark:border-amber-700">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-amber-800 dark:text-amber-200">Current Balance</h3>
+              <Coins className="w-10 h-10 text-amber-500" />
             </div>
             {promptCoinLoading ? (
               <div className="flex items-center">
-                <Loader2 className="h-6 w-6 animate-spin text-amber-500 mr-2" />
-                <span className="text-amber-700 dark:text-amber-300">Loading...</span>
+                <Loader2 className="h-8 w-8 animate-spin text-amber-500 mr-3" />
+                <span className="text-amber-700 dark:text-amber-300 text-lg">Loading...</span>
               </div>
             ) : (
-              <div className="text-3xl font-bold text-amber-900 dark:text-amber-100">
+              <div className="text-4xl font-bold text-amber-900 dark:text-amber-100 mb-4">
                 <PromptCoinBalance amount={promptCoinData.balance} size="xl" />
               </div>
             )}
-            <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+            <p className="text-amber-600 dark:text-amber-400 mb-4">
               Use PromptCoins to purchase Smart Prompts, take exams, and enhance prompts
             </p>
+            <Link href="/promptcoin-history">
+              <Button variant="outline" className="w-full border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30">
+                <History className="w-4 h-4 mr-2" />
+                View Complete History
+              </Button>
+            </Link>
           </div>
 
-          {/* Recent Activity */}
-          <div className="lg:col-span-2 bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">Recent Transactions</h3>
-            {promptCoinLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="animate-pulse flex space-x-4">
-                    <div className="rounded-full bg-neutral-200 dark:bg-neutral-700 h-10 w-10"></div>
-                    <div className="flex-1 space-y-2 py-1">
-                      <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4"></div>
-                      <div className="h-3 bg-neutral-200 dark:bg-neutral-700 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : promptCoinData.transactions.length > 0 ? (
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {promptCoinData.transactions.slice(0, 10).map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${
-                        transaction.amount > 0 
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                          : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                      }`}>
-                        {transaction.amount > 0 ? 
-                          <TrendingUp className="w-4 h-4" /> : 
-                          <TrendingDown className="w-4 h-4" />
-                        }
-                      </div>
-                      <div>
-                        <p className="font-medium dark:text-white">{transaction.description}</p>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                          {new Date(transaction.created_at).toLocaleDateString()} at {new Date(transaction.created_at).toLocaleTimeString()}
-                        </p>
+          {/* Quick Stats */}
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
+                Recent Activity
+              </h3>
+              {promptCoinLoading ? (
+                <div className="space-y-3">
+                  {[1, 2].map(i => (
+                    <div key={i} className="animate-pulse flex space-x-4">
+                      <div className="rounded-full bg-neutral-200 dark:bg-neutral-700 h-8 w-8"></div>
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-3 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4"></div>
+                        <div className="h-2 bg-neutral-200 dark:bg-neutral-700 rounded w-1/2"></div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-semibold ${
+                  ))}
+                </div>
+              ) : promptCoinData.transactions.length > 0 ? (
+                <div className="space-y-3">
+                  {promptCoinData.transactions.slice(0, 3).map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-1.5 rounded-full ${
+                          transaction.amount > 0 
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                            : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                        }`}>
+                          {transaction.amount > 0 ? 
+                            <TrendingUp className="w-3 h-3" /> : 
+                            <TrendingDown className="w-3 h-3" />
+                          }
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium dark:text-white">{transaction.description}</p>
+                          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                            {new Date(transaction.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <p className={`text-sm font-semibold ${
                         transaction.amount > 0 
                           ? 'text-green-600 dark:text-green-400'
                           : 'text-red-600 dark:text-red-400'
                       }`}>
                         {transaction.amount > 0 ? '+' : ''}{transaction.amount} PC
                       </p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                        Balance: {transaction.balance_after} PC
-                      </p>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Coins className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-                <p className="text-neutral-500 dark:text-neutral-400">No transactions yet</p>
-                <p className="text-sm text-neutral-400 dark:text-neutral-500 mt-1">
-                  Your PromptCoin activity will appear here
-                </p>
-              </div>
-            )}
+                  ))}
+                  {promptCoinData.transactions.length > 3 && (
+                    <Link href="/promptcoin-history" className="block text-center text-sm text-indigo-600 dark:text-indigo-400 hover:underline mt-3">
+                      View {promptCoinData.transactions.length - 3} more transactions
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <Coins className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">No transactions yet</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

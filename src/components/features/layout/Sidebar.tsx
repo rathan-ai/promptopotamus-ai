@@ -136,10 +136,10 @@ export default function Sidebar() {
                           <div className="flex items-center justify-between">
                             <PromptCoinBalance amount={promptCoinBalance} size="sm" />
                             <Link 
-                              href="/dashboard#promptcoins"
+                              href="/promptcoin-history"
                               className="text-xs text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 font-medium"
                               onClick={() => {
-                                track('promptcoin_dashboard_access', {
+                                track('promptcoin_history_access', {
                                   user_email: user.email || 'unknown',
                                   source: 'sidebar_balance',
                                   balance: promptCoinBalance
