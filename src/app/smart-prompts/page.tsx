@@ -187,10 +187,18 @@ export default function SmartPromptsPage() {
       const purchasedResponse = await fetch('/api/smart-prompts/my-prompts?type=purchased');
       if (purchasedResponse.ok) {
         const purchasedData = await purchasedResponse.json();
+        console.log('Fetched purchased prompts:', purchasedData.purchasedPrompts || []);
         setUserPurchasedPrompts(purchasedData.purchasedPrompts || []);
-      } else if (purchasedResponse.status === 401) {
-        // User not authenticated, clear purchased prompts
-        setUserPurchasedPrompts([]);
+      } else {
+        console.error('Failed to fetch purchased prompts:', {
+          status: purchasedResponse.status,
+          statusText: purchasedResponse.statusText
+        });
+        if (purchasedResponse.status === 401) {
+          // User not authenticated, clear purchased prompts
+          console.log('User not authenticated, clearing purchased prompts');
+          setUserPurchasedPrompts([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching user prompts:', error);
@@ -233,11 +241,9 @@ export default function SmartPromptsPage() {
   useEffect(() => {
     fetchPrompts();
     checkCertificationStatus();
-    // Also fetch user's purchased prompts for marketplace purchase status
-    if (activeView === 'marketplace') {
-      fetchMyPrompts();
-    }
-  }, [selectedCategory, selectedComplexity, selectedDifficulty, priceRange, activeView]);
+    // Always fetch user's purchased prompts for marketplace purchase status
+    fetchMyPrompts();
+  }, [selectedCategory, selectedComplexity, selectedDifficulty, priceRange]);
   
   useEffect(() => {
     if (activeView === 'my-prompts') {
@@ -297,8 +303,9 @@ export default function SmartPromptsPage() {
       if (response.ok) {
         if (data.free) {
           toast.success('Free prompt added to your collection!');
-          // Refresh the prompts to update download count
+          // Refresh both prompts and purchased prompts to update status
           fetchPrompts();
+          fetchMyPrompts();
         } else {
           // This shouldn't happen anymore since paid prompts use the modal
           toast.error('Please use the purchase button for paid prompts');
@@ -336,8 +343,10 @@ export default function SmartPromptsPage() {
   const handlePurchaseSuccess = () => {
     setShowPurchaseModal(false);
     setSelectedPromptForPurchase(null);
-    // Refresh prompts to update purchase status
+    // Refresh prompts and purchased prompts to update purchase status
     fetchPrompts();
+    fetchMyPrompts();
+    toast.success('Prompt purchased successfully!');
   };
 
   const renderStars = (rating: number, count: number) => {
@@ -456,10 +465,22 @@ export default function SmartPromptsPage() {
   );
 
   const PromptCard = ({ prompt }: { prompt: SmartPrompt }) => {
-    // Check if user has purchased this prompt
-    const isPurchased = userPurchasedPrompts.some(p => p.id === prompt.id);
+    // Check if user has purchased this prompt (ensure we're comparing numbers)
+    const isPurchased = userPurchasedPrompts.some(p => Number(p.id) === Number(prompt.id));
     // Check if user created this prompt
     const isOwned = currentUser && prompt.user_id === currentUser.id;
+    
+    // Debug logging (remove this in production)
+    if (prompt.title === 'The Ultimate Blog Post Writer') {
+      console.log('PromptCard Debug for "The Ultimate Blog Post Writer":', {
+        promptId: prompt.id,
+        promptTitle: prompt.title,
+        isPurchased,
+        isOwned,
+        userPurchasedPrompts: userPurchasedPrompts.map(p => ({ id: p.id, title: p.title })),
+        currentUser: currentUser?.id
+      });
+    }
     
     return (
       <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700 p-6 hover:shadow-lg transition-shadow">
