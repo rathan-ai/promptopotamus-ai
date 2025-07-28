@@ -114,9 +114,8 @@ export default function AboutPage() {
           </p>
           
           <p className="text-body text-neutral-600 dark:text-neutral-400 leading-relaxed">
-            Today, Promptopotamus serves over 10,000 active users worldwide, from students learning their first 
-            prompts to enterprise teams optimizing complex AI workflows. Our community has created over 50,000 
-            prompts and earned more than 1,200 professional certifications.
+            Today, Promptopotamus is building a vibrant community of AI enthusiasts, from students learning their first 
+            prompts to enterprise teams optimizing complex AI workflows. Join us in shaping the future of AI communication.
           </p>
         </div>
       </section>

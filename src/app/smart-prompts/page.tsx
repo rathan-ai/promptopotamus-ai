@@ -87,10 +87,14 @@ const difficultyColors = {
 };
 
 export default function SmartPromptsPage() {
-  const [activeView, setActiveView] = useState<'marketplace' | 'builder' | 'learn'>('marketplace');
+  const [activeView, setActiveView] = useState<'marketplace' | 'builder' | 'learn' | 'my-prompts'>('marketplace');
   const [prompts, setPrompts] = useState<SmartPrompt[]>([]);
   const [filteredPrompts, setFilteredPrompts] = useState<SmartPrompt[]>([]);
+  const [userCreatedPrompts, setUserCreatedPrompts] = useState<SmartPrompt[]>([]);
+  const [userPurchasedPrompts, setUserPurchasedPrompts] = useState<SmartPrompt[]>([]);
   const [loading, setLoading] = useState(true);
+  const [myPromptsLoading, setMyPromptsLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [selectedComplexity, setSelectedComplexity] = useState('all');
@@ -158,6 +162,47 @@ export default function SmartPromptsPage() {
     }
   };
 
+  const fetchMyPrompts = async () => {
+    setMyPromptsLoading(true);
+    try {
+      // Fetch user authentication status
+      const authResponse = await fetch('/api/profiles/dashboard');
+      if (authResponse.ok) {
+        const authData = await authResponse.json();
+        const userData = authData.success ? authData.data : authData;
+        setCurrentUser(userData?.profile);
+      }
+      
+      // Fetch created prompts (only if user is authenticated)
+      const createdResponse = await fetch('/api/smart-prompts/my-prompts?type=created');
+      if (createdResponse.ok) {
+        const createdData = await createdResponse.json();
+        setUserCreatedPrompts(createdData.createdPrompts || []);
+      } else if (createdResponse.status === 401) {
+        // User not authenticated, clear created prompts
+        setUserCreatedPrompts([]);
+      }
+      
+      // Fetch purchased prompts (only if user is authenticated)
+      const purchasedResponse = await fetch('/api/smart-prompts/my-prompts?type=purchased');
+      if (purchasedResponse.ok) {
+        const purchasedData = await purchasedResponse.json();
+        setUserPurchasedPrompts(purchasedData.purchasedPrompts || []);
+      } else if (purchasedResponse.status === 401) {
+        // User not authenticated, clear purchased prompts
+        setUserPurchasedPrompts([]);
+      }
+    } catch (error) {
+      console.error('Error fetching user prompts:', error);
+      // Only show error if user is trying to access "My Prompts" view
+      if (activeView === 'my-prompts') {
+        toast.error('Please log in to view your prompts');
+      }
+    } finally {
+      setMyPromptsLoading(false);
+    }
+  };
+
   const checkCertificationStatus = async () => {
     try {
       const response = await fetch('/api/smart-prompts/my-prompts');
@@ -188,7 +233,17 @@ export default function SmartPromptsPage() {
   useEffect(() => {
     fetchPrompts();
     checkCertificationStatus();
-  }, [selectedCategory, selectedComplexity, selectedDifficulty, priceRange]);
+    // Also fetch user's purchased prompts for marketplace purchase status
+    if (activeView === 'marketplace') {
+      fetchMyPrompts();
+    }
+  }, [selectedCategory, selectedComplexity, selectedDifficulty, priceRange, activeView]);
+  
+  useEffect(() => {
+    if (activeView === 'my-prompts') {
+      fetchMyPrompts();
+    }
+  }, [activeView]);
 
   useEffect(() => {
     const filtered = prompts.filter(prompt => {
@@ -303,7 +358,7 @@ export default function SmartPromptsPage() {
     );
   };
 
-  const PromptCard = ({ prompt }: { prompt: SmartPrompt }) => (
+  const MyPromptCard = ({ prompt, isCreated }: { prompt: SmartPrompt; isCreated: boolean }) => (
     <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700 p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
@@ -313,17 +368,30 @@ export default function SmartPromptsPage() {
           </p>
         </div>
         <div className="text-right ml-4">
-          <div className="text-2xl font-bold">
-            {prompt.price > 0 ? (
-              <PromptCoinPrice amount={prompt.price} />
-            ) : (
-              <span className="text-green-600 dark:text-green-400">Free</span>
-            )}
-          </div>
-          <div className="text-sm text-neutral-500">
-            <Download className="w-3 h-3 inline mr-1" />
-            {prompt.downloads_count}
-          </div>
+          {isCreated ? (
+            <div className="text-sm text-neutral-500">
+              <div className="flex items-center">
+                <Download className="w-3 h-3 inline mr-1" />
+                {prompt.downloads_count || 0}
+              </div>
+              {prompt.price > 0 && (
+                <div className="mt-1">
+                  <PromptCoinPrice amount={prompt.price} />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <span className="inline-block px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full mb-2">
+                Purchased
+              </span>
+              {(prompt as any).purchase_info && (
+                <div className="text-xs text-neutral-500">
+                  <PromptCoinPrice amount={(prompt as any).purchase_info.purchase_price} />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -361,32 +429,145 @@ export default function SmartPromptsPage() {
             onClick={() => handlePreview(prompt)}
           >
             <Eye className="w-3 h-3 mr-1" />
-            Preview
+            {isCreated ? 'View' : 'Use'}
           </Button>
-          <Button 
-            size="sm" 
-            onClick={() => {
-              if (prompt.price > 0) {
-                setSelectedPromptForPurchase(prompt);
-                setShowPurchaseModal(true);
-              } else {
-                handlePurchase(prompt.id);
-              }
-            }}
-            className="min-w-20"
-          >
-            {prompt.price > 0 ? 'Buy' : 'Get'}
-          </Button>
+          {isCreated && (
+            <Button 
+              size="sm"
+              variant="outline" 
+              onClick={() => {
+                // Navigate to edit or manage this prompt
+                window.location.href = `/smart-prompts/${prompt.id}`;
+              }}
+              className="min-w-20"
+            >
+              Edit
+            </Button>
+          )}
         </div>
       </div>
 
-      {prompt.profiles && (
+      {!isCreated && (prompt as any).purchase_info && (
         <div className="mt-3 pt-3 border-t border-neutral-200 dark:border-neutral-600 text-sm text-neutral-500 dark:text-neutral-400">
-          by {prompt.profiles.full_name}
+          Purchased on {new Date((prompt as any).purchase_info.purchased_at).toLocaleDateString()}
         </div>
       )}
     </div>
   );
+
+  const PromptCard = ({ prompt }: { prompt: SmartPrompt }) => {
+    // Check if user has purchased this prompt
+    const isPurchased = userPurchasedPrompts.some(p => p.id === prompt.id);
+    // Check if user created this prompt
+    const isOwned = currentUser && prompt.user_id === currentUser.id;
+    
+    return (
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700 p-6 hover:shadow-lg transition-shadow">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold dark:text-white mb-2">{prompt.title}</h3>
+            <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-3 line-clamp-2">
+              {prompt.description}
+            </p>
+          </div>
+          <div className="text-right ml-4">
+            <div className="text-2xl font-bold">
+              {prompt.price > 0 ? (
+                <PromptCoinPrice amount={prompt.price} />
+              ) : (
+                <span className="text-green-600 dark:text-green-400">Free</span>
+              )}
+            </div>
+            <div className="text-sm text-neutral-500">
+              <Download className="w-3 h-3 inline mr-1" />
+              {prompt.downloads_count}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${complexityColors[prompt.complexity_level]}`}>
+            {prompt.complexity_level}
+          </span>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${difficultyColors[prompt.difficulty_level]}`}>
+            {prompt.difficulty_level}
+          </span>
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300">
+            {prompt.category}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap gap-1 mb-4">
+          {(prompt.tags || []).slice(0, 3).map(tag => (
+            <span key={tag} className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded">
+              {tag}
+            </span>
+          ))}
+          {(prompt.tags || []).length > 3 && (
+            <span className="px-2 py-1 bg-neutral-50 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400 text-xs rounded">
+              +{(prompt.tags || []).length - 3} more
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between">
+          {renderStars(prompt.rating_average, prompt.rating_count)}
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handlePreview(prompt)}
+            >
+              <Eye className="w-3 h-3 mr-1" />
+              Preview
+            </Button>
+            {isPurchased ? (
+              <Button 
+                size="sm"
+                variant="outline"
+                className="min-w-20 text-green-600 border-green-300 hover:bg-green-50"
+                disabled
+              >
+                Purchased
+              </Button>
+            ) : isOwned ? (
+              <Button 
+                size="sm"
+                variant="outline"
+                className="min-w-20"
+                onClick={() => {
+                  window.location.href = `/smart-prompts/${prompt.id}`;
+                }}
+              >
+                Edit
+              </Button>
+            ) : (
+              <Button 
+                size="sm" 
+                onClick={() => {
+                  if (prompt.price > 0) {
+                    setSelectedPromptForPurchase(prompt);
+                    setShowPurchaseModal(true);
+                  } else {
+                    handlePurchase(prompt.id);
+                  }
+                }}
+                className="min-w-20"
+              >
+                {prompt.price > 0 ? 'Buy' : 'Get'}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {prompt.profiles && (
+          <div className="mt-3 pt-3 border-t border-neutral-200 dark:border-neutral-600 text-sm text-neutral-500 dark:text-neutral-400">
+            by {prompt.profiles.full_name}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <PageErrorBoundary>
@@ -425,6 +606,13 @@ export default function SmartPromptsPage() {
             variant={activeView === 'marketplace' ? 'default' : 'outline'}
           >
             Marketplace
+          </Button>
+          <Button
+            onClick={() => setActiveView('my-prompts')}
+            variant={activeView === 'my-prompts' ? 'default' : 'outline'}
+          >
+            <Coins className="w-4 h-4 mr-2" />
+            My Prompts
           </Button>
           <Button
             onClick={() => setActiveView('learn')}
@@ -540,6 +728,87 @@ export default function SmartPromptsPage() {
               </Button>
             </div>
           </div>
+        </div>
+      ) : activeView === 'my-prompts' ? (
+        <div className="space-y-6">
+          {/* My Prompts Header */}
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-6">
+            <h2 className="text-2xl font-bold dark:text-white mb-4">My Prompts</h2>
+            <p className="text-neutral-600 dark:text-neutral-400">
+              Manage your created prompts and view your purchased collection
+            </p>
+          </div>
+
+          {myPromptsLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {/* Created Prompts Section */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold dark:text-white">Your Created Prompts</h3>
+                  <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                    {userCreatedPrompts.length} prompt{userCreatedPrompts.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                
+                {userCreatedPrompts.length === 0 ? (
+                  <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-8 text-center">
+                    <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Plus className="w-8 h-8 text-neutral-400" />
+                    </div>
+                    <h4 className="text-lg font-semibold dark:text-white mb-2">No prompts created yet</h4>
+                    <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                      Start building your first Smart Prompt to share with others
+                    </p>
+                    <Button onClick={() => setActiveView('builder')}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Your First Prompt
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    {userCreatedPrompts.map(prompt => (
+                      <MyPromptCard key={prompt.id} prompt={prompt} isCreated={true} />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Purchased Prompts Section */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold dark:text-white">Your Purchased Prompts</h3>
+                  <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                    {userPurchasedPrompts.length} prompt{userPurchasedPrompts.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                
+                {userPurchasedPrompts.length === 0 ? (
+                  <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-8 text-center">
+                    <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Coins className="w-8 h-8 text-neutral-400" />
+                    </div>
+                    <h4 className="text-lg font-semibold dark:text-white mb-2">No purchased prompts yet</h4>
+                    <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                      Browse the marketplace to find prompts that enhance your workflow
+                    </p>
+                    <Button onClick={() => setActiveView('marketplace')}>
+                      Browse Marketplace
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    {userPurchasedPrompts.map(prompt => (
+                      <MyPromptCard key={prompt.id} prompt={prompt} isCreated={false} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-6">

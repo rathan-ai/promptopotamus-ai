@@ -135,16 +135,28 @@ export async function GET(req: NextRequest) {
       recentSales: salesData?.slice(0, 10) || []
     };
 
-    return NextResponse.json({
-      created: createdPrompts,
-      purchased: purchasedPrompts,
-      salesStats,
-      canCreateMarketplace: hasValidCertificate,
-      certificationStatus: {
-        hasValidCertificate,
-        certificates: userCertificates
-      }
-    });
+    // Support different response formats based on request type
+    if (type === 'created') {
+      return NextResponse.json({
+        createdPrompts: createdPrompts,
+        canCreateMarketplace: hasValidCertificate
+      });
+    } else if (type === 'purchased') {
+      return NextResponse.json({
+        purchasedPrompts: purchasedPrompts
+      });
+    } else {
+      return NextResponse.json({
+        created: createdPrompts,
+        purchased: purchasedPrompts,
+        salesStats,
+        canCreateMarketplace: hasValidCertificate,
+        certificationStatus: {
+          hasValidCertificate,
+          certificates: userCertificates
+        }
+      });
+    }
 
   } catch (error) {
     console.error('Error fetching user smart prompts:', error);

@@ -8,6 +8,7 @@ import { PromptCoinDisplay, PromptCoinCost } from '@/components/ui/PromptCoinDis
 import { PROMPTCOIN_COSTS } from '@/lib/promptcoin-utils';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { getSettings, type LimitSettings } from '@/lib/admin-settings';
 
 interface AnalysisResult {
     score: number;

@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown, Calendar, Bell, BookOpen, Zap } from 'lucide-react';
+import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown, Calendar, Bell, BookOpen, Zap, Coins } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import BuyCreditsModal from '../payments/BuyCreditsModal';
+import { PromptCoinDisplay } from '@/components/ui/PromptCoinDisplay';
 import { getSettings, type LimitSettings } from '@/lib/admin-settings';
 import dynamic from 'next/dynamic';
 
@@ -37,7 +38,7 @@ export default function PromptBuilder() {
     const [enhancedPrompt, setEnhancedPrompt] = useState('');
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const [promptCoins, setPromptCoins] = useState(45); // Free tier limit (45 PC = 3 enhancements, will be updated from settings)
+    const [promptCoins, setPromptCoins] = useState(0); // Will be fetched from user profile
     const [showBuyCreditsModal, setShowBuyCreditsModal] = useState(false);
     const [showWizardMode, setShowWizardMode] = useState(false);
     const [limitSettings, setLimitSettings] = useState<LimitSettings>({
@@ -50,20 +51,31 @@ export default function PromptBuilder() {
     });
 
     useEffect(() => {
-        const fetchUser = async () => {
+        const fetchUserAndBalance = async () => {
             const supabase = createClient();
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
+            
+            if (user) {
+                // Fetch user's actual PromptCoin balance
+                try {
+                    const response = await fetch('/api/user/balance');
+                    if (response.ok) {
+                        const data = await response.json();
+                        setPromptCoins(data.balance || 0);
+                    }
+                } catch (error) {
+                    console.error('Error fetching PromptCoin balance:', error);
+                }
+            }
         };
-        fetchUser();
+        fetchUserAndBalance();
 
         // Load limit settings from admin configuration
         const loadLimitSettings = async () => {
             try {
                 const settings = await getSettings('limits') as LimitSettings;
                 setLimitSettings(settings);
-                // Update initial PromptCoins based on settings (assuming free tier for now)
-                setPromptCoins(settings.prompt_builder_free_daily * 15); // 15 PC per enhancement
             } catch (error) {
                 console.error('Failed to load limit settings:', error);
                 // Keep default values if loading fails
@@ -258,8 +270,15 @@ export default function PromptBuilder() {
                             <p className="text-neutral-600 dark:text-neutral-300">Construct detailed prompts with AI assistance.</p>
                         </div>
                         <div className="text-right">
-                            <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                                PromptCoins: {promptCoins} ({Math.floor(promptCoins / 15)} enhancements left)
+                            <div className="flex items-center justify-end gap-2 mb-1">
+                                <PromptCoinDisplay 
+                                    amount={promptCoins} 
+                                    size="md"
+                                    showLabel 
+                                />
+                            </div>
+                            <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                                ({Math.floor(promptCoins / 15)} enhancements left)
                             </div>
                             {promptCoins < 30 && ( // Show warning when less than 2 enhancements left
                                 <button 
