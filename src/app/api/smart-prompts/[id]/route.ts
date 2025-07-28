@@ -11,17 +11,57 @@ export async function GET(
   try {
     const promptId = parseInt(params.id);
 
-    // Get prompt details with creator info
-    const { data: prompt, error: promptError } = await supabase
-      .from('saved_prompts')
-      .select(`
-        *,
-        profiles!saved_prompts_user_id_fkey(full_name)
-      `)
-      .eq('id', promptId)
-      .eq('is_marketplace', true)
-      .eq('is_public', true)
-      .single();
+    // Get prompt details with creator info - allow owners to access their own prompts
+    let prompt, promptError;
+    
+    if (user) {
+      // If user is logged in, check if they own the prompt first
+      const { data: ownedPrompt, error: ownedError } = await supabase
+        .from('saved_prompts')
+        .select(`
+          *,
+          profiles!saved_prompts_user_id_fkey(full_name)
+        `)
+        .eq('id', promptId)
+        .eq('user_id', user.id)
+        .single();
+      
+      if (ownedPrompt && !ownedError) {
+        // User owns this prompt, allow access regardless of marketplace/public flags
+        prompt = ownedPrompt;
+        promptError = null;
+      } else {
+        // Not owned by user, check marketplace prompts
+        const { data: marketplacePrompt, error: marketplaceError } = await supabase
+          .from('saved_prompts')
+          .select(`
+            *,
+            profiles!saved_prompts_user_id_fkey(full_name)
+          `)
+          .eq('id', promptId)
+          .eq('is_marketplace', true)
+          .eq('is_public', true)
+          .single();
+        
+        prompt = marketplacePrompt;
+        promptError = marketplaceError;
+      }
+    } else {
+      // Anonymous user, only show public marketplace prompts
+      const { data: publicPrompt, error: publicError } = await supabase
+        .from('saved_prompts')
+        .select(`
+          *,
+          profiles!saved_prompts_user_id_fkey(full_name)
+        `)
+        .eq('id', promptId)
+        .eq('is_marketplace', true)
+        .eq('is_public', true)
+        .single();
+      
+      prompt = publicPrompt;
+      promptError = publicError;
+    }
 
     if (promptError || !prompt) {
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
