@@ -29,15 +29,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ leve
         return NextResponse.json({ error: `Not enough questions in the database for this level. Found ${allQuestions.length}, need ${QUIZ_LENGTH}.` }, { status: 500 });
     }
 
-    // Use proper Fisher-Yates shuffle instead of biased Math.random() sort
-    const shuffledQuestions = shuffleQuestions(allQuestions as QuizQuestion[]);
+    // Use proper Fisher-Yates shuffle instead of biased Math.random() sort (but keep original format for now)
+    const shuffledQuestions = shuffleQuestions(allQuestions);
     const selectedQuestions = shuffledQuestions.slice(0, QUIZ_LENGTH);
     
-    // Randomize option order for each question while preserving correct answers
-    const randomizedQuestions = randomizeQuizQuestions(selectedQuestions);
+    // For now, just return the questions without option randomization to fix the loading issue
+    // TODO: Implement secure option randomization with server-side answer mapping
     
     return NextResponse.json({ 
-        questions: randomizedQuestions, 
+        questions: selectedQuestions, 
         timeLimit: TIME_LIMIT_IN_MINUTES * 60 
     });
 }
