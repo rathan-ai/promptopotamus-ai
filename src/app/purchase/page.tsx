@@ -6,7 +6,7 @@ import { Metadata } from 'next';
 import { Coins, Check, ArrowLeft, Shield, Clock, CreditCard, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import PayPalPaymentModal from '@/components/features/payments/PayPalPaymentModal';
+import PayPalGenericModal from '@/components/features/payments/PayPalGenericModal';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 
@@ -216,13 +216,14 @@ function PurchaseContent() {
 
       {/* PayPal Payment Modal */}
       {showPaymentModal && amount && (
-        <PayPalPaymentModal
+        <PayPalGenericModal
           isOpen={showPaymentModal}
           onClose={handlePaymentClose}
           onSuccess={handlePaymentSuccess}
           amount={parsedAmount}
           description={`PromptCoins Purchase`}
           itemName={`${promptCoins} PromptCoins`}
+          purchaseType="promptcoin"
         />
       )}
     </div>

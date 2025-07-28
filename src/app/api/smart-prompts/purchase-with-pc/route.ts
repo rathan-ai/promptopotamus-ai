@@ -12,12 +12,12 @@ export async function POST(req: Request) {
 
     const { promptId, amount } = await req.json();
 
-    if (!promptId || !amount) {
+    if (!promptId || amount === undefined || amount === null) {
       return NextResponse.json({ error: 'Prompt ID and amount are required' }, { status: 400 });
     }
 
-    // Validate amount is a positive integer
-    if (!Number.isInteger(amount) || amount <= 0) {
+    // Validate amount is a non-negative integer (allow 0 for free prompts)
+    if (!Number.isInteger(amount) || amount < 0) {
       return NextResponse.json({ error: 'Invalid PromptCoin amount' }, { status: 400 });
     }
 

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
-import PayPalPaymentModal from '@/components/features/payments/PayPalPaymentModal';
+import { PromptCoinSymbol } from '@/components/ui/PromptCoinDisplay';
 import ReviewsList from '@/components/features/prompts/ReviewsList';
 
 interface SmartPromptDetail {
@@ -83,7 +83,6 @@ export default function SmartPromptDetailPage() {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'preview' | 'variables' | 'examples' | 'reviews'>('preview');
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -170,55 +169,41 @@ export default function SmartPromptDetailPage() {
   const handlePurchase = async () => {
     if (!prompt) return;
     
-    // If it's a free prompt, handle it directly
-    if (prompt.price === 0) {
-      setIsPurchasing(true);
-      try {
-        const response = await fetch('/api/smart-prompts/purchase', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ promptId: prompt.id })
-        });
+    setIsPurchasing(true);
+    try {
+      // Use the PromptCoin purchase endpoint
+      const response = await fetch('/api/smart-prompts/purchase-with-pc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          promptId: prompt.id,
+          amount: prompt.price // price is already in PromptCoins
+        })
+      });
 
-        const data = await response.json();
-        
-        if (response.ok && data.free) {
-          toast.success('Free prompt added to your collection!');
-          setHasAccess(true);
-        } else {
-          toast.error(data.error || 'Error processing purchase');
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        toast.success(data.message || 'Smart Prompt purchased successfully!');
+        setHasAccess(true);
+      } else if (data.shortage) {
+        // User doesn't have enough PromptCoins
+        toast.error(`You need ${data.shortage} more PromptCoins to purchase this prompt.`);
+        // Optionally redirect to purchase page
+        if (confirm('Would you like to buy more PromptCoins?')) {
+          window.location.href = '/purchase';
         }
-      } catch (error) {
-        console.error('Error purchasing prompt:', error);
-        toast.error('Error processing purchase');
-      } finally {
-        setIsPurchasing(false);
+      } else {
+        toast.error(data.error || 'Error processing purchase');
       }
-    } else {
-      // For paid prompts, open payment modal
-      setShowPaymentModal(true);
+    } catch (error) {
+      console.error('Error purchasing prompt:', error);
+      toast.error('Error processing purchase');
+    } finally {
+      setIsPurchasing(false);
     }
   };
 
-  const handlePaymentSuccess = () => {
-    setHasAccess(true);
-    // Refresh prompt data to get updated download count
-    const fetchPrompt = async () => {
-      try {
-        const response = await fetch(`/api/smart-prompts/${params.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          const foundPrompt = data.prompt;
-          if (foundPrompt) {
-            setPrompt(foundPrompt);
-          }
-        }
-      } catch (error) {
-        console.error('Error refreshing prompt:', error);
-      }
-    };
-    fetchPrompt();
-  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -341,7 +326,14 @@ export default function SmartPromptDetailPage() {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-              {prompt.price > 0 ? `$${prompt.price.toFixed(2)}` : 'Free'}
+              {prompt.price > 0 ? (
+                <span className="flex items-center gap-1">
+                  {prompt.price}
+                  <PromptCoinSymbol className="w-7 h-7" />
+                </span>
+              ) : (
+                'Free'
+              )}
             </div>
             <div className="flex items-center text-sm text-neutral-500">
               {renderStars(prompt.rating_average)}
@@ -362,7 +354,7 @@ export default function SmartPromptDetailPage() {
                 </div>
               ) : (
                 <>
-                  {prompt.price > 0 ? <DollarSign className="w-4 h-4 mr-2" /> : <Download className="w-4 h-4 mr-2" />}
+                  {prompt.price > 0 ? <PromptCoinSymbol className="w-4 h-4 mr-2" /> : <Download className="w-4 h-4 mr-2" />}
                   {prompt.price > 0 ? 'Purchase' : 'Get Free'}
                 </>
               )}
@@ -453,7 +445,14 @@ export default function SmartPromptDetailPage() {
                         Get this smart prompt to unlock the interactive preview and customization features.
                       </p>
                       <Button onClick={handlePurchase} disabled={isPurchasing}>
-                        {prompt.price > 0 ? `Purchase for $${prompt.price}` : 'Get for Free'}
+                        {prompt.price > 0 ? (
+                          <span className="flex items-center gap-2">
+                            Purchase for {prompt.price}
+                            <PromptCoinSymbol className="w-4 h-4" />
+                          </span>
+                        ) : (
+                          'Get for Free'
+                        )}
                       </Button>
                     </div>
                   )}
@@ -649,18 +648,7 @@ export default function SmartPromptDetailPage() {
         </div>
       </div>
 
-      {/* Stripe Payment Modal */}
-      {prompt && showPaymentModal && (
-        <PayPalPaymentModal
-          isOpen={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
-          onSuccess={handlePaymentSuccess}
-          promptId={prompt.id}
-          amount={prompt.price}
-          promptTitle={prompt.title}
-          sellerName={prompt.profiles?.full_name || 'Unknown Creator'}
-        />
-      )}
+      {/* Payment handled with PromptCoins directly */}
     </div>
   );
 }

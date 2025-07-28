@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Coins } from 'lucide-react';
+import { PromptCoinSymbol as CustomSymbol } from './PromptCoinSymbol';
 
 interface PromptCoinDisplayProps {
   amount: number;
@@ -10,6 +11,7 @@ interface PromptCoinDisplayProps {
   showSymbol?: boolean;
   showLabel?: boolean;
   variant?: 'default' | 'success' | 'warning' | 'muted';
+  symbolType?: 'coin' | 'custom';
 }
 
 const sizeClasses = {
@@ -53,7 +55,8 @@ export function PromptCoinDisplay({
   className = '',
   showSymbol = true,
   showLabel = false,
-  variant = 'default'
+  variant = 'default',
+  symbolType = 'custom'
 }: PromptCoinDisplayProps) {
   const sizeStyle = sizeClasses[size];
   const variantStyle = variantClasses[variant];
@@ -64,7 +67,11 @@ export function PromptCoinDisplay({
   return (
     <span className={`inline-flex items-center font-medium ${sizeStyle.gap} ${variantStyle} ${className}`}>
       {showSymbol && (
-        <Coins className={`${sizeStyle.icon} fill-current`} />
+        symbolType === 'coin' ? (
+          <Coins className={`${sizeStyle.icon} fill-current`} />
+        ) : (
+          <CustomSymbol className={sizeStyle.icon} />
+        )
       )}
       <span className={sizeStyle.text}>
         {formattedAmount}
@@ -112,5 +119,8 @@ export function PromptCoinCost({ amount, className }: { amount: number; classNam
     />
   );
 }
+
+// Export the symbol component for standalone use
+export { PromptCoinSymbol } from './PromptCoinSymbol';
 
 export default PromptCoinDisplay;
