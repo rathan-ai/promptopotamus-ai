@@ -110,6 +110,11 @@ export async function GET(req: NextRequest) {
       }).filter(Boolean) || [];
 
       console.log('Purchased prompts processed:', purchasedPrompts.length, 'from', purchased?.length || 0, 'raw purchases');
+      console.log('Raw purchased data:', purchased?.map(p => ({ 
+        id: p.id, 
+        prompt_id: p.prompt_id, 
+        saved_prompts: p.saved_prompts ? { id: p.saved_prompts.id, title: p.saved_prompts.title } : null 
+      })));
     }
 
     // Get sales analytics for created marketplace prompts

@@ -92,6 +92,7 @@ export default function SmartPromptsPage() {
   const [filteredPrompts, setFilteredPrompts] = useState<SmartPrompt[]>([]);
   const [userCreatedPrompts, setUserCreatedPrompts] = useState<SmartPrompt[]>([]);
   const [userPurchasedPrompts, setUserPurchasedPrompts] = useState<SmartPrompt[]>([]);
+  const [purchasedPromptIds, setPurchasedPromptIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [myPromptsLoading, setMyPromptsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -200,6 +201,14 @@ export default function SmartPromptsPage() {
           setUserPurchasedPrompts([]);
         }
       }
+      
+      // Also fetch purchased prompt IDs for marketplace status check
+      const idsResponse = await fetch('/api/smart-prompts/purchased-ids');
+      if (idsResponse.ok) {
+        const idsData = await idsResponse.json();
+        console.log('Fetched purchased prompt IDs:', idsData.purchasedIds || []);
+        setPurchasedPromptIds(idsData.purchasedIds || []);
+      }
     } catch (error) {
       console.error('Error fetching user prompts:', error);
       // Only show error if user is trying to access "My Prompts" view
@@ -239,10 +248,15 @@ export default function SmartPromptsPage() {
   };
 
   useEffect(() => {
-    fetchPrompts();
-    checkCertificationStatus();
-    // Always fetch user's purchased prompts for marketplace purchase status
-    fetchMyPrompts();
+    const loadData = async () => {
+      // Load prompts first
+      await fetchPrompts();
+      // Then load user data (purchased prompts, etc.)
+      await fetchMyPrompts();
+      // Finally check certification
+      await checkCertificationStatus();
+    };
+    loadData();
   }, [selectedCategory, selectedComplexity, selectedDifficulty, priceRange]);
   
   useEffect(() => {
@@ -465,8 +479,9 @@ export default function SmartPromptsPage() {
   );
 
   const PromptCard = ({ prompt }: { prompt: SmartPrompt }) => {
-    // Check if user has purchased this prompt (ensure we're comparing numbers)
-    const isPurchased = userPurchasedPrompts.some(p => Number(p.id) === Number(prompt.id));
+    // Check if user has purchased this prompt (use both methods for reliability)
+    const isPurchased = purchasedPromptIds.includes(Number(prompt.id)) || 
+                       userPurchasedPrompts.some(p => Number(p.id) === Number(prompt.id));
     // Check if user created this prompt
     const isOwned = currentUser && prompt.user_id === currentUser.id;
     
