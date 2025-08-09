@@ -96,24 +96,9 @@ export default function Introduction() {
           </div>
 
           <div className="text-small text-neutral-500 dark:text-neutral-400">
-            <span className="inline-flex items-center gap-1">
-              ✨ Free tools available • 🎓 Professional certification • 🚀 Enterprise solutions
-            </span>
+            Pay only for what you use • No subscriptions required
           </div>
         </div>
-      </div>
-
-      {/* Quote Section */}
-      <div className="mt-16 text-center">
-        <blockquote className="relative">
-          <div className="absolute -top-6 -left-6 text-6xl text-indigo-200 dark:text-indigo-800 font-serif">"</div>
-          <p className="text-body-large italic text-neutral-700 dark:text-neutral-300 max-w-3xl mx-auto mb-4 relative z-10">
-            Prompt engineering is the key that unlocks the full potential of AI. It's how we turn a general-purpose model into a specialized expert for any task.
-          </p>
-          <cite className="text-small text-neutral-500 dark:text-neutral-400 font-medium">
-            — The Promptopotamus Team
-          </cite>
-        </blockquote>
       </div>
     </Section>
   );

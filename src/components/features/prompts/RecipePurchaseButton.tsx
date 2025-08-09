@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { DollarSign, Coins, Loader2, ShoppingCart } from 'lucide-react';
+import { DollarSign, Loader2, ShoppingCart } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface RecipePurchaseButtonProps {
@@ -10,7 +10,6 @@ interface RecipePurchaseButtonProps {
   price: number;
   title: string;
   sellerName: string;
-  userPromptCoins?: number;
   onPurchaseSuccess?: () => void;
   className?: string;
 }
@@ -20,27 +19,18 @@ export default function RecipePurchaseButton({
   price,
   title,
   sellerName,
-  userPromptCoins = 0,
   onPurchaseSuccess,
   className = ''
 }: RecipePurchaseButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [purchaseMethod, setPurchaseMethod] = useState<'usd' | 'promptcoins' | null>(null);
+  const [purchaseMethod, setPurchaseMethod] = useState<'usd' | null>(null);
 
-  const promptCoinPrice = price; // Price is already in PromptCoins
-  const hasEnoughPromptCoins = userPromptCoins >= promptCoinPrice;
-
-  const handlePromptCoinPurchase = async () => {
-    if (!hasEnoughPromptCoins) {
-      toast.error(`You need ${promptCoinPrice} PromptCoins but only have ${userPromptCoins} PC. Buy more PromptCoins to continue.`);
-      return;
-    }
-
+  const handlePurchase = async () => {
     setIsLoading(true);
-    setPurchaseMethod('promptcoins');
+    setPurchaseMethod('usd');
 
     try {
-      const response = await fetch('/api/smart-prompts/purchase-promptcoins', {
+      const response = await fetch('/api/smart-prompts/purchase', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

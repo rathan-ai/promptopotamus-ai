@@ -4,21 +4,14 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import Introduction from "@/components/guides/Introduction";
-import PromptCoinStatusBanner from "@/components/features/payments/SubscriptionStatusBanner";
 import FeaturedPromptsShowcase from "@/components/features/prompts/FeaturedPromptsShowcase";
 import HowItWorks from "@/components/features/shared/HowItWorks";
 import PromptBuilder from "@/components/features/prompts/PromptBuilder";
 import PromptAnalyzer from "@/components/features/prompts/PromptAnalyzer";
-import BasicTechniques from "@/components/guides/BasicTechniques";
-import AdvancedTechniques from "@/components/guides/AdvancedTechniques";
-import PromptRecipes from "@/components/guides/PromptRecipes";
-import IndustryGuides from "@/components/guides/IndustryGuides";
-import ExploringModels from "@/components/guides/ExploringModels";
-import BestPractices from "@/components/guides/BestPractices";
-import RisksCaution from "@/components/guides/RisksCaution";
-import FurtherReading from "@/components/guides/FurtherReading";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { BookOpen } from "lucide-react";
 
-const SectionSeparator = () => <hr className="my-12 border-t border-dashed border-neutral-200 dark:border-neutral-800" />;
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -39,12 +32,6 @@ export default function Home() {
         <Introduction />
       </div>
 
-      {/* PromptCoin Status Banner */}
-      {user && (
-        <div className="max-w-4xl mx-auto">
-          <PromptCoinStatusBanner user={user} />
-        </div>
-      )}
       
       {/* Featured Prompts Marketplace */}
       <FeaturedPromptsShowcase />
@@ -52,28 +39,26 @@ export default function Home() {
       {/* How It Works Section */}
       <HowItWorks />
       
-      {/* Educational Content */}
+      {/* Interactive Tools */}
       <div className="max-w-4xl mx-auto space-y-12">
-        <SectionSeparator />
         <PromptBuilder />
-        <SectionSeparator />
         <PromptAnalyzer />
-        <SectionSeparator />
-        <BasicTechniques />
-        <SectionSeparator />
-        <AdvancedTechniques />
-        <SectionSeparator />
-        <PromptRecipes />
-        <SectionSeparator />
-        <IndustryGuides />
-        <SectionSeparator />
-        <ExploringModels />
-        <SectionSeparator />
-        <BestPractices />
-        <SectionSeparator />
-        <RisksCaution />
-        <SectionSeparator />
-        <FurtherReading />
+      </div>
+      
+      {/* Link to Guides */}
+      <div className="max-w-4xl mx-auto text-center py-12">
+        <h2 className="text-h2 text-neutral-900 dark:text-white mb-4">
+          Want to Learn More?
+        </h2>
+        <p className="text-body text-neutral-600 dark:text-neutral-400 mb-6">
+          Explore our comprehensive guides on prompt engineering techniques and best practices.
+        </p>
+        <Link href="/guides">
+          <Button size="lg" variant="outline">
+            <BookOpen className="w-5 h-5 mr-2" />
+            View All Guides
+          </Button>
+        </Link>
       </div>
     </div>
   );

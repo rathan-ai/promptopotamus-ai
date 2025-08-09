@@ -11,7 +11,7 @@ const steps = [
     action: "Explore Smart Prompts",
     href: "/smart-prompts",
     color: "from-blue-500 to-cyan-500",
-    bgColor: "from-blue-50/50 to-cyan-50/50 dark:from-blue-900/20 dark:to-cyan-900/20"
+    bgColor: "bg-neutral-50 dark:bg-neutral-800/50"
   },
   {
     icon: Edit3,
@@ -20,7 +20,7 @@ const steps = [
     action: "Try Prompt Builder",
     href: "/#generator",
     color: "from-purple-500 to-pink-500",
-    bgColor: "from-purple-50/50 to-pink-50/50 dark:from-purple-900/20 dark:to-pink-900/20"
+    bgColor: "bg-neutral-50 dark:bg-neutral-800/50"
   },
   {
     icon: CheckCircle,
@@ -29,7 +29,7 @@ const steps = [
     action: "Learn Best Practices",
     href: "/#best-practices",
     color: "from-green-500 to-emerald-500",
-    bgColor: "from-green-50/50 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-900/20"
+    bgColor: "bg-neutral-50 dark:bg-neutral-800/50"
   },
   {
     icon: Award,
@@ -38,13 +38,13 @@ const steps = [
     action: "Get Certified",
     href: "/certificates",
     color: "from-orange-500 to-red-500",
-    bgColor: "from-orange-50/50 to-red-50/50 dark:from-orange-900/20 dark:to-red-900/20"
+    bgColor: "bg-neutral-50 dark:bg-neutral-800/50"
   }
 ];
 
 const HowItWorks = () => {
   return (
-    <section className="py-24 bg-gradient-to-b from-neutral-50 to-white dark:from-neutral-900 dark:to-neutral-800">
+    <section className="py-16 bg-white dark:bg-neutral-900">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -73,7 +73,7 @@ const HowItWorks = () => {
                 </div>
                 
                 {/* Card */}
-                <div className={`relative p-8 rounded-2xl bg-gradient-to-br ${step.bgColor} border border-white/20 dark:border-neutral-700/50 backdrop-blur-sm group-hover:scale-105 transition-all duration-300 h-full`}>
+                <div className={`relative p-6 rounded-xl ${step.bgColor} border border-neutral-200 dark:border-neutral-700 h-full`}>
                   {/* Icon */}
                   <div className={`w-16 h-16 bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                     <Icon className="w-8 h-8 text-white" />

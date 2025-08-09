@@ -1,16 +1,18 @@
 import { createClient } from '@/lib/supabase/client';
 import { createServerClient } from '@/lib/supabase/server';
-import { PromptCoinPackage, PaymentTransaction, UserProfile } from '@/shared/types';
+import { PaymentTransaction, UserProfile } from '@/shared/types';
 
-import { 
-  PROMPTCOIN_COSTS, 
-  FREE_DAILY_LIMITS, 
-  PROMPTCOIN_PACKAGES,
-  getPackageById as getPackageByIdConstant
-} from '../constants';
+// Pricing constants in USD
+export const FEATURE_PRICING = {
+  PROMPT_ANALYSIS: 0.50,      // $0.50 per analysis
+  PROMPT_ENHANCEMENT: 1.00,    // $1.00 per enhancement
+  EXAM_ATTEMPT: 5.00,          // $5.00 per exam attempt
+  EXPORT_FEATURE: 0.25,        // $0.25 per export
+  MIN_SMART_PROMPT_PRICE: 0.99, // Minimum price for Smart Prompts
+} as const;
 
 /**
- * Payment service for handling PromptCoin transactions
+ * Payment service for handling direct USD transactions
  */
 export class PaymentService {
   private supabase;
@@ -20,137 +22,144 @@ export class PaymentService {
   }
 
   /**
-   * Check if user has sufficient PromptCoins for a specific action
+   * Process a payment for a specific feature
    */
-  hasPromptCoins(
-    profile: UserProfile, 
-    action: keyof typeof PROMPTCOIN_COSTS,
-    required: number = 1
-  ): boolean {
-    const cost = PROMPTCOIN_COSTS[action] * required;
-    
-    switch (action) {
-      case 'analysis':
-        return profile.totalPromptCoins.analysis >= cost;
-      case 'enhancement':
-        return profile.totalPromptCoins.enhancement >= cost;
-      case 'exam':
-        return profile.totalPromptCoins.exam >= cost;
-      case 'export':
-        return profile.totalPromptCoins.export >= cost;
-      default:
-        return false;
-    }
-  }
-
-  /**
-   * Deduct PromptCoins for a specific action
-   */
-  async deductPromptCoins(
+  async processFeaturePayment(
     userId: string,
-    action: keyof typeof PROMPTCOIN_COSTS,
-    amount: number = 1
+    feature: keyof typeof FEATURE_PRICING,
+    transactionId: string,
+    paymentProvider: string
   ): Promise<boolean> {
-    const cost = PROMPTCOIN_COSTS[action] * amount;
-    let columnName: string;
+    const amount = FEATURE_PRICING[feature];
+    
+    try {
+      // Log the transaction
+      await this.logTransaction(
+        userId,
+        'purchase',
+        amount,
+        `Payment for ${feature.toLowerCase().replace('_', ' ')}`,
+        transactionId,
+        paymentProvider
+      );
 
-    switch (action) {
-      case 'analysis':
-        columnName = 'credits_analysis';
-        break;
-      case 'enhancement':
-        columnName = 'credits_enhancement';
-        break;
-      case 'exam':
-        columnName = 'credits_exam';
-        break;
-      case 'export':
-        columnName = 'credits_export';
-        break;
-      default:
-        return false;
-    }
+      // Feature-specific post-payment logic could go here
+      // For example, granting exam attempts, etc.
 
-    const { error } = await this.supabase
-      .from('profiles')
-      .update({
-        [columnName]: this.supabase.sql`${columnName} - ${cost}`
-      })
-      .eq('id', userId)
-      .gte(columnName, cost);
-
-    if (error) {
-      console.error('Error deducting PromptCoins:', error);
+      return true;
+    } catch (error) {
+      console.error('Error processing feature payment:', error);
       return false;
     }
-
-    // Log the transaction
-    await this.logTransaction(userId, 'usage', cost, `Used ${cost} PC for ${action}`);
-    return true;
   }
 
   /**
-   * Add PromptCoins from payment
+   * Process a Smart Prompt purchase
    */
-  async addPromptCoinsFromPayment(
-    userId: string,
-    promptCoinsToAdd: {
-      analysis: number;
-      enhancement: number;
-      exam: number;
-      export: number;
-    },
-    paymentProvider: string,
+  async processSmartPromptPurchase(
+    buyerId: string,
+    sellerId: string,
+    promptId: string,
+    price: number,
     transactionId: string,
-    paymentAmount: number
+    paymentProvider: string
   ): Promise<boolean> {
     try {
-      const { error } = await this.supabase
-        .from('profiles')
-        .update({
-          credits_analysis: this.supabase.sql`credits_analysis + ${promptCoinsToAdd.analysis}`,
-          credits_enhancement: this.supabase.sql`credits_enhancement + ${promptCoinsToAdd.enhancement}`,
-          credits_exam: this.supabase.sql`credits_exam + ${promptCoinsToAdd.exam}`,
-          credits_export: this.supabase.sql`credits_export + ${promptCoinsToAdd.export}`,
-          payment_status: 'active'
-        })
-        .eq('id', userId);
+      // Calculate platform fee (e.g., 20%)
+      const platformFee = price * 0.20;
+      const sellerEarnings = price - platformFee;
 
-      if (error) {
-        console.error('Error adding PromptCoins:', error);
+      // Record the purchase
+      const { error: purchaseError } = await this.supabase
+        .from('smart_prompt_purchases')
+        .insert({
+          prompt_id: promptId,
+          buyer_id: buyerId,
+          seller_id: sellerId,
+          price: price,
+          platform_fee: platformFee,
+          seller_earnings: sellerEarnings,
+          transaction_id: transactionId,
+          payment_provider: paymentProvider,
+          created_at: new Date().toISOString()
+        });
+
+      if (purchaseError) {
+        console.error('Error recording Smart Prompt purchase:', purchaseError);
         return false;
       }
 
       // Log the transaction
-      const totalCoins = Object.values(promptCoinsToAdd).reduce((sum, coins) => sum + coins, 0);
       await this.logTransaction(
-        userId, 
-        'purchase', 
-        paymentAmount, 
-        `Purchased ${totalCoins} PromptCoins via ${paymentProvider}`,
+        buyerId,
+        'smart_prompt_purchase',
+        price,
+        `Purchased Smart Prompt #${promptId}`,
+        transactionId,
+        paymentProvider
+      );
+
+      // Log seller earnings
+      await this.logTransaction(
+        sellerId,
+        'smart_prompt_sale',
+        sellerEarnings,
+        `Earned from Smart Prompt #${promptId} sale`,
         transactionId,
         paymentProvider
       );
 
       return true;
     } catch (error) {
-      console.error('Error in addPromptCoinsFromPayment:', error);
+      console.error('Error processing Smart Prompt purchase:', error);
       return false;
     }
   }
 
   /**
-   * Get available PromptCoin packages
+   * Process exam payment
    */
-  getPromptCoinPackages(): PromptCoinPackage[] {
-    return PROMPTCOIN_PACKAGES;
-  }
+  async processExamPayment(
+    userId: string,
+    examLevel: string,
+    transactionId: string,
+    paymentProvider: string
+  ): Promise<boolean> {
+    try {
+      const amount = FEATURE_PRICING.EXAM_ATTEMPT;
 
-  /**
-   * Get package by ID
-   */
-  getPackageById(packageId: string): PromptCoinPackage | null {
-    return getPackageByIdConstant(packageId);
+      // Grant exam attempt
+      const { error } = await this.supabase
+        .from('exam_attempts')
+        .insert({
+          user_id: userId,
+          exam_level: examLevel,
+          payment_amount: amount,
+          transaction_id: transactionId,
+          payment_provider: paymentProvider,
+          created_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error granting exam attempt:', error);
+        return false;
+      }
+
+      // Log the transaction
+      await this.logTransaction(
+        userId,
+        'exam_attempt',
+        amount,
+        `Exam attempt for ${examLevel} level`,
+        transactionId,
+        paymentProvider
+      );
+
+      return true;
+    } catch (error) {
+      console.error('Error processing exam payment:', error);
+      return false;
+    }
   }
 
   /**
@@ -158,21 +167,22 @@ export class PaymentService {
    */
   private async logTransaction(
     userId: string,
-    type: 'purchase' | 'usage' | 'refund',
+    type: string,
     amount: number,
     description: string,
-    transactionId?: string,
-    paymentProvider?: string
+    transactionId: string,
+    paymentProvider: string
   ): Promise<void> {
     try {
       await this.supabase
-        .from('promptcoin_transactions')
+        .from('payment_transactions')
         .insert({
           user_id: userId,
           type,
           amount,
+          currency: 'USD',
           description,
-          transaction_id: transactionId || `${type}_${Date.now()}`,
+          transaction_id: transactionId,
           payment_provider: paymentProvider,
           created_at: new Date().toISOString()
         });
@@ -187,7 +197,7 @@ export class PaymentService {
    */
   async getTransactionHistory(userId: string, limit: number = 50): Promise<PaymentTransaction[]> {
     const { data, error } = await this.supabase
-      .from('promptcoin_transactions')
+      .from('payment_transactions')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
@@ -199,6 +209,41 @@ export class PaymentService {
     }
 
     return data || [];
+  }
+
+  /**
+   * Calculate seller earnings after platform fee
+   */
+  calculateSellerEarnings(salePrice: number): {
+    platformFee: number;
+    sellerEarnings: number;
+  } {
+    const platformFeePercentage = 0.20; // 20% platform fee
+    const platformFee = salePrice * platformFeePercentage;
+    const sellerEarnings = salePrice - platformFee;
+
+    return {
+      platformFee: Math.round(platformFee * 100) / 100,
+      sellerEarnings: Math.round(sellerEarnings * 100) / 100
+    };
+  }
+
+  /**
+   * Get user's total earnings from Smart Prompt sales
+   */
+  async getUserEarnings(userId: string): Promise<number> {
+    const { data, error } = await this.supabase
+      .from('smart_prompt_purchases')
+      .select('seller_earnings')
+      .eq('seller_id', userId);
+
+    if (error) {
+      console.error('Error fetching user earnings:', error);
+      return 0;
+    }
+
+    const totalEarnings = data?.reduce((sum, purchase) => sum + purchase.seller_earnings, 0) || 0;
+    return Math.round(totalEarnings * 100) / 100;
   }
 }
 

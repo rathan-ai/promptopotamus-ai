@@ -6,7 +6,6 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
 import type { AITemplate } from '@/lib/data';
 import { track } from '@vercel/analytics';
-import UpgradeModal from '../payments/UpgradeModal';
 
 interface TemplateCardProps {
   template: AITemplate;
@@ -14,7 +13,6 @@ interface TemplateCardProps {
 
 export default function TemplateCard({ template }: TemplateCardProps) {
   const { title, prompt, tier, tags, usageCount, rating } = template;
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const handleCopy = () => {
     if (tier === 'premium' || tier === 'pro') {
       // Track premium template access attempt
@@ -24,7 +22,7 @@ export default function TemplateCard({ template }: TemplateCardProps) {
         template_tier: tier,
         template_category: template.category
       });
-      toast.error('Premium templates require PromptCoins! Purchase credits to access.');
+      toast.error('Premium templates require payment. Click to purchase access.');
       return;
     }
     
@@ -41,16 +39,17 @@ export default function TemplateCard({ template }: TemplateCardProps) {
     toast.success('Prompt copied to clipboard!');
   };
 
-  const handlePurchaseCredits = () => {
-    // Track PromptCoin purchase button click
-    track('template_promptcoin_purchase_clicked', {
+  const handlePurchase = () => {
+    // Track purchase button click
+    track('template_purchase_clicked', {
       template_id: template.id,
       template_name: title,
       template_tier: tier,
       template_category: template.category
     });
     
-    setShowUpgradeModal(true);
+    // TODO: Implement direct purchase flow
+    toast.info('Purchase flow coming soon');
   };
 
   const getTierConfig = (tier: string) => {

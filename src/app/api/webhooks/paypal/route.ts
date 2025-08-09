@@ -17,30 +17,7 @@ const getPayPalConfig = () => {
   return { webhookId, clientId, clientSecret, environment };
 };
 
-// Idempotency cache for webhook events
-const processedEvents = new Map<string, { timestamp: number; status: string }>();
-const IDEMPOTENCY_TTL = 24 * 60 * 60 * 1000; // 24 hours
-
-function cleanIdempotencyCache() {
-  const now = Date.now();
-  for (const [eventId, data] of processedEvents.entries()) {
-    if (now - data.timestamp > IDEMPOTENCY_TTL) {
-      processedEvents.delete(eventId);
-    }
-  }
-}
-
-function isEventProcessed(eventId: string): boolean {
-  cleanIdempotencyCache();
-  return processedEvents.has(eventId);
-}
-
-function markEventProcessed(eventId: string, status: string): void {
-  processedEvents.set(eventId, {
-    timestamp: Date.now(),
-    status
-  });
-}
+import { isEventProcessed, markEventProcessed } from '@/lib/webhooks/idempotency';
 
 async function verifyPayPalWebhook(
   headers: Headers,

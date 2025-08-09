@@ -22,30 +22,7 @@ const getEndpointSecret = () => {
   return secret;
 };
 
-// Idempotency cache for webhook events (use Redis in production)
-const processedEvents = new Map<string, { timestamp: number; status: string }>();
-const IDEMPOTENCY_TTL = 24 * 60 * 60 * 1000; // 24 hours
-
-function cleanIdempotencyCache() {
-  const now = Date.now();
-  for (const [eventId, data] of processedEvents.entries()) {
-    if (now - data.timestamp > IDEMPOTENCY_TTL) {
-      processedEvents.delete(eventId);
-    }
-  }
-}
-
-function isEventProcessed(eventId: string): boolean {
-  cleanIdempotencyCache();
-  return processedEvents.has(eventId);
-}
-
-function markEventProcessed(eventId: string, status: string): void {
-  processedEvents.set(eventId, {
-    timestamp: Date.now(),
-    status
-  });
-}
+import { isEventProcessed, markEventProcessed } from '@/lib/webhooks/idempotency';
 
 export async function POST(req: Request) {
   const supabase = await createServerClient();

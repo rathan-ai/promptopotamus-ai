@@ -1,6 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { paymentAdapter } from '@/lib/payment-adapter';
+import { serverPaymentService } from '@/features/payments/services/payment-service';
 
 export async function POST(req: Request) {
   let supabase;
