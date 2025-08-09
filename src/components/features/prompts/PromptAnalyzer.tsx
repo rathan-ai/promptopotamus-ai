@@ -27,9 +27,8 @@ const samplePrompts = [
 export default function PromptAnalyzer() {
     const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [userBalance, setUserBalance] = useState(0);
     const [currentPrompt, setCurrentPrompt] = useState('');
-    const [balanceLoading, setBalanceLoading] = useState(true);
+    const [canAnalyze, setCanAnalyze] = useState(true);
     const [limitSettings, setLimitSettings] = useState<LimitSettings>({
         prompt_builder_free_daily: 3,
         prompt_analyzer_free_daily: 5,
@@ -39,26 +38,18 @@ export default function PromptAnalyzer() {
         prompt_analyzer_premium_daily: -1,
     });
 
-    // Load user's PromptCoin balance
+    // Check if user is authenticated
     useEffect(() => {
-        const fetchUserBalance = async () => {
+        const checkAuth = async () => {
             try {
-                setBalanceLoading(true);
                 const response = await fetch('/api/user/balance');
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserBalance(data.total || 0);
-                } else {
-                    console.error('Failed to load balance');
-                }
+                setCanAnalyze(response.ok);
             } catch (err) {
-                console.error('Failed to load balance:', err);
-            } finally {
-                setBalanceLoading(false);
+                setCanAnalyze(false);
             }
         };
         
-        fetchUserBalance();
+        checkAuth();
     }, []);
 
     const analyzePrompt = (prompt: string): AnalysisResult => {
@@ -107,11 +98,11 @@ export default function PromptAnalyzer() {
             return;
         }
         
-        if (userBalance < FEATURE_PRICING.PROMPT_ANALYSIS) {
-            track('prompt_analysis_limit_reached', {
+        if (!canAnalyze) {
+            track('prompt_analysis_unauthorized', {
                 source: 'prompt_analyzer'
             });
-            toast.error(`You need $${FEATURE_PRICING.PROMPT_ANALYSIS} to analyze this prompt`);
+            toast.error('Please log in to analyze prompts');
             return;
         }
         
@@ -121,7 +112,7 @@ export default function PromptAnalyzer() {
         // Track analysis start
         track('prompt_analysis_started', {
             prompt_length: userPrompt.length,
-            remaining_balance: userBalance - FEATURE_PRICING.PROMPT_ANALYSIS
+            price: FEATURE_PRICING.PROMPT_ANALYSIS
         });
 
         try {
@@ -135,8 +126,7 @@ export default function PromptAnalyzer() {
             if (response.ok) {
                 const result = analyzePrompt(userPrompt);
                 
-                // Update balance after successful analysis
-                setUserBalance(prev => prev - FEATURE_PRICING.PROMPT_ANALYSIS);
+                // Analysis completed successfully
                 
                 // Track analysis completion with results
                 track('prompt_analysis_completed', {
@@ -214,29 +204,12 @@ export default function PromptAnalyzer() {
                     <p className="text-neutral-600 dark:text-neutral-300">Get AI-powered feedback on your prompts</p>
                 </div>
                 <div className="text-right">
-                    {balanceLoading ? (
-                        <div className="animate-pulse">
-                            <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-24 mb-1"></div>
-                            <div className="h-3 bg-neutral-200 dark:bg-neutral-700 rounded w-20"></div>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                        <span className="font-medium">${FEATURE_PRICING.PROMPT_ANALYSIS}</span> per analysis
+                        <div className="text-xs mt-1">
+                            Pay as you go
                         </div>
-                    ) : (
-                        <>
-                            <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                                <span className="font-medium">${userBalance.toFixed(2)}</span> balance
-                                <div className="text-xs mt-1">
-                                    ({Math.floor(userBalance / FEATURE_PRICING.PROMPT_ANALYSIS)} analyses left)
-                                </div>
-                            </div>
-                            {userBalance < (FEATURE_PRICING.PROMPT_ANALYSIS * 2) && (
-                                <Link href="/pricing">
-                                    <button className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer">
-                                        <Crown className="w-3 h-3 inline mr-1" />
-                                        Add Funds
-                                    </button>
-                                </Link>
-                            )}
-                        </>
-                    )}
+                    </div>
                 </div>
             </div>
 
@@ -277,8 +250,8 @@ export default function PromptAnalyzer() {
                         💡 Tip: Better prompts include persona, task, context, and format
                     </div>
                     <Button 
-                        onClick={userBalance < FEATURE_PRICING.PROMPT_ANALYSIS ? () => window.open('/pricing', '_blank') : handleAnalyze} 
-                        disabled={isLoading || balanceLoading}
+                        onClick={handleAnalyze} 
+                        disabled={isLoading || !canAnalyze}
                         className="px-6"
                     >
                         {isLoading ? (
@@ -286,10 +259,10 @@ export default function PromptAnalyzer() {
                                 <Loader2 className="animate-spin mr-2 h-4 w-4" />
                                 Analyzing...
                             </>
-                        ) : userBalance < FEATURE_PRICING.PROMPT_ANALYSIS ? (
+                        ) : !canAnalyze ? (
                             <>
                                 <Crown className="mr-2 h-4 w-4" />
-                                Add Funds to Analyze
+                                Login to Analyze
                             </>
                         ) : (
                             <>
@@ -457,47 +430,6 @@ export default function PromptAnalyzer() {
                 </div>
             )}
 
-            {/* Insufficient PromptCoins */}
-            {userBalance < FEATURE_PRICING.PROMPT_ANALYSIS && !analysis && (
-                <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-700 rounded-lg">
-                    <div className="flex items-start gap-3">
-                        <Crown className="w-6 h-6 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-1" />
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-rose-800 dark:text-rose-200 mb-2">
-                                Insufficient Funds for Analysis
-                            </h3>
-                            <p className="text-rose-700 dark:text-rose-300 text-sm mb-4">
-                                You need ${FEATURE_PRICING.PROMPT_ANALYSIS} to analyze your prompt.
-                            </p>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <Link href="/pricing">
-                                    <Button
-                                        size="sm"
-                                        className="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700"
-                                    >
-                                        <Crown className="w-4 h-4 mr-2" />
-                                        Add Funds
-                                    </Button>
-                                </Link>
-                                
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                        track('manual_analysis_from_analyzer');
-                                        document.getElementById('basic-techniques')?.scrollIntoView({ behavior: 'smooth' });
-                                    }}
-                                    className="border-rose-300 text-rose-700 hover:bg-rose-100 dark:hover:bg-rose-900/30"
-                                >
-                                    <Lightbulb className="w-4 h-4 mr-2" />
-                                    Learn Manual Analysis
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </section>
     );
 }

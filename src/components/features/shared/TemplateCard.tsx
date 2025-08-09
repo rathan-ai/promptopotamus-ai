@@ -51,8 +51,8 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       template_category: template.category
     });
     
-    // Redirect to purchase page
-    router.push('/purchase');
+    // Show premium templates require payment
+    toast.error('Premium templates require payment. This feature is coming soon.');
   };
 
   const getTierConfig = (tier: string) => {

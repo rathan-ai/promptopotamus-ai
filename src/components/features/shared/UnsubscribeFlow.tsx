@@ -237,7 +237,7 @@ export default function UnsubscribeFlow({
               <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
                 <h4 className="font-medium mb-2 dark:text-white">What you'll lose:</h4>
                 <ul className="text-sm space-y-1 text-neutral-600 dark:text-neutral-400">
-                  <li>• Unlimited AI enhancements and analyses</li>
+                  <li>• AI enhancements and analyses</li>
                   <li>• Access to premium templates</li>
                   <li>• Priority customer support</li>
                   <li>• Advanced analytics and insights</li>

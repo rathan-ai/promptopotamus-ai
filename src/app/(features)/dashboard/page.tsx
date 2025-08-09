@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2, CheckCircle, XCircle, History, FileText, Award, Eye, User as UserIcon, ShoppingCart, Brain, Plus, Coins, TrendingDown, TrendingUp } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, History, FileText, Award, Eye, User as UserIcon, ShoppingCart, Brain, Plus, DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
 import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ui/ErrorBoundary';
@@ -36,14 +36,6 @@ interface Profile {
 interface QuizAttempt { id: number; quiz_level: string; attempted_at: string; score: number; passed: boolean; }
 interface SavedPrompt { id: number; title: string; prompt_text: string; created_at: string; }
 interface UserCertificate { id: number; certificate_slug: string; earned_at: string; credential_id: string; }
-interface PromptCoinTransaction { 
-  id: number; 
-  transaction_type: string; 
-  amount: number; 
-  balance_after: number; 
-  description: string; 
-  created_at: string; 
-}
 
 interface DashboardData {
   attempts: QuizAttempt[];
@@ -52,17 +44,24 @@ interface DashboardData {
   profile: Profile;
 }
 
-interface PromptCoinData {
-  balance: number;
-  transactions: PromptCoinTransaction[];
+interface SellerData {
+  totalRevenue: number;
+  totalSales: number;
+  hasActiveListings: boolean;
+  recentSales: Array<{
+    prompt_id: number;
+    purchase_price: number;
+    purchased_at: string;
+    saved_prompts: { title: string };
+  }>;
 }
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [promptCoinData, setPromptCoinData] = useState<PromptCoinData>({ balance: 0, transactions: [] });
-  const [promptCoinLoading, setPromptCoinLoading] = useState(true);
+  const [sellerData, setSellerData] = useState<SellerData | null>(null);
+  const [sellerLoading, setSellerLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
   const supabase = createClient();
@@ -76,7 +75,7 @@ export default function DashboardPage() {
           console.error('Auth error:', userError);
           toast.error('Authentication error. Please refresh the page.');
           setLoading(false);
-          setPromptCoinLoading(false);
+          setSellerLoading(false);
           return;
         }
         setUser(user);
@@ -94,323 +93,214 @@ export default function DashboardPage() {
           toast.error(errorData.error || 'Could not load your dashboard data.');
         }
 
-        // Fetch PromptCoin data
+        // Fetch seller data if user has smart prompts
         try {
-          const [balanceRes, transactionsRes] = await Promise.all([
-            fetch('/api/user/balance'),
-            fetch('/api/user/promptcoin-transactions')
-          ]);
-          
-          const balance = balanceRes.ok ? (await balanceRes.json()).balance || 0 : 0;
-          const transactions = transactionsRes.ok ? (await transactionsRes.json()).transactions || [] : [];
-          
-          setPromptCoinData({ balance, transactions });
-        } catch (pcError) {
-          console.error('PromptCoin data fetch error:', pcError);
-          // Don't show error toast for PC data, just use defaults
+          const sellerRes = await fetch('/api/smart-prompts/my-prompts');
+          if (sellerRes.ok) {
+            const smartPromptsData = await sellerRes.json();
+            
+            // Check if user is a seller (has created prompts or sales)
+            if (smartPromptsData.salesStats && (smartPromptsData.salesStats.totalSales > 0 || smartPromptsData.created?.length > 0)) {
+              setSellerData({
+                totalRevenue: smartPromptsData.salesStats.totalRevenue || 0,
+                totalSales: smartPromptsData.salesStats.totalSales || 0,
+                hasActiveListings: smartPromptsData.created?.some((p: any) => p.is_marketplace) || false,
+                recentSales: smartPromptsData.salesStats.recentSales || []
+              });
+            }
+          }
+        } catch (sellerError) {
+          console.error('Seller data fetch error:', sellerError);
+          // Don't show error toast for seller data, just don't show the section
         }
       } catch (error) {
         console.error('Dashboard fetch error:', error);
         toast.error('Network error loading dashboard. Please check your connection.');
       } finally {
         setLoading(false);
-        setPromptCoinLoading(false);
+        setSellerLoading(false);
       }
     };
+
     fetchData();
   }, [supabase.auth]);
 
-  const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    const res = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile)
-    });
-    const result = await res.json();
-    if(res.ok) {
-        toast.success(result.message);
-    } else {
-        toast.error(result.error);
-    }
-    setIsSaving(false);
+  const getProfileCompletion = () => {
+    if (!profile) return 0;
+    const fields = ['first_name', 'last_name', 'region', 'gender', 'age', 'education'];
+    const completed = fields.filter(field => profile[field as keyof Profile]).length;
+    return Math.round((completed / fields.length) * 100);
   };
 
-  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setProfile(prev => prev ? { ...prev, [name]: value } : null);
-  };
-
-  const copyPrompt = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Prompt copied to clipboard!');
-  };
-
-  if (loading) {
-    return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  if (loading) return <LoadingSpinner />;
+  if (!data || !profile) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-lg text-neutral-600 dark:text-neutral-400">No data available. Please refresh the page.</p>
+      </div>
+    );
   }
-  
-  const passedAttempts = data?.attempts.filter(a => a.passed) || [];
-  const failedAttempts = data?.attempts.filter(a => !a.passed) || [];
-  const purchaseHistory = data?.profile.purchased_attempts ? Object.entries(data.profile.purchased_attempts) : [];
+
+  const profileCompletion = getProfileCompletion();
 
   return (
     <PageErrorBoundary>
-      <div className="max-w-5xl mx-auto space-y-12">
-      <div className="flex items-center gap-4">
-        <h1 className="text-4xl font-bold dark:text-white">Your Dashboard</h1>
-        {user && (
-          <Suspense fallback={<LoadingSpinner size="sm" />}>
-            <UserIdentityBadge user={user} size="lg" />
-          </Suspense>
-        )}
-      </div>
-
-      {/* Profile Settings Section */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><UserIcon className="mr-2" /> Profile Settings</h2>
-        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
-            <form onSubmit={handleProfileUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* First Name */}
-                <div>
-                    <label htmlFor="first_name" className="block text-sm font-medium">First Name</label>
-                    <input type="text" name="first_name" id="first_name" value={profile?.first_name || ''} onChange={handleProfileInputChange} className="mt-1 block w-full rounded-md dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 shadow-sm px-3 py-2" />
-                </div>
-                {/* Last Name */}
-                <div>
-                    <label htmlFor="last_name" className="block text-sm font-medium">Last Name</label>
-                    <input type="text" name="last_name" id="last_name" value={profile?.last_name || ''} onChange={handleProfileInputChange} className="mt-1 block w-full rounded-md dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 shadow-sm px-3 py-2" />
-                </div>
-                {/* Age */}
-                <div>
-                    <label htmlFor="age" className="block text-sm font-medium">Age</label>
-                    <input type="number" name="age" id="age" value={profile?.age || ''} onChange={handleProfileInputChange} className="mt-1 block w-full rounded-md dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 shadow-sm px-3 py-2" />
-                </div>
-                {/* Gender */}
-                <div>
-                    <label htmlFor="gender" className="block text-sm font-medium">Gender</label>
-                    <select name="gender" id="gender" value={profile?.gender || ''} onChange={handleProfileInputChange} className="mt-1 block w-full rounded-md dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 shadow-sm px-3 py-2">
-                        <option value="">Select...</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Non-binary">Non-binary</option>
-                        <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
-                </div>
-                {/* Region */}
-                <div className="md:col-span-2">
-                    <label htmlFor="region" className="block text-sm font-medium">Country / Region</label>
-                    <input type="text" name="region" id="region" value={profile?.region || ''} onChange={handleProfileInputChange} className="mt-1 block w-full rounded-md dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 shadow-sm px-3 py-2" placeholder="e.g., United States" />
-                </div>
-                {/* Education */}
-                <div className="md:col-span-2">
-                    <label htmlFor="education" className="block text-sm font-medium">Highest Educational Qualification</label>
-                    <input type="text" name="education" id="education" value={profile?.education || ''} onChange={handleProfileInputChange} className="mt-1 block w-full rounded-md dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 shadow-sm px-3 py-2" placeholder="e.g., Bachelor's Degree in Computer Science" />
-                </div>
-                {/* Save Button */}
-                <div className="md:col-span-2 text-right">
-                    <Button type="submit" disabled={isSaving}>
-                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Save Changes
-                    </Button>
-                </div>
-            </form>
-        </div>
-      </section>
-
-      {/* My Certificates Section */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><Award className="mr-2" /> My Certificates</h2>
-        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
-          {data?.certificates && data.certificates.length > 0 ? (
-            <ul className="space-y-4">
-              {data.certificates.map((cert) => (
-                <li key={cert.id} className="flex items-center justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-md">
-                  <div>
-                    <p className="font-semibold">{certDetails[cert.certificate_slug]?.badgeName || 'Certificate'}</p>
-                    <p className="text-sm text-neutral-500">Earned on: {new Date(cert.earned_at).toLocaleDateString()}</p>
-                  </div>
-                  <Link href={`/certificates/view/${cert.credential_id}`} passHref>
-                    <Button asChild size="sm" variant="outline">
-                      <a><Eye className="mr-2 h-4 w-4" /> View</a>
-                    </Button>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : ( <p className="text-neutral-500">You haven&apos;t earned any certificates yet.</p> )}
-        </div>
-      </section>
-
-      {/* Exam History Section */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><History className="mr-2" /> Exam History</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-neutral-800/50 p-4 rounded-lg">
-                <h3 className="font-semibold mb-3 flex items-center text-green-600"><CheckCircle className="mr-2" /> Passed Exams</h3>
-                {passedAttempts.length > 0 ? (
-                    <ul className="space-y-2">{passedAttempts.map(a => <li key={a.id} className="text-sm p-2 bg-neutral-100 dark:bg-neutral-800 rounded capitalize">{a.quiz_level} Exam ({a.score.toFixed(0)}%)</li>)}</ul>
-                ) : <p className="text-sm text-neutral-500">No passed exams yet.</p>}
-            </div>
-            <div className="bg-white dark:bg-neutral-800/50 p-4 rounded-lg">
-                <h3 className="font-semibold mb-3 flex items-center text-red-600"><XCircle className="mr-2" /> Failed Attempts</h3>
-                {failedAttempts.length > 0 ? (
-                    <ul className="space-y-2">{failedAttempts.map(a => <li key={a.id} className="text-sm p-2 bg-neutral-100 dark:bg-neutral-800 rounded capitalize">{a.quiz_level} Exam ({a.score.toFixed(0)}%)</li>)}</ul>
-                ) : <p className="text-sm text-neutral-500">No failed attempts. Great job!</p>}
-            </div>
-        </div>
-      </section>
-
-      {/* Purchase History Section */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><ShoppingCart className="mr-2" /> Purchase History</h2>
-        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
-          {purchaseHistory.length > 0 ? (
-            <ul className="space-y-2">
-              {purchaseHistory.map(([level, count]) => (
-                <li key={level} className="text-sm p-2 bg-neutral-100 dark:bg-neutral-800 rounded capitalize">
-                  {level}: {count} purchase(s) for {count * 3} extra attempts.
-                </li>
-              ))}
-            </ul>
-          ) : ( <p className="text-neutral-500">You have not purchased any extra attempts.</p> )}
-        </div>
-      </section>
-      
-      {/* Saved Prompts Section */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white"><FileText className="mr-2" /> Saved Prompts</h2>
-        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
-          {data?.prompts && data.prompts.length > 0 ? (
-            <ul className="space-y-4">
-              {data.prompts.map((prompt) => (
-                <li key={prompt.id} className="p-4 bg-neutral-100 dark:bg-neutral-800 rounded-md">
-                  <div className="flex justify-between items-start">
-                    <div>
-                        <p className="font-semibold">{prompt.title || 'Untitled Prompt'}</p>
-                        <p className="text-sm text-neutral-500 mt-2 whitespace-pre-wrap font-mono">{prompt.prompt_text}</p>
-                    </div>
-                    <Button size="sm" variant="ghost" onClick={() => copyPrompt(prompt.prompt_text)}>Copy</Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : ( <p className="text-neutral-500">You haven&apos;t saved any prompts yet. Use the Prompt Builder to create and save one!</p> )}
-        </div>
-      </section>
-
-      {/* PromptCoin Dashboard Section */}
-      <section id="promptcoins">
-        <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white">
-          <Coins className="mr-2 text-amber-500" /> PromptCoin Dashboard
-        </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Balance Card */}
-          <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 p-8 rounded-lg shadow-md border border-amber-200 dark:border-amber-700">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-amber-800 dark:text-amber-200">Current Balance</h3>
-              <Coins className="w-10 h-10 text-amber-500" />
-            </div>
-            {promptCoinLoading ? (
-              <div className="flex items-center">
-                <Loader2 className="h-8 w-8 animate-spin text-amber-500 mr-3" />
-                <span className="text-amber-700 dark:text-amber-300 text-lg">Loading...</span>
-              </div>
-            ) : (
-              <div className="text-4xl font-bold text-amber-900 dark:text-amber-100 mb-4">
-                <div className="text-2xl font-bold">${(promptCoinData.balance / 100).toFixed(2)}</div>
-              </div>
-            )}
-            <p className="text-amber-600 dark:text-amber-400 mb-4">
-              Use PromptCoins to purchase Smart Prompts, take exams, and enhance prompts
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
+      {/* Welcome Section */}
+      <section className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 rounded-xl shadow-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">
+              Welcome back, {profile?.first_name || 'User'}!
+            </h1>
+            <p className="text-indigo-100">
+              Manage your prompts, track your progress, and explore new AI possibilities.
             </p>
-            <Link href="/promptcoin-history">
-              <Button variant="outline" className="w-full border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30">
-                <History className="w-4 h-4 mr-2" />
-                View Complete History
+          </div>
+          <Suspense fallback={<LoadingSpinner size="sm" />}>
+            <ComponentErrorBoundary componentName="UserIdentityBadge">
+              <UserIdentityBadge user={user} size="lg" showTierName />
+            </ComponentErrorBoundary>
+          </Suspense>
+        </div>
+      </section>
+
+      {/* Profile Completion Alert */}
+      {profileCompletion < 100 && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-yellow-800 dark:text-yellow-200 font-semibold">
+                Complete your profile to unlock all features
+              </p>
+              <p className="text-yellow-600 dark:text-yellow-400 text-sm">
+                Your profile is {profileCompletion}% complete
+              </p>
+            </div>
+            <Link href="/profile">
+              <Button variant="outline" size="sm" className="border-yellow-600 text-yellow-700 hover:bg-yellow-100">
+                Complete Profile
               </Button>
             </Link>
           </div>
+        </div>
+      )}
 
-          {/* Quick Stats */}
-          <div className="space-y-6">
+      {/* Quick Stats */}
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Saved Prompts</p>
+              <p className="text-2xl font-bold dark:text-white">{data.prompts.length}</p>
+            </div>
+            <FileText className="text-indigo-500" />
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Quiz Attempts</p>
+              <p className="text-2xl font-bold dark:text-white">{data.attempts.length}</p>
+            </div>
+            <History className="text-purple-500" />
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Certificates</p>
+              <p className="text-2xl font-bold dark:text-white">{data.certificates.length}</p>
+            </div>
+            <Award className="text-green-500" />
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Pass Rate</p>
+              <p className="text-2xl font-bold dark:text-white">
+                {data.attempts.length > 0 
+                  ? `${Math.round((data.attempts.filter(a => a.passed).length / data.attempts.length) * 100)}%`
+                  : 'N/A'
+                }
+              </p>
+            </div>
+            <CheckCircle className="text-emerald-500" />
+          </div>
+        </div>
+      </section>
+
+      {/* Seller Dashboard Section - Only shown for users who sell prompts */}
+      {sellerData && sellerData.hasActiveListings && (
+        <section id="seller-earnings">
+          <h2 className="text-2xl font-semibold mb-4 flex items-center dark:text-white">
+            <DollarSign className="mr-2 text-green-500" /> Seller Earnings
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Earnings Card */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-8 rounded-lg shadow-md border border-green-200 dark:border-green-700">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-green-800 dark:text-green-200">Total Earnings</h3>
+                <DollarSign className="w-10 h-10 text-green-500" />
+              </div>
+              {sellerLoading ? (
+                <div className="flex items-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-green-500 mr-3" />
+                  <span className="text-green-700 dark:text-green-300 text-lg">Loading...</span>
+                </div>
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-green-900 dark:text-green-100 mb-2">
+                    ${(sellerData.totalRevenue || 0).toFixed(2)}
+                  </div>
+                  <p className="text-green-600 dark:text-green-400 mb-4">
+                    From {sellerData.totalSales || 0} sales
+                  </p>
+                </>
+              )}
+            </div>
+
+            {/* Recent Sales */}
             <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700">
               <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center">
                 <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
-                Recent Activity
+                Recent Sales
               </h3>
-              {promptCoinLoading ? (
+              {sellerData.recentSales.length > 0 ? (
                 <div className="space-y-3">
-                  {[1, 2].map(i => (
-                    <div key={i} className="animate-pulse flex space-x-4">
-                      <div className="rounded-full bg-neutral-200 dark:bg-neutral-700 h-8 w-8"></div>
-                      <div className="flex-1 space-y-2 py-1">
-                        <div className="h-3 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4"></div>
-                        <div className="h-2 bg-neutral-200 dark:bg-neutral-700 rounded w-1/2"></div>
+                  {sellerData.recentSales.slice(0, 3).map((sale, idx) => (
+                    <div key={idx} className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium dark:text-white">{sale.saved_prompts.title}</p>
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                          {new Date(sale.purchased_at).toLocaleDateString()}
+                        </p>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : promptCoinData.transactions.length > 0 ? (
-                <div className="space-y-3">
-                  {promptCoinData.transactions.slice(0, 3).map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-1.5 rounded-full ${
-                          transaction.amount > 0 
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                            : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                        }`}>
-                          {transaction.amount > 0 ? 
-                            <TrendingUp className="w-3 h-3" /> : 
-                            <TrendingDown className="w-3 h-3" />
-                          }
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium dark:text-white">{transaction.description}</p>
-                          <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                            {new Date(transaction.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <p className={`text-sm font-semibold ${
-                        transaction.amount > 0 
-                          ? 'text-green-600 dark:text-green-400'
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {transaction.amount > 0 ? '+' : ''}{transaction.amount} PC
+                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                        ${sale.purchase_price.toFixed(2)}
                       </p>
                     </div>
                   ))}
-                  {promptCoinData.transactions.length > 3 && (
-                    <Link href="/promptcoin-history" className="block text-center text-sm text-indigo-600 dark:text-indigo-400 hover:underline mt-3">
-                      View {promptCoinData.transactions.length - 3} more transactions
-                    </Link>
-                  )}
                 </div>
               ) : (
                 <div className="text-center py-6">
-                  <Coins className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">No transactions yet</p>
+                  <ShoppingCart className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">No sales yet</p>
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </section>
+      )}
 
-        {/* Quick Actions */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/purchase">
-            <Button className="w-full h-16 text-left flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-              <div>
-                <div className="font-semibold">Buy PromptCoins</div>
-                <div className="text-sm opacity-75">Top up your balance</div>
-              </div>
-              <Plus className="w-6 h-6" />
-            </Button>
-          </Link>
-          
+      {/* Quick Actions */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4 dark:text-white">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link href="/smart-prompts">
             <Button variant="outline" className="w-full h-16 text-left flex items-center justify-between">
               <div>
@@ -428,6 +318,16 @@ export default function DashboardPage() {
                 <div className="text-sm opacity-75">Enhance your skills</div>
               </div>
               <Award className="w-6 h-6" />
+            </Button>
+          </Link>
+          
+          <Link href="/templates">
+            <Button variant="outline" className="w-full h-16 text-left flex items-center justify-between">
+              <div>
+                <div className="font-semibold">Explore Templates</div>
+                <div className="text-sm opacity-75">Free prompt templates</div>
+              </div>
+              <FileText className="w-6 h-6" />
             </Button>
           </Link>
         </div>

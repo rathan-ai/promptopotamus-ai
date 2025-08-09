@@ -298,7 +298,7 @@ export default function FeaturedPromptsShowcase() {
             Ready to Level Up Your AI Prompts?
           </h3>
           <p className="text-neutral-600 dark:text-neutral-400 mb-6 max-w-2xl mx-auto">
-            Join thousands of professionals using Smart Prompts to enhance their AI workflows. 
+            Use Smart Prompts to enhance your AI workflows. 
             Get certified and start creating your own prompts today.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">

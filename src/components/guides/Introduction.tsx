@@ -33,7 +33,7 @@ export default function Introduction() {
             </div>
             <h3 className="text-h4 text-neutral-900 dark:text-white mb-2">Smart Prompts</h3>
             <p className="text-small text-neutral-600 dark:text-neutral-400">
-              Access thousands of professionally crafted prompts from certified creators
+              Browse and purchase prompts from certified creators
             </p>
           </div>
           
@@ -73,7 +73,7 @@ export default function Introduction() {
               Ready to Transform Your AI Experience?
             </h2>
             <p className="text-body-large text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
-              Join thousands of professionals who've mastered AI prompting. Whether you're a beginner or expert, 
+              Start mastering AI prompting today. Whether you're a beginner or expert, 
               we have the tools and knowledge to elevate your AI interactions.
             </p>
           </div>

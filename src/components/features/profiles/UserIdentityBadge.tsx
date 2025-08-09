@@ -38,7 +38,7 @@ const TIER_CONFIG = {
     bgColor: 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20',
     borderColor: 'border-yellow-400 dark:border-yellow-500',
     gradient: 'from-yellow-500 via-orange-500 to-red-500',
-    tagline: 'Leading Innovation'
+    tagline: 'Premium Member'
   }
 };
 
