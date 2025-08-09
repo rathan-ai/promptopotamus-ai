@@ -33,7 +33,7 @@ export default function Introduction() {
             </div>
             <h3 className="text-h4 text-neutral-900 dark:text-white mb-2">Smart Prompts</h3>
             <p className="text-small text-neutral-600 dark:text-neutral-400">
-              Browse and purchase prompts from certified creators
+              Browse and purchase professionally crafted prompts
             </p>
           </div>
           

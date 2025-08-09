@@ -68,7 +68,7 @@ const sections = [
     id: 'recentlyAdded',
     title: 'Recently Added',
     icon: Clock,
-    description: 'Fresh prompts from certified creators',
+    description: 'Recently added prompts',
     color: 'text-blue-600 dark:text-blue-400',
     bgColor: 'bg-blue-50 dark:bg-blue-900/20'
   },
@@ -176,7 +176,7 @@ export default function FeaturedPromptsShowcase() {
             Smart Prompts Marketplace
           </h2>
           <p className="text-xl text-neutral-600 dark:text-neutral-400 mb-8 max-w-3xl mx-auto">
-            Discover professionally crafted prompts from certified creators. Transform your AI interactions with templates, recipes, and intelligent workflows.
+            Discover professionally crafted prompts. Transform your AI interactions with templates, recipes, and intelligent workflows.
           </p>
           
           {/* Stats */}
@@ -196,9 +196,9 @@ export default function FeaturedPromptsShowcase() {
                 <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
               <div className="text-3xl font-bold text-neutral-900 dark:text-white">
-                {data.stats.totalCreators}+
+                Admin
               </div>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">Certified Creators</p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Created by</p>
             </div>
             
             <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-neutral-700">

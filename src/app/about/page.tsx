@@ -110,7 +110,7 @@ export default function AboutPage() {
           <p className="text-body text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6">
             In 2023, we launched with a vision to bridge this gap. What started as a collection of educational 
             resources has grown into a comprehensive platform featuring interactive tools, professional certifications, 
-            and a thriving marketplace where certified creators share their expertise.
+            and a marketplace for sharing prompts and expertise.
           </p>
           
           <p className="text-body text-neutral-600 dark:text-neutral-400 leading-relaxed">
