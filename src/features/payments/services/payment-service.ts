@@ -1,15 +1,9 @@
-import { createClient } from '@/lib/supabase/client';
+// Server-side only payment service
 import { createServerClient } from '@/lib/supabase/server';
 import { PaymentTransaction, UserProfile } from '@/shared/types';
 
-// Pricing constants in USD
-export const FEATURE_PRICING = {
-  PROMPT_ANALYSIS: 0.50,      // $0.50 per analysis
-  PROMPT_ENHANCEMENT: 1.00,    // $1.00 per enhancement
-  EXAM_ATTEMPT: 5.00,          // $5.00 per exam attempt
-  EXPORT_FEATURE: 0.25,        // $0.25 per export
-  MIN_SMART_PROMPT_PRICE: 0.99, // Minimum price for Smart Prompts
-} as const;
+// Re-export pricing constants
+export { FEATURE_PRICING } from './payment-constants';
 
 /**
  * Payment service for handling direct USD transactions
@@ -17,8 +11,16 @@ export const FEATURE_PRICING = {
 export class PaymentService {
   private supabase;
 
-  constructor(serverSide = false) {
-    this.supabase = serverSide ? createServerClient() : createClient();
+  constructor() {
+    // This will be initialized async in each method
+    this.supabase = null as any;
+  }
+
+  private async getSupabase() {
+    if (!this.supabase) {
+      this.supabase = await createServerClient();
+    }
+    return this.supabase;
   }
 
   /**
@@ -70,7 +72,8 @@ export class PaymentService {
       const sellerEarnings = price - platformFee;
 
       // Record the purchase
-      const { error: purchaseError } = await this.supabase
+      const supabase = await this.getSupabase();
+      const { error: purchaseError } = await supabase
         .from('smart_prompt_purchases')
         .insert({
           prompt_id: promptId,
@@ -129,7 +132,8 @@ export class PaymentService {
       const amount = FEATURE_PRICING.EXAM_ATTEMPT;
 
       // Grant exam attempt
-      const { error } = await this.supabase
+      const supabase = await this.getSupabase();
+      const { error } = await supabase
         .from('exam_attempts')
         .insert({
           user_id: userId,
@@ -174,7 +178,8 @@ export class PaymentService {
     paymentProvider: string
   ): Promise<void> {
     try {
-      await this.supabase
+      const supabase = await this.getSupabase();
+      await supabase
         .from('payment_transactions')
         .insert({
           user_id: userId,
@@ -196,7 +201,8 @@ export class PaymentService {
    * Get user's transaction history
    */
   async getTransactionHistory(userId: string, limit: number = 50): Promise<PaymentTransaction[]> {
-    const { data, error } = await this.supabase
+    const supabase = await this.getSupabase();
+    const { data, error } = await supabase
       .from('payment_transactions')
       .select('*')
       .eq('user_id', userId)
@@ -232,7 +238,8 @@ export class PaymentService {
    * Get user's total earnings from Smart Prompt sales
    */
   async getUserEarnings(userId: string): Promise<number> {
-    const { data, error } = await this.supabase
+    const supabase = await this.getSupabase();
+    const { data, error } = await supabase
       .from('smart_prompt_purchases')
       .select('seller_earnings')
       .eq('seller_id', userId);
@@ -247,6 +254,5 @@ export class PaymentService {
   }
 }
 
-// Export singleton instances
-export const paymentService = new PaymentService();
-export const serverPaymentService = new PaymentService(true);
+// Export singleton instance for server-side use only
+export const serverPaymentService = new PaymentService();

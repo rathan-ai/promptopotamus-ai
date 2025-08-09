@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Loader2, CheckCircle, AlertTriangle, Info, ExternalLink, Crown, Lightbulb, BookOpen, TrendingUp, Users, Calendar } from 'lucide-react';
 import { track } from '@vercel/analytics';
-import { FEATURE_PRICING } from '@/features/payments/services/payment-service';
+import { FEATURE_PRICING } from '@/features/payments/services/payment-constants';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { getSettings, type LimitSettings } from '@/lib/admin-settings';

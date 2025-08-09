@@ -558,8 +558,6 @@ export default function PromptBuilder() {
                     </div>
                 </div>
             )}
-            
-                    />
                 </section>
             )}
         </>

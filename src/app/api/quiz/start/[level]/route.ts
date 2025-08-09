@@ -2,7 +2,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { QuizLevel } from '@/lib/data';
 import { QUIZ_CONFIG } from '@/config/constants';
-import { FEATURE_PRICING } from '@/features/payments/services/payment-service';
+import { FEATURE_PRICING } from '@/features/payments/services/payment-constants';
 import { shuffleQuestions, randomizeQuizQuestions, type QuizQuestion } from '@/lib/quiz-randomization';
 
 // The change is in the function signature below

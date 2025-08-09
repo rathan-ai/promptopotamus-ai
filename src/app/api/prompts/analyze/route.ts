@@ -1,6 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { FEATURE_PRICING } from '@/features/payments/services/payment-service';
+import { FEATURE_PRICING } from '@/features/payments/services/payment-constants';
 
 export async function POST(req: Request) {
   try {

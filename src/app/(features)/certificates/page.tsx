@@ -5,7 +5,7 @@ import { certificates, type Certificate } from '@/lib/data';
 import { Button } from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { CheckCircle, Lock, ArrowRight, AlertTriangle, Award, Users } from 'lucide-react';
-import { FEATURE_PRICING } from '@/features/payments/services/payment-service';
+import { FEATURE_PRICING } from '@/features/payments/services/payment-constants';
 
 interface UserCertificate {
   certificate_slug: string;

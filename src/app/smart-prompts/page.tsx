@@ -19,10 +19,6 @@ const PromptPreviewModal = dynamic(() => import('@/components/features/prompts/P
   ssr: false
 });
 
-const PromptCoinPurchaseModal = dynamic(() => import('@/components/features/payments/PromptCoinPurchaseModal'), {
-  loading: () => <LoadingSpinner size="lg" />,
-  ssr: false
-});
 
 const PromptTypesGuide = dynamic(() => import('@/components/features/shared/PromptTypesGuide'), {
   loading: () => <LoadingSkeleton lines={5} />,
@@ -1024,21 +1020,6 @@ export default function SmartPromptsPage() {
         />
       )}
 
-      {/* PromptCoin Purchase Modal */}
-      {selectedPromptForPurchase && showPurchaseModal && (
-        <PromptCoinPurchaseModal
-          isOpen={showPurchaseModal}
-          onClose={() => {
-            setShowPurchaseModal(false);
-            setSelectedPromptForPurchase(null);
-          }}
-          onSuccess={handlePurchaseSuccess}
-          promptId={selectedPromptForPurchase.id}
-          amount={selectedPromptForPurchase.price}
-          promptTitle={selectedPromptForPurchase.title}
-          sellerName={selectedPromptForPurchase.profiles?.full_name || 'Unknown Creator'}
-        />
-      )}
     </div>
     </PageErrorBoundary>
   );
