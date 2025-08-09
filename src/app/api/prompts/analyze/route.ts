@@ -1,6 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { PROMPTCOIN_COSTS } from '@/lib/promptcoin-utils';
+import { FEATURE_PRICING } from '@/features/payments/services/payment-service';
 
 export async function POST(req: Request) {
   try {
@@ -38,34 +38,17 @@ export async function POST(req: Request) {
                           (profile?.credits_exam || 0) + 
                           (profile?.credits_export || 0);
 
-    // Check if user has sufficient PromptCoins
-    if (currentBalance < PROMPTCOIN_COSTS.analysis) {
-      return NextResponse.json({ 
-        error: `Insufficient PromptCoins. You need ${PROMPTCOIN_COSTS.analysis} PC for analysis.`,
-        required: PROMPTCOIN_COSTS.analysis,
-        available: currentBalance,
-        shortage: PROMPTCOIN_COSTS.analysis - currentBalance
-      }, { status: 400 });
-    }
-
-    // Deduct PromptCoins for analysis
-    const { error: deductError } = await supabase.rpc('deduct_promptcoins_for_feature', {
-      p_user_id: user.id,
-      p_amount: PROMPTCOIN_COSTS.analysis,
-      p_feature: 'analysis',
-      p_description: 'Prompt Analysis'
-    });
-
-    if (deductError) {
-      console.error('Failed to deduct PromptCoins:', deductError);
-      return NextResponse.json({ error: 'Failed to process payment' }, { status: 500 });
-    }
-
+    // TODO: Implement pay-as-you-go payment for analysis
+    // For now, allow the analysis to proceed
+    // In production, this should create a payment intent and process payment
+    
+    const analysisPrice = FEATURE_PRICING.PROMPT_ANALYSIS;
+    
     // Return success (the actual analysis is done client-side for now)
     return NextResponse.json({ 
       success: true,
-      message: 'Analysis payment processed successfully',
-      charged: PROMPTCOIN_COSTS.analysis
+      message: 'Analysis available',
+      price: analysisPrice
     });
 
   } catch (error) {

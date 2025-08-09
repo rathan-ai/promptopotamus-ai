@@ -10,7 +10,6 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { certificates as certDetails } from '@/lib/data';
 import { createClient } from '@/lib/supabase/client';
-import { PromptCoinBalance } from '@/components/ui/PromptCoinDisplay';
 
 // Lazy load heavy components that are not immediately visible
 const UserSmartPromptsManager = dynamic(() => import('@/components/features/prompts/UserSmartPromptsManager'), {
@@ -320,7 +319,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="text-4xl font-bold text-amber-900 dark:text-amber-100 mb-4">
-                <PromptCoinBalance amount={promptCoinData.balance} size="xl" />
+                <div className="text-2xl font-bold">${(promptCoinData.balance / 100).toFixed(2)}</div>
               </div>
             )}
             <p className="text-amber-600 dark:text-amber-400 mb-4">

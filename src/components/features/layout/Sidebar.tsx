@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/Button';
 import { X, LogIn, LogOut, LayoutDashboard, Shield, Award, Brain, Coins } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import UserIdentityBadge from '../profiles/UserIdentityBadge';
-import { PromptCoinBalance } from '@/components/ui/PromptCoinDisplay';
 
 const navItems = [
     { title: 'Home & Tools', links: [
@@ -45,22 +44,10 @@ export default function Sidebar() {
     const pathname = usePathname();
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
-    const [promptCoinBalance, setPromptCoinBalance] = useState<number>(0);
     const supabase = createClient();
     const router = useRouter();
 
     
-    const fetchPromptCoinBalance = async (userId: string) => {
-      try {
-        const response = await fetch('/api/user/balance');
-        if (response.ok) {
-          const data = await response.json();
-          setPromptCoinBalance(data.balance || 0);
-        }
-      } catch (error) {
-        console.error('Error fetching PromptCoin balance:', error);
-      }
-    };
 
     useEffect(() => {
       const fetchUserAndProfile = async () => {
@@ -69,7 +56,6 @@ export default function Sidebar() {
           if (user) {
             const { data: profileData } = await supabase.from('profiles').select('role').eq('id', user.id).single();
             setProfile(profileData);
-            fetchPromptCoinBalance(user.id);
           }
       };
       fetchUserAndProfile();
@@ -78,11 +64,9 @@ export default function Sidebar() {
           setUser(session?.user ?? null);
           if (event === 'SIGNED_IN' && session?.user.id) {
             supabase.from('profiles').select('role').eq('id', session.user.id).single().then(({data}) => setProfile(data));
-            fetchPromptCoinBalance(session.user.id);
           }
           if (event === 'SIGNED_OUT') {
             setProfile(null);
-            setPromptCoinBalance(0);
           }
       });
   
@@ -134,7 +118,6 @@ export default function Sidebar() {
                         {/* PromptCoin Balance */}
                         <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-2">
                           <div className="flex items-center justify-between">
-                            <PromptCoinBalance amount={promptCoinBalance} size="sm" />
                             <Link 
                               href="/promptcoin-history"
                               className="text-xs text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 font-medium"

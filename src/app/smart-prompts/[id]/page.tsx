@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
-import { PromptCoinSymbol } from '@/components/ui/PromptCoinDisplay';
 import ReviewsList from '@/components/features/prompts/ReviewsList';
 
 interface SmartPromptDetail {
@@ -338,7 +337,7 @@ export default function SmartPromptDetailPage() {
               {prompt.price > 0 ? (
                 <span className="flex items-center gap-1">
                   {prompt.price}
-                  <PromptCoinSymbol className="w-7 h-7" />
+                  <DollarSign className="w-7 h-7" />
                 </span>
               ) : (
                 'Free'
@@ -363,7 +362,7 @@ export default function SmartPromptDetailPage() {
                 </div>
               ) : (
                 <>
-                  {prompt.price > 0 ? <PromptCoinSymbol className="w-4 h-4 mr-2" /> : <Download className="w-4 h-4 mr-2" />}
+                  {prompt.price > 0 ? <DollarSign className="w-4 h-4 mr-2" /> : <Download className="w-4 h-4 mr-2" />}
                   {prompt.price > 0 ? 'Purchase' : 'Get Free'}
                 </>
               )}
@@ -471,7 +470,7 @@ export default function SmartPromptDetailPage() {
                                 {prompt.price > 0 ? (
                                   <span className="flex items-center gap-2">
                                     Unlock for {prompt.price}
-                                    <PromptCoinSymbol className="w-4 h-4" />
+                                    <DollarSign className="w-4 h-4" />
                                   </span>
                                 ) : (
                                   'Get for Free'
@@ -498,7 +497,7 @@ export default function SmartPromptDetailPage() {
                             {prompt.price > 0 ? (
                               <span className="flex items-center gap-2">
                                 Purchase for {prompt.price}
-                                <PromptCoinSymbol className="w-4 h-4" />
+                                <DollarSign className="w-4 h-4" />
                               </span>
                             ) : (
                               'Get for Free'

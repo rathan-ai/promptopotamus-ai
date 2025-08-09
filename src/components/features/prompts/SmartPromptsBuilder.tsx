@@ -43,8 +43,6 @@ import {
 } from '@/lib/ai-assistant';
 import ComplexityGuidance from '../shared/ComplexityGuidance';
 import RecipeFlowVisualizer from './RecipeFlowVisualizer';
-import { PromptCoinDisplay } from '@/components/ui/PromptCoinDisplay';
-import { validatePromptCoinAmount, PROMPTCOIN_COSTS } from '@/lib/promptcoin-utils';
 
 interface Variable {
   name: string;
@@ -143,7 +141,7 @@ export default function SmartPromptsBuilder({
     pro_commission_rate: 0.15,
     premium_commission_rate: 0.10,
     allow_user_pricing: true,
-    min_price: PROMPTCOIN_COSTS.smart_prompt_min, // 1 PC
+    min_price: 0.99, // Minimum $0.99
     max_price: PROMPTCOIN_COSTS.smart_prompt_max, // 9999 PC
   });
 
@@ -1153,11 +1151,9 @@ export default function SmartPromptsBuilder({
                               </div>
                               <div className="text-right">
                                 <div className="text-2xl font-bold">
-                                  <PromptCoinDisplay 
-                                    amount={formData.price} 
-                                    size="xl" 
-                                    variant={formData.price === 0 ? 'success' : 'default'}
-                                  />
+                                  <span className={`text-2xl font-bold ${formData.price === 0 ? 'text-green-600' : 'text-neutral-900 dark:text-white'}`}>
+                                    ${formData.price.toFixed(2)}
+                                  </span>
                                 </div>
                                 <div className="flex gap-1 mt-1">
                                   {formData.tags.slice(0, 3).map(tag => (

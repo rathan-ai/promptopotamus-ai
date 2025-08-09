@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { X, Play, Copy, RefreshCw, Eye, Wand2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { PromptCoinDisplay } from '@/components/ui/PromptCoinDisplay';
 
 interface Variable {
   name: string;

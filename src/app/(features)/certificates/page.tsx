@@ -5,8 +5,7 @@ import { certificates, type Certificate } from '@/lib/data';
 import { Button } from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { CheckCircle, Lock, ArrowRight, AlertTriangle, Award, Users } from 'lucide-react';
-import { PromptCoinCost } from '@/components/ui/PromptCoinDisplay';
-import { PROMPTCOIN_COSTS } from '@/lib/promptcoin-utils';
+import { FEATURE_PRICING } from '@/features/payments/services/payment-service';
 
 interface UserCertificate {
   certificate_slug: string;
@@ -140,7 +139,7 @@ const EnhancedCertificateCard = ({
             <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
               Exam Cost:
             </span>
-            <PromptCoinCost amount={PROMPTCOIN_COSTS.exam} />
+            <span className="text-sm font-medium">${FEATURE_PRICING.EXAM_ATTEMPT} per attempt</span>
           </div>
         </div>
       )}

@@ -7,8 +7,6 @@ import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown, Calendar, Bell, BookOpen, Zap, Coins } from 'lucide-react';
 import { track } from '@vercel/analytics';
-import BuyCreditsModal from '../payments/BuyCreditsModal';
-import { PromptCoinDisplay } from '@/components/ui/PromptCoinDisplay';
 import { getSettings, type LimitSettings } from '@/lib/admin-settings';
 import dynamic from 'next/dynamic';
 
@@ -39,7 +37,6 @@ export default function PromptBuilder() {
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [promptCoins, setPromptCoins] = useState(0); // Will be fetched from user profile
-    const [showBuyCreditsModal, setShowBuyCreditsModal] = useState(false);
     const [showWizardMode, setShowWizardMode] = useState(false);
     const [limitSettings, setLimitSettings] = useState<LimitSettings>({
         prompt_builder_free_daily: 3,
@@ -127,7 +124,7 @@ export default function PromptBuilder() {
             track('prompt_enhancement_limit_reached', {
                 source: 'prompt_builder'
             });
-            setShowBuyCreditsModal(true);
+            toast.info('Payment required for this feature');
             return;
         }
 
@@ -271,18 +268,13 @@ export default function PromptBuilder() {
                         </div>
                         <div className="text-right">
                             <div className="flex items-center justify-end gap-2 mb-1">
-                                <PromptCoinDisplay 
-                                    amount={promptCoins} 
-                                    size="md"
-                                    showLabel 
-                                />
                             </div>
                             <div className="text-xs text-neutral-500 dark:text-neutral-400">
                                 ({Math.floor(promptCoins / 15)} enhancements left)
                             </div>
                             {promptCoins < 30 && ( // Show warning when less than 2 enhancements left
                                 <button 
-                                    onClick={() => setShowBuyCreditsModal(true)}
+                                    onClick={() => toast.info('Payment required for this feature')}
                                     className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer"
                                 >
                                     <Crown className="w-3 h-3 inline mr-1" />
@@ -363,7 +355,7 @@ export default function PromptBuilder() {
                     Generate Prompt
                 </Button>
                 <Button
-                    onClick={promptCoins < 15 ? () => setShowBuyCreditsModal(true) : handleEnhancePrompt}
+                    onClick={handleEnhancePrompt}
                     variant="secondary"
                     disabled={isEnhancing}
                     className="flex-1 min-w-fit"
@@ -529,7 +521,7 @@ export default function PromptBuilder() {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <Button
                                     size="sm"
-                                    onClick={() => setShowBuyCreditsModal(true)}
+                                    onClick={() => toast.info('Payment required for this feature')}
                                     className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                                 >
                                     <Crown className="w-4 h-4 mr-2" />
@@ -567,11 +559,6 @@ export default function PromptBuilder() {
                 </div>
             )}
             
-                    <BuyCreditsModal
-                        isOpen={showBuyCreditsModal}
-                        onClose={() => setShowBuyCreditsModal(false)}
-                        type="enhancement"
-                        source="prompt_builder"
                     />
                 </section>
             )}

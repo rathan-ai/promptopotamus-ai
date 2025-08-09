@@ -6,7 +6,6 @@ import { Plus, Search, Grid, List, Star, Download, Coins, Eye, ExternalLink, Spa
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
 import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ui/ErrorBoundary';
-import { PromptCoinPrice } from '@/components/ui/PromptCoinDisplay';
 import toast from 'react-hot-toast';
 
 // Lazy load heavy components
@@ -415,7 +414,7 @@ export default function SmartPromptsPage() {
               </div>
               {prompt.price > 0 && (
                 <div className="mt-1">
-                  <PromptCoinPrice amount={prompt.price} />
+                  <span className="text-sm font-medium">${prompt.price.toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -426,7 +425,7 @@ export default function SmartPromptsPage() {
               </span>
               {(prompt as any).purchase_info && (
                 <div className="text-xs text-neutral-500">
-                  <PromptCoinPrice amount={(prompt as any).purchase_info.purchase_price} />
+                  <span className="text-sm font-medium">${(prompt as any).purchase_info.purchase_price.toFixed(2)}</span>
                 </div>
               )}
             </div>
