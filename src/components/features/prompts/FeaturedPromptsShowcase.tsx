@@ -196,9 +196,9 @@ export default function FeaturedPromptsShowcase() {
                 <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
               <div className="text-3xl font-bold text-neutral-900 dark:text-white">
-                Admin
+                1
               </div>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">Created by</p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Content Creator</p>
             </div>
             
             <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-neutral-700">
