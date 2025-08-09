@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
 import type { AITemplate } from '@/lib/data';
 import { track } from '@vercel/analytics';
+import { useRouter } from 'next/navigation';
 
 interface TemplateCardProps {
   template: AITemplate;
@@ -13,6 +14,8 @@ interface TemplateCardProps {
 
 export default function TemplateCard({ template }: TemplateCardProps) {
   const { title, prompt, tier, tags, usageCount, rating } = template;
+  const router = useRouter();
+  
   const handleCopy = () => {
     if (tier === 'premium' || tier === 'pro') {
       // Track premium template access attempt
@@ -48,8 +51,8 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       template_category: template.category
     });
     
-    // TODO: Implement direct purchase flow
-    toast.info('Purchase flow coming soon');
+    // Redirect to purchase page
+    router.push('/purchase');
   };
 
   const getTierConfig = (tier: string) => {
@@ -64,13 +67,13 @@ export default function TemplateCard({ template }: TemplateCardProps) {
         return { 
           icon: Star, 
           color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-          label: 'PromptCoins' 
+          label: 'Paid' 
         };
       case 'premium':
         return { 
           icon: Crown, 
           color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-          label: 'PromptCoins' 
+          label: 'Paid' 
         };
       default:
         return { 
@@ -144,9 +147,9 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       {/* Actions */}
       <div className="flex gap-2">
         {isPremium ? (
-          <Button onClick={handlePurchaseCredits} size="sm" className="flex-1">
+          <Button onClick={handlePurchase} size="sm" className="flex-1">
             <Crown className="mr-2 h-4 w-4" />
-            Buy PromptCoins
+            Add Funds
           </Button>
         ) : (
           <Button onClick={handleCopy} variant="secondary" size="sm" className="flex-1">
@@ -155,12 +158,6 @@ export default function TemplateCard({ template }: TemplateCardProps) {
           </Button>
         )}
       </div>
-      
-      <UpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        source={`template_${template.id}`}
-      />
     </div>
   );
 }

@@ -107,11 +107,11 @@ export default function PromptAnalyzer() {
             return;
         }
         
-        if (userBalance < PROMPTCOIN_COSTS.analysis) {
+        if (userBalance < FEATURE_PRICING.PROMPT_ANALYSIS) {
             track('prompt_analysis_limit_reached', {
                 source: 'prompt_analyzer'
             });
-            toast.error(`You need ${PROMPTCOIN_COSTS.analysis} PromptCoins to analyze this prompt`);
+            toast.error(`You need $${FEATURE_PRICING.PROMPT_ANALYSIS} to analyze this prompt`);
             return;
         }
         
@@ -121,7 +121,7 @@ export default function PromptAnalyzer() {
         // Track analysis start
         track('prompt_analysis_started', {
             prompt_length: userPrompt.length,
-            remaining_promptcoins: userBalance - PROMPTCOIN_COSTS.analysis
+            remaining_balance: userBalance - FEATURE_PRICING.PROMPT_ANALYSIS
         });
 
         try {
@@ -136,7 +136,7 @@ export default function PromptAnalyzer() {
                 const result = analyzePrompt(userPrompt);
                 
                 // Update balance after successful analysis
-                setUserBalance(prev => prev - PROMPTCOIN_COSTS.analysis);
+                setUserBalance(prev => prev - FEATURE_PRICING.PROMPT_ANALYSIS);
                 
                 // Track analysis completion with results
                 track('prompt_analysis_completed', {
@@ -222,16 +222,16 @@ export default function PromptAnalyzer() {
                     ) : (
                         <>
                             <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                                <PromptCoinDisplay amount={userBalance} size="sm" showLabel />
+                                <span className="font-medium">${userBalance.toFixed(2)}</span> balance
                                 <div className="text-xs mt-1">
-                                    ({Math.floor(userBalance / PROMPTCOIN_COSTS.analysis)} analyses left)
+                                    ({Math.floor(userBalance / FEATURE_PRICING.PROMPT_ANALYSIS)} analyses left)
                                 </div>
                             </div>
-                            {userBalance < (PROMPTCOIN_COSTS.analysis * 2) && (
+                            {userBalance < (FEATURE_PRICING.PROMPT_ANALYSIS * 2) && (
                                 <Link href="/pricing">
                                     <button className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer">
                                         <Crown className="w-3 h-3 inline mr-1" />
-                                        Buy More PromptCoins
+                                        Add Funds
                                     </button>
                                 </Link>
                             )}
@@ -277,7 +277,7 @@ export default function PromptAnalyzer() {
                         💡 Tip: Better prompts include persona, task, context, and format
                     </div>
                     <Button 
-                        onClick={userBalance < PROMPTCOIN_COSTS.analysis ? () => window.open('/pricing', '_blank') : handleAnalyze} 
+                        onClick={userBalance < FEATURE_PRICING.PROMPT_ANALYSIS ? () => window.open('/pricing', '_blank') : handleAnalyze} 
                         disabled={isLoading || balanceLoading}
                         className="px-6"
                     >
@@ -286,14 +286,14 @@ export default function PromptAnalyzer() {
                                 <Loader2 className="animate-spin mr-2 h-4 w-4" />
                                 Analyzing...
                             </>
-                        ) : userBalance < PROMPTCOIN_COSTS.analysis ? (
+                        ) : userBalance < FEATURE_PRICING.PROMPT_ANALYSIS ? (
                             <>
                                 <Crown className="mr-2 h-4 w-4" />
-                                Buy PromptCoins to Analyze
+                                Add Funds to Analyze
                             </>
                         ) : (
                             <>
-                                🔬 Analyze Prompt (<PromptCoinCost amount={PROMPTCOIN_COSTS.analysis} />)
+                                🔬 Analyze Prompt (${FEATURE_PRICING.PROMPT_ANALYSIS})
                             </>
                         )}
                     </Button>
@@ -458,16 +458,16 @@ export default function PromptAnalyzer() {
             )}
 
             {/* Insufficient PromptCoins */}
-            {userBalance < PROMPTCOIN_COSTS.analysis && !analysis && (
+            {userBalance < FEATURE_PRICING.PROMPT_ANALYSIS && !analysis && (
                 <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-700 rounded-lg">
                     <div className="flex items-start gap-3">
                         <Crown className="w-6 h-6 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-1" />
                         <div className="flex-1">
                             <h3 className="font-semibold text-rose-800 dark:text-rose-200 mb-2">
-                                Insufficient PromptCoins for Analysis
+                                Insufficient Funds for Analysis
                             </h3>
                             <p className="text-rose-700 dark:text-rose-300 text-sm mb-4">
-                                You need <PromptCoinCost amount={PROMPTCOIN_COSTS.analysis} /> to analyze your prompt.
+                                You need ${FEATURE_PRICING.PROMPT_ANALYSIS} to analyze your prompt.
                             </p>
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -477,7 +477,7 @@ export default function PromptAnalyzer() {
                                         className="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700"
                                     >
                                         <Crown className="w-4 h-4 mr-2" />
-                                        Buy PromptCoins
+                                        Add Funds
                                     </Button>
                                 </Link>
                                 

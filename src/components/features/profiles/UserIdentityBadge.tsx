@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { getUserProfile } from '@/lib/subscription';
 import { Gift, Zap, Crown, User } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -61,14 +60,23 @@ export default function UserIdentityBadge({
       }
 
       try {
-        const profileData = await getUserProfile(user.id);
-        setProfile(profileData);
+        const supabase = createClient();
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('payment_status')
+          .eq('id', user.id)
+          .single();
+        
+        if (error || !profileData) {
+          setProfile({ tier: 'free' });
+        } else {
+          // Determine tier based on payment status
+          const tier = profileData.payment_status === 'active' ? 'paid' : 'free';
+          setProfile({ tier });
+        }
       } catch (error) {
         console.error('Failed to fetch profile:', error);
-        // Default profile
-        setProfile({
-          tier: 'free'
-        });
+        setProfile({ tier: 'free' });
       } finally {
         setLoading(false);
       }
@@ -182,13 +190,23 @@ export function useUserIdentity(userId?: string) {
       }
 
       try {
-        const profileData = await getUserProfile(userId);
-        setProfile(profileData);
+        const supabase = createClient();
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('payment_status')
+          .eq('id', userId)
+          .single();
+        
+        if (error || !profileData) {
+          setProfile({ tier: 'free' });
+        } else {
+          // Determine tier based on payment status
+          const tier = profileData.payment_status === 'active' ? 'paid' : 'free';
+          setProfile({ tier });
+        }
       } catch (error) {
         console.error('Failed to fetch profile:', error);
-        setProfile({
-          tier: 'free'
-        });
+        setProfile({ tier: 'free' });
       } finally {
         setLoading(false);
       }

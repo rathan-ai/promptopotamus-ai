@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Metadata } from 'next';
-import { Coins, Check, ArrowLeft, Shield, Clock, CreditCard, Heart } from 'lucide-react';
+import { DollarSign, Check, ArrowLeft, Shield, Clock, CreditCard, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import UniversalPaymentModal from '@/components/features/payments/UniversalPaymentModal';
@@ -37,7 +37,6 @@ function PurchaseContent() {
   }, [supabase.auth]);
 
   const parsedAmount = parseFloat(amount) || 0;
-  const promptCoins = Math.round(parsedAmount * 100);
 
   const handlePurchase = async () => {
     // Validate amount
@@ -53,7 +52,7 @@ function PurchaseContent() {
 
     // Require user to be logged in
     if (!user) {
-      toast.error('Please log in to purchase PromptCoins');
+      toast.error('Please log in to add funds');
       router.push('/login');
       return;
     }
@@ -66,15 +65,15 @@ function PurchaseContent() {
     if (!amount || !user) return;
 
     try {
-      // Call the PromptCoin purchase API
-      const response = await fetch('/api/purchase/promptcoins', {
+      // Call the payment API to add funds
+      const response = await fetch('/api/purchase/add-funds', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           paymentProvider: 'paypal',
-          transactionId: transactionId || `pc_${Date.now()}`,
+          transactionId: transactionId || `funds_${Date.now()}`,
           amount: parsedAmount
         }),
       });
@@ -82,15 +81,15 @@ function PurchaseContent() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        toast.success(`🎉 Successfully purchased ${promptCoins} PromptCoins!`);
+        toast.success(`🎉 Successfully added $${parsedAmount.toFixed(2)} to your account!`);
         // Redirect to success page
-        router.push(`/purchase/success?amount=${parsedAmount}&coins=${promptCoins}`);
+        router.push(`/purchase/success?amount=${parsedAmount}`);
       } else {
-        toast.error(data.error || 'Purchase failed. Please contact support.');
+        toast.error(data.error || 'Payment failed. Please contact support.');
       }
     } catch (error) {
-      console.error('Error processing purchase:', error);
-      toast.error('Purchase failed. Please contact support.');
+      console.error('Error processing payment:', error);
+      toast.error('Payment failed. Please contact support.');
     }
     
     setShowPaymentModal(false);
@@ -113,14 +112,14 @@ function PurchaseContent() {
         </Link>
         
         <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <Coins className="w-8 h-8 text-white" />
+          <DollarSign className="w-8 h-8 text-white" />
         </div>
         
         <h1 className="text-4xl font-bold mb-4 dark:text-white">
-          Purchase PromptCoins
+          Add Funds
         </h1>
         <p className="text-xl text-neutral-600 dark:text-neutral-400 leading-relaxed">
-          Enter any amount to get PromptCoins instantly
+          Add funds to your account for pay-as-you-go features
         </p>
       </div>
 
@@ -140,7 +139,7 @@ function PurchaseContent() {
               step="0.01"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="1.00"
+              placeholder="10.00"
               className="w-full pl-12 pr-4 py-4 text-2xl border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-neutral-700 dark:text-white font-mono"
             />
           </div>
@@ -149,19 +148,19 @@ function PurchaseContent() {
           </p>
         </div>
 
-        {/* Conversion Display */}
+        {/* Balance Display */}
         {amount && parsedAmount >= 1 && (
           <div className="mb-8 p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-lg font-semibold text-blue-900 dark:text-blue-100">
-                  You'll receive: {promptCoins} PromptCoins
+                  Amount to add: ${parsedAmount.toFixed(2)}
                 </p>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Conversion rate: 100 PC = $1
+                  Use funds for any paid features
                 </p>
               </div>
-              <Coins className="w-12 h-12 text-blue-600" />
+              <DollarSign className="w-12 h-12 text-blue-600" />
             </div>
           </div>
         )}
@@ -182,7 +181,7 @@ function PurchaseContent() {
           ) : (
             <>
               <CreditCard className="w-5 h-5 mr-2" />
-              Purchase ${amount} with PayPal
+              Add ${amount} with PayPal
             </>
           )}
         </Button>

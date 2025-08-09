@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getSettings, type SmartPromptSettings } from '@/lib/admin-settings';
+import { FEATURE_PRICING } from '@/features/payments/services/payment-constants';
 import {
   SMART_TEMPLATES,
   getTemplateById,
@@ -142,7 +143,7 @@ export default function SmartPromptsBuilder({
     premium_commission_rate: 0.10,
     allow_user_pricing: true,
     min_price: 0.99, // Minimum $0.99
-    max_price: PROMPTCOIN_COSTS.smart_prompt_max, // 9999 PC
+    max_price: 99.99, // Maximum $99.99
   });
 
   const [currentStep, setCurrentStep] = useState(0);
