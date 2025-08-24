@@ -9,7 +9,6 @@ import HowItWorks from "@/components/features/shared/HowItWorks";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { BookOpen, Wand2 } from "lucide-react";
-import AdminStatusDebug from "@/components/debug/AdminStatusDebug";
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -25,9 +24,6 @@ export default function HomePage() {
 
   return (
     <div className="space-y-12">
-      {/* Admin Status Debug - Temporary */}
-      <AdminStatusDebug />
-      
       {/* Hero Section */}
       <div className="max-w-4xl mx-auto">
         <Introduction />

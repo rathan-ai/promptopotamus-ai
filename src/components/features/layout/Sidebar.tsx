@@ -58,7 +58,7 @@ export default function Sidebar() {
       icon: <Globe className="w-4 h-4" />
     },
     {
-      label: 'Dashboard',
+      label: 'My Dashboard',
       href: '/dashboard',
       icon: <Home className="w-4 h-4" />,
       requiresAuth: true
@@ -97,10 +97,10 @@ export default function Sidebar() {
     }
   ];
   
-  // Add admin dashboard at the beginning if user is admin
+  // Add admin dashboard after personal dashboard if user is admin
   if (isAdminUser) {
-    navItems.splice(1, 0, {
-      label: 'Admin Dashboard',
+    navItems.splice(2, 0, {
+      label: 'Admin Panel',
       href: '/admin',
       icon: <Shield className="w-4 h-4" />,
       requiresAuth: true
