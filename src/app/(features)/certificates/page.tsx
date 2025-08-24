@@ -76,7 +76,7 @@ const EnhancedCertificateCard = ({
   const statusInfo = getStatusInfo();
 
   return (
-    <div className={`card relative transition-all ${isLocked ? 'opacity-60' : 'hover:shadow-xl hover:scale-105'}`}>
+    <div className={`card p-6 relative transition-all ${isLocked ? 'opacity-60' : 'hover:shadow-xl hover:scale-105'}`}>
       {status === 'completed' && (
         <div className="absolute top-4 right-4">
           <CheckCircle className="w-8 h-8 text-emerald-600" />
@@ -255,7 +255,7 @@ export default function CertificatesPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-extrabold mb-4 dark:text-white">
@@ -301,7 +301,7 @@ export default function CertificatesPage() {
       </div>
 
       {/* Certificate Cards */}
-      <div className="grid gap-8">
+      <div className="grid grid-cols-1 gap-6 md:gap-8">
         {certs.map(cert => {
           const status = getCertStatus(cert.slug);
           const credentialId = getCredentialId(cert.slug);
