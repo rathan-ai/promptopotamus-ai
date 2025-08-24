@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { Home, BookOpen, ShoppingCart, Award, Settings, User, LogOut, BarChart3, Wand2, Search, FileText, DollarSign, Globe } from 'lucide-react';
+import { Home, BookOpen, ShoppingCart, Award, Settings, User, LogOut, BarChart3, Wand2, Search, FileText, DollarSign, Globe, Shield } from 'lucide-react';
+import { isAdmin } from '@/lib/auth';
 
 interface NavItem {
   label: string;
@@ -17,17 +18,34 @@ interface NavItem {
 export default function Sidebar() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
+  const [isAdminUser, setIsAdminUser] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      
+      // Check if user is admin
+      if (user) {
+        const adminStatus = await isAdmin(supabase);
+        setIsAdminUser(adminStatus);
+      } else {
+        setIsAdminUser(false);
+      }
     };
     fetchUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
+      
+      // Check admin status on auth state change
+      if (session?.user) {
+        const adminStatus = await isAdmin(supabase);
+        setIsAdminUser(adminStatus);
+      } else {
+        setIsAdminUser(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -78,6 +96,16 @@ export default function Sidebar() {
       icon: <BarChart3 className="w-4 h-4" />
     }
   ];
+  
+  // Add admin dashboard at the beginning if user is admin
+  if (isAdminUser) {
+    navItems.splice(1, 0, {
+      label: 'Admin Dashboard',
+      href: '/admin',
+      icon: <Shield className="w-4 h-4" />,
+      requiresAuth: true
+    });
+  }
 
   // Filter nav items based on authentication status
   const visibleNavItems = navItems.filter(item => !item.requiresAuth || user);
