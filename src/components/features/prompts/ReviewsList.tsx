@@ -136,7 +136,7 @@ export default function ReviewsList({
             key={star}
             className={`${starSize} ${
               star <= rating
-                ? 'fill-yellow-400 text-yellow-400'
+                ? 'fill-slate-400 text-slate-400'
                 : 'text-neutral-300 dark:text-neutral-600'
             }`}
           />
@@ -244,7 +244,7 @@ export default function ReviewsList({
             <div key={review.id} className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-slate-600 rounded-full flex items-center justify-center">
                     <User className="w-4 h-4 text-white" />
                   </div>
                   <div>

@@ -40,7 +40,7 @@ const EnhancedCertificateCard = ({
     switch (status) {
       case 'completed':
         return {
-          icon: <CheckCircle className="w-6 h-6 text-green-500" />,
+          icon: <CheckCircle className="w-6 h-6 text-emerald-600" />,
           badge: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200',
           text: 'Completed',
           buttonText: 'View Certificate',
@@ -65,7 +65,7 @@ const EnhancedCertificateCard = ({
       default:
         return {
           icon: <Award className="w-6 h-6 text-blue-500" />,
-          badge: `${cert.level === 'Beginner' ? 'bg-green-500/10 text-green-500' : cert.level === 'Intermediate' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-red-500/10 text-red-500'}`,
+          badge: `${cert.level === 'Beginner' ? 'bg-emerald-600/10 text-emerald-600' : cert.level === 'Intermediate' ? 'bg-slate-500/10 text-slate-500' : 'bg-slate-500/10 text-slate-500'}`,
           text: cert.level,
           buttonText: 'Start Exam',
           buttonVariant: 'default' as const
@@ -76,10 +76,10 @@ const EnhancedCertificateCard = ({
   const statusInfo = getStatusInfo();
 
   return (
-    <div className={`relative bg-white dark:bg-neutral-800/50 p-6 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700 transition-all hover:shadow-xl ${isLocked ? 'opacity-60' : 'hover:scale-105'}`}>
+    <div className={`card relative transition-all ${isLocked ? 'opacity-60' : 'hover:shadow-xl hover:scale-105'}`}>
       {status === 'completed' && (
         <div className="absolute top-4 right-4">
-          <CheckCircle className="w-8 h-8 text-green-500" />
+          <CheckCircle className="w-8 h-8 text-emerald-600" />
         </div>
       )}
       
@@ -92,24 +92,24 @@ const EnhancedCertificateCard = ({
         </div>
       </div>
 
-      <h3 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
+      <h3 className="card-title text-blue-600 dark:text-blue-400 mb-2">
         {cert.badgeName}
       </h3>
       
-      <p className="text-neutral-600 dark:text-neutral-300 mb-4">
+      <p className="card-description mb-4">
         {cert.description}
       </p>
 
       {/* Prerequisites Warning */}
       {isLocked && prerequisite && (
-        <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
           <div className="flex items-start">
-            <Lock className="w-5 h-5 text-amber-500 mr-2 mt-0.5" />
+            <Lock className="w-5 h-5 text-slate-500 mr-2 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
                 Prerequisites Required
               </p>
-              <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
                 Complete {prerequisite} certification first to unlock this level.
               </p>
             </div>
@@ -119,13 +119,13 @@ const EnhancedCertificateCard = ({
 
       {/* Skills & Benefits */}
       <div className="mb-4">
-        <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
           Skills You&apos;ll Validate:
         </h4>
-        <ul className="text-sm text-neutral-600 dark:text-neutral-400 space-y-1">
+        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
           {cert.skills.slice(0, 2).map((skill, index) => (
             <li key={index} className="flex items-center">
-              <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
+              <CheckCircle className="w-3 h-3 text-emerald-600 mr-2" />
               {skill}
             </li>
           ))}
@@ -134,9 +134,9 @@ const EnhancedCertificateCard = ({
 
       {/* Exam Cost */}
       {status !== 'completed' && (
-        <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+        <div className="mb-6 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+            <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
               Exam Cost:
             </span>
             <span className="text-sm font-medium">${FEATURE_PRICING.EXAM_ATTEMPT} per attempt</span>

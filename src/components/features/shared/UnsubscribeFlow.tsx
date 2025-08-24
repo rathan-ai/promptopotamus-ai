@@ -29,21 +29,21 @@ const retentionOffers = {
     title: '50% Off Next 3 Months',
     description: 'We value your feedback. Continue with 50% discount on your current plan.',
     icon: Gift,
-    color: 'text-green-600',
+    color: 'text-emerald-600',
     bgColor: 'bg-green-50'
   },
   usage: {
     title: 'Downgrade to Pro',
     description: 'Keep essential features at a lower cost. Upgrade anytime when you need more.',
     icon: Zap,
-    color: 'text-blue-600',
+    color: 'text-slate-600',
     bgColor: 'bg-blue-50'
   },
   features: {
     title: 'Feature Request Priority',
     description: 'Tell us what you need. We\'ll prioritize your feature requests and notify you when ready.',
     icon: Star,
-    color: 'text-purple-600',
+    color: 'text-slate-600',
     bgColor: 'bg-purple-50'
   },
   quality: {
@@ -64,7 +64,7 @@ const retentionOffers = {
     title: 'Pause Subscription',
     description: 'Pause for up to 6 months. Your data and settings will be preserved.',
     icon: Calendar,
-    color: 'text-indigo-600',
+    color: 'text-slate-600',
     bgColor: 'bg-indigo-50'
   }
 };
@@ -223,7 +223,7 @@ export default function UnsubscribeFlow({
           {step === 'confirm' && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
-                <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                <AlertTriangle className="w-5 h-5 text-slate-600 dark:text-red-400" />
                 <div>
                   <h3 className="font-medium text-red-800 dark:text-red-200">
                     You're about to cancel your {currentTier} subscription
@@ -254,7 +254,7 @@ export default function UnsubscribeFlow({
                 <Button 
                   onClick={handleConfirmCancel}
                   variant="outline"
-                  className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                  className="flex-1 border-red-200 text-slate-600 hover:bg-red-50"
                 >
                   Yes, Cancel Subscription
                 </Button>

@@ -80,7 +80,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
       >
         <div className="text-center space-y-4">
           <div className="mx-auto w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-500" />
           </div>
           
           <p className="text-gray-600 dark:text-gray-400">
@@ -91,7 +91,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
             <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">
               Next steps:
             </p>
-            <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+            <ul className="text-sm text-slate-700 dark:text-blue-300 space-y-1">
               <li>• Check your email inbox</li>
               <li>• Click the reset link in the email</li>
               <li>• Create a new password</li>
@@ -120,7 +120,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
     >
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-          <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <Mail className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </div>
         <div>
           <h3 className="font-medium text-gray-900 dark:text-white">

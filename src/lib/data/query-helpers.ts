@@ -376,7 +376,7 @@ export class AnalyticsQueries {
         downloads_count,
         rating_average,
         created_at,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        profiles(full_name)
       `)
       .eq('is_marketplace', true)
       .eq('is_public', true)

@@ -108,7 +108,7 @@ export default function CertificateDetailPage({ params }: { params: Promise<{ sl
         }
         if (!user) {
              return (
-                <div className="p-4 bg-yellow-500/10 text-yellow-500 rounded-lg text-center">
+                <div className="p-4 bg-slate-500/10 text-slate-500 rounded-lg text-center">
                     <AlertCircle className="inline-block mr-2" />
                     Please <Link href="/login" className="font-bold underline">log in</Link> to take the exam.
                 </div>
@@ -122,14 +122,14 @@ export default function CertificateDetailPage({ params }: { params: Promise<{ sl
                 : `This is a purchased attempt block.`;
             
             return (
-                 <div className="text-center p-4 bg-green-500/10 text-green-500 rounded-lg">
+                 <div className="text-center p-4 bg-emerald-600/10 text-emerald-600 rounded-lg">
                     <CheckCircle className="inline-block mr-2" />
                     You are ready! {attemptTypeText} You have { (status.totalAllowed || 0) - (status.attemptsMade || 0) } of {status.totalAllowed} attempts remaining.
                 </div>
             );
         } else {
             return (
-                <div className="text-center p-4 bg-red-500/10 text-red-500 rounded-lg">
+                <div className="text-center p-4 bg-slate-500/10 text-slate-500 rounded-lg">
                     <Clock className="inline-block mr-2" />
                     {status.reason}
                     {status.cooldownUntil && ` You can try again for free on ${new Date(status.cooldownUntil).toLocaleDateString()}.`}

@@ -131,20 +131,20 @@ export default function UserPromptCoinManager({
                         {/* Analysis Credits */}
                         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
                             <div className="flex items-center justify-between mb-2">
-                                <label className="text-sm font-medium text-green-700 dark:text-green-300">
+                                <label className="text-sm font-medium text-emerald-700 dark:text-green-300">
                                     Analysis Credits (10 PC per use)
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => adjustCredits('credits_analysis', -10)}
-                                        className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                        className="p-1 bg-slate-500 text-white rounded hover:bg-slate-600"
                                     >
                                         <Minus className="w-3 h-3" />
                                     </button>
                                     <span className="font-mono text-lg w-16 text-center">{formData.credits_analysis}</span>
                                     <button
                                         onClick={() => adjustCredits('credits_analysis', 10)}
-                                        className="p-1 bg-green-500 text-white rounded hover:bg-green-600"
+                                        className="p-1 bg-emerald-600 text-white rounded hover:bg-emerald-600"
                                     >
                                         <Plus className="w-3 h-3" />
                                     </button>
@@ -154,7 +154,7 @@ export default function UserPromptCoinManager({
                                 type="number"
                                 value={formData.credits_analysis}
                                 onChange={(e) => updateField('credits_analysis', parseInt(e.target.value) || 0)}
-                                className="w-full rounded-lg border-green-300 dark:border-green-600 focus:border-green-500 focus:ring-green-500/50 bg-white dark:bg-neutral-800 px-3 py-2"
+                                className="w-full rounded-lg border-green-300 dark:border-emerald-600 focus:border-emerald-600 focus:ring-emerald-600/50 bg-white dark:bg-neutral-800 px-3 py-2"
                                 min="0"
                             />
                         </div>
@@ -168,7 +168,7 @@ export default function UserPromptCoinManager({
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => adjustCredits('credits_enhancement', -15)}
-                                        className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                        className="p-1 bg-slate-500 text-white rounded hover:bg-slate-600"
                                     >
                                         <Minus className="w-3 h-3" />
                                     </button>
@@ -199,14 +199,14 @@ export default function UserPromptCoinManager({
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => adjustCredits('credits_exam', -50)}
-                                        className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                        className="p-1 bg-slate-500 text-white rounded hover:bg-slate-600"
                                     >
                                         <Minus className="w-3 h-3" />
                                     </button>
                                     <span className="font-mono text-lg w-16 text-center">{formData.credits_exam}</span>
                                     <button
                                         onClick={() => adjustCredits('credits_exam', 50)}
-                                        className="p-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                                        className="p-1 bg-slate-500 text-white rounded hover:bg-yellow-600"
                                     >
                                         <Plus className="w-3 h-3" />
                                     </button>
@@ -216,7 +216,7 @@ export default function UserPromptCoinManager({
                                 type="number"
                                 value={formData.credits_exam}
                                 onChange={(e) => updateField('credits_exam', parseInt(e.target.value) || 0)}
-                                className="w-full rounded-lg border-yellow-300 dark:border-yellow-600 focus:border-yellow-500 focus:ring-yellow-500/50 bg-white dark:bg-neutral-800 px-3 py-2"
+                                className="w-full rounded-lg border-yellow-300 dark:border-yellow-600 focus:border-slate-500 focus:ring-slate-500/50 bg-white dark:bg-neutral-800 px-3 py-2"
                                 min="0"
                             />
                         </div>
@@ -230,14 +230,14 @@ export default function UserPromptCoinManager({
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => adjustCredits('credits_export', -5)}
-                                        className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                        className="p-1 bg-slate-500 text-white rounded hover:bg-slate-600"
                                     >
                                         <Minus className="w-3 h-3" />
                                     </button>
                                     <span className="font-mono text-lg w-16 text-center">{formData.credits_export}</span>
                                     <button
                                         onClick={() => adjustCredits('credits_export', 5)}
-                                        className="p-1 bg-purple-500 text-white rounded hover:bg-purple-600"
+                                        className="p-1 bg-slate-500 text-white rounded hover:bg-slate-600"
                                     >
                                         <Plus className="w-3 h-3" />
                                     </button>
@@ -247,7 +247,7 @@ export default function UserPromptCoinManager({
                                 type="number"
                                 value={formData.credits_export}
                                 onChange={(e) => updateField('credits_export', parseInt(e.target.value) || 0)}
-                                className="w-full rounded-lg border-purple-300 dark:border-purple-600 focus:border-purple-500 focus:ring-purple-500/50 bg-white dark:bg-neutral-800 px-3 py-2"
+                                className="w-full rounded-lg border-purple-300 dark:border-slate-600 focus:border-slate-500 focus:ring-slate-500/50 bg-white dark:bg-neutral-800 px-3 py-2"
                                 min="0"
                             />
                         </div>
@@ -284,7 +284,7 @@ export default function UserPromptCoinManager({
                                         payment_status: 'active'
                                     }));
                                 }}
-                                className="px-3 py-1 bg-green-600 text-white text-xs rounded-full hover:bg-green-700 transition-colors"
+                                className="px-3 py-1 bg-emerald-600 text-white text-xs rounded-full hover:bg-green-700 transition-colors"
                             >
                                 Add Starter Pack (500 PC each)
                             </button>

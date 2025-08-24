@@ -227,7 +227,7 @@ export default function AffiliateManager() {
                                 </button>
                                 <button
                                     onClick={() => affiliate.id && handleDelete(affiliate.id)}
-                                    className="p-2 text-neutral-500 hover:text-red-600 transition-colors"
+                                    className="p-2 text-neutral-500 hover:text-slate-600 transition-colors"
                                     title="Delete affiliate"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -383,12 +383,12 @@ export default function AffiliateManager() {
                                         className="w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2"
                                     >
                                         <option value="bg-blue-500">Blue</option>
-                                        <option value="bg-green-500">Green</option>
-                                        <option value="bg-purple-500">Purple</option>
+                                        <option value="bg-emerald-600">Green</option>
+                                        <option value="bg-slate-500">Purple</option>
                                         <option value="bg-orange-500">Orange</option>
                                         <option value="bg-pink-500">Pink</option>
                                         <option value="bg-gray-500">Gray</option>
-                                        <option value="bg-red-500">Red</option>
+                                        <option value="bg-slate-500">Red</option>
                                     </select>
                                 </div>
                                 <div>
@@ -441,7 +441,7 @@ export default function AffiliateManager() {
                                             />
                                             <button
                                                 onClick={() => removeFeature(index)}
-                                                className="p-2 text-red-500 hover:text-red-700 transition-colors"
+                                                className="p-2 text-slate-500 hover:text-red-700 transition-colors"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>

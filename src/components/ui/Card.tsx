@@ -22,10 +22,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({
   ...props
 }, ref) => {
   const variants = {
-    default: 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700',
-    outline: 'border-2 border-gray-200 dark:border-gray-700 bg-transparent',
-    ghost: 'bg-gray-50 dark:bg-gray-800/50 border-0',
-    elevated: 'bg-white dark:bg-gray-900 shadow-lg border-0'
+    default: 'bg-white dark:bg-[#1E293B] shadow-sm',
+    outline: 'border border-[#E5E7EB] dark:border-[#334155] bg-transparent',
+    ghost: 'bg-[#F9FAFB] dark:bg-[#0F172A] border-0',
+    elevated: 'bg-white dark:bg-[#1E293B] shadow-md border-0'
   };
 
   const paddings = {
@@ -39,10 +39,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({
     <div
       ref={ref}
       className={cn(
-        'rounded-lg transition-all duration-200',
+        'rounded-lg overflow-hidden transition-all duration-200',
         variants[variant],
         paddings[padding],
-        hover && 'hover:shadow-md hover:scale-[1.02] cursor-pointer',
+        hover && 'hover:shadow-md cursor-pointer',
         className
       )}
       {...props}
@@ -71,17 +71,17 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(({
   return (
     <div
       ref={ref}
-      className={cn('flex items-start justify-between space-y-1.5 p-6 pb-4', className)}
+      className={cn('flex items-start justify-between px-6 py-4 border-b border-[#E5E7EB] dark:border-[#334155]', className)}
       {...props}
     >
       <div className="space-y-1.5">
         {title && (
-          <h3 className="text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold leading-none tracking-tight text-[#6B7280] dark:text-[#94A3B8]-900 dark:text-white">
             {title}
           </h3>
         )}
         {description && (
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-[#6B7280] dark:text-[#94A3B8]-600 dark:text-[#6B7280] dark:text-[#94A3B8]-400">
             {description}
           </p>
         )}
@@ -133,7 +133,7 @@ export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(({
     <div
       ref={ref}
       className={cn(
-        'flex items-center p-6 pt-0',
+        'flex items-center px-6 py-3 bg-[#F9FAFB] dark:bg-[#0F172A] border-t border-[#E5E7EB] dark:border-[#334155]',
         justifyClasses[justify],
         className
       )}
@@ -173,28 +173,28 @@ export function StatsCard({
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p className="text-sm font-medium text-[#6B7280] dark:text-[#94A3B8]-600 dark:text-[#6B7280] dark:text-[#94A3B8]-400">
               {title}
             </p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+            <p className="text-2xl font-bold text-[#6B7280] dark:text-[#94A3B8]-900 dark:text-white">
               {value}
             </p>
             {change && (
               <p className={cn(
                 "text-xs",
-                change.type === 'increase' ? "text-green-600" : "text-red-600"
+                change.type === 'increase' ? "text-emerald-600" : "text-slate-600"
               )}>
                 {change.type === 'increase' ? '↗' : '↘'} {Math.abs(change.value)}%
               </p>
             )}
             {description && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-[#6B7280] dark:text-[#94A3B8]-500 dark:text-[#6B7280] dark:text-[#94A3B8]-400 mt-1">
                 {description}
               </p>
             )}
           </div>
           {icon && (
-            <div className="text-gray-400 dark:text-gray-500">
+            <div className="text-[#6B7280] dark:text-[#94A3B8]-400 dark:text-[#6B7280] dark:text-[#94A3B8]-500">
               {icon}
             </div>
           )}
@@ -249,7 +249,7 @@ export function FeatureCard({
           )}
           <div>
             <h3 className="text-lg font-semibold">{title}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-[#6B7280] dark:text-[#94A3B8]-600 dark:text-[#6B7280] dark:text-[#94A3B8]-400">
               {description}
             </p>
           </div>

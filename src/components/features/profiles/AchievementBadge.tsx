@@ -42,25 +42,25 @@ const CategoryColors = {
     bg: 'bg-blue-100 dark:bg-blue-900/30',
     border: 'border-blue-300 dark:border-blue-600',
     text: 'text-blue-800 dark:text-blue-300',
-    icon: 'text-blue-600 dark:text-blue-400'
+    icon: 'text-slate-600 dark:text-slate-400'
   },
   engagement: {
     bg: 'bg-green-100 dark:bg-green-900/30',
-    border: 'border-green-300 dark:border-green-600',
+    border: 'border-green-300 dark:border-emerald-600',
     text: 'text-green-800 dark:text-green-300',
-    icon: 'text-green-600 dark:text-green-400'
+    icon: 'text-emerald-600 dark:text-emerald-500'
   },
   social: {
     bg: 'bg-purple-100 dark:bg-purple-900/30',
-    border: 'border-purple-300 dark:border-purple-600',
+    border: 'border-purple-300 dark:border-slate-600',
     text: 'text-purple-800 dark:text-purple-300',
-    icon: 'text-purple-600 dark:text-purple-400'
+    icon: 'text-slate-600 dark:text-purple-400'
   },
   learning: {
     bg: 'bg-yellow-100 dark:bg-yellow-900/30',
     border: 'border-yellow-300 dark:border-yellow-600',
     text: 'text-yellow-800 dark:text-yellow-300',
-    icon: 'text-yellow-600 dark:text-yellow-400'
+    icon: 'text-yellow-600 dark:text-slate-400'
   }
 };
 
@@ -132,13 +132,13 @@ export default function AchievementBadge({
       {/* Sparkle effect for newly earned achievements */}
       {earned && earnedAt && (
         <div className="absolute -top-1 -right-1">
-          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+          <div className="w-3 h-3 bg-slate-400 rounded-full animate-pulse"></div>
         </div>
       )}
       
       {/* XP indicator */}
       {showXP && achievementData.xp_points > 0 && (
-        <div className="absolute -bottom-1 -right-1 bg-yellow-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+        <div className="absolute -bottom-1 -right-1 bg-slate-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
           {achievementData.xp_points}
         </div>
       )}

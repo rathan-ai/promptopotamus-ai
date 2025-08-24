@@ -129,7 +129,7 @@ export default function ReviewSubmissionModal({
                   <Star
                     className={`w-8 h-8 ${
                       star <= (hoveredRating || rating)
-                        ? 'fill-yellow-400 text-yellow-400'
+                        ? 'fill-slate-400 text-slate-400'
                         : 'text-neutral-300 dark:text-neutral-600'
                     }`}
                   />
@@ -171,12 +171,12 @@ export default function ReviewSubmissionModal({
           {/* Guidelines */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
             <div className="flex items-start">
-              <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
+              <MessageSquare className="w-5 h-5 text-slate-600 dark:text-slate-400 mr-2 mt-0.5 flex-shrink-0" />
               <div>
                 <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200">
                   Review Guidelines
                 </h4>
-                <ul className="text-xs text-blue-700 dark:text-blue-300 mt-1 space-y-1">
+                <ul className="text-xs text-slate-700 dark:text-blue-300 mt-1 space-y-1">
                   <li>• Focus on how the prompt helped you achieve your goals</li>
                   <li>• Mention specific use cases or scenarios where it worked well</li>
                   <li>• Be honest and constructive in your feedback</li>

@@ -55,7 +55,7 @@ function CommentItem({
       <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 mb-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-slate-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
               {comment.profiles?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div>
@@ -98,7 +98,7 @@ function CommentItem({
                       onDelete(comment.id);
                       setShowActions(false);
                     }}
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-700 text-red-600 dark:text-red-400 flex items-center gap-2"
+                    className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-700 text-slate-600 dark:text-red-400 flex items-center gap-2"
                   >
                     <Trash2 className="w-3 h-3" />
                     Delete
@@ -116,7 +116,7 @@ function CommentItem({
         {level < 2 && ( // Limit nesting to 2 levels
           <button
             onClick={() => onReply(comment.id)}
-            className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400 hover:underline"
           >
             <Reply className="w-3 h-3" />
             Reply
@@ -356,7 +356,7 @@ export default function PromptComments({
       {canComment && user && (
         <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 mb-6">
           {(replyToId || editingComment) && (
-            <div className="flex items-center justify-between mb-3 text-sm text-blue-600 dark:text-blue-400">
+            <div className="flex items-center justify-between mb-3 text-sm text-slate-600 dark:text-slate-400">
               <span>
                 {editingComment ? 'Editing comment' : 'Replying to comment'}
               </span>
@@ -370,7 +370,7 @@ export default function PromptComments({
           )}
           
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-slate-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
               {user.user_metadata?.name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             

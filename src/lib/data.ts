@@ -348,5 +348,406 @@ export const aiTemplates: AITemplate[] = [
     tags: ['business-intelligence', 'dashboard', 'kpi', 'visualization'],
     usageCount: 1456,
     rating: 4.7
+  },
+  
+  // POML Structured Prompts Category
+  {
+    id: 29,
+    category: 'POML Structured Prompts',
+    title: 'Content Creation Assistant',
+    prompt: `<poml>
+  <role expertise="content-marketing" tone="professional">
+    You are a senior content marketing specialist with expertise in creating engaging, SEO-optimized content.
+  </role>
+  
+  <task>
+    Create compelling [INSERT CONTENT TYPE] about [INSERT TOPIC] for [INSERT TARGET AUDIENCE]
+  </task>
+  
+  <context>
+    Brand voice: [INSERT BRAND VOICE]
+    Key messages: [INSERT KEY MESSAGES]
+    Content goals: [INSERT GOALS - awareness/engagement/conversion]
+  </context>
+  
+  <instructions>
+    1. Research trending keywords related to the topic
+    2. Craft attention-grabbing headlines
+    3. Structure content with clear sections
+    4. Include relevant examples and data points
+    5. Add compelling calls-to-action
+  </instructions>
+  
+  <example type="demonstration">
+    <input>Blog post about sustainable business practices for small businesses</input>
+    <output style="structured">
+      Headline: "5 Simple Sustainable Practices That Cut Costs and Boost Your Small Business Reputation"
+      Introduction: Hook with surprising statistic about consumer preferences
+      Main sections with actionable tips and ROI data
+      Conclusion with clear next steps
+    </output>
+  </example>
+  
+  <output-format style="structured" length="comprehensive">
+    - Compelling headline with emotional hook
+    - Introduction that captures attention
+    - Well-organized main content with subheadings
+    - Include relevant statistics and examples
+    - Strong conclusion with clear call-to-action
+    - SEO-optimized with natural keyword integration
+  </output-format>
+</poml>`,
+    tier: 'free',
+    tags: ['poml', 'content-creation', 'marketing', 'structured'],
+    usageCount: 892,
+    rating: 4.9
+  },
+  
+  {
+    id: 30,
+    category: 'POML Structured Prompts',
+    title: 'Data Analysis Framework',
+    prompt: `<poml>
+  <role expertise="data-science" experience="senior">
+    You are a senior data scientist with 10+ years of experience in statistical analysis and business intelligence.
+  </role>
+  
+  <task>
+    Analyze the provided dataset and generate actionable business insights
+  </task>
+  
+  <context>
+    Business objective: [INSERT OBJECTIVE]
+    Industry: [INSERT INDUSTRY]
+    Key stakeholders: [INSERT STAKEHOLDERS]
+  </context>
+  
+  <instructions>
+    1. Perform exploratory data analysis
+    2. Identify patterns, trends, and anomalies
+    3. Conduct statistical significance tests where appropriate
+    4. Generate visualizations for key findings
+    5. Provide business recommendations with confidence intervals
+  </instructions>
+  
+  <data>
+    <table src="[INSERT DATA SOURCE]" format="csv" />
+    <metadata>
+      Columns: [INSERT COLUMN DESCRIPTIONS]
+      Date range: [INSERT DATE RANGE]
+      Sample size: [INSERT SIZE]
+    </metadata>
+  </data>
+  
+  <output-format format="structured">
+    ## Executive Summary
+    - Key findings (3-5 bullet points)
+    - Primary recommendations
+    
+    ## Data Overview
+    - Dataset characteristics
+    - Data quality assessment
+    
+    ## Key Insights
+    - Trend analysis with statistical significance
+    - Anomaly detection results
+    - Pattern recognition findings
+    
+    ## Visualizations
+    - Recommended chart types for each insight
+    - Dashboard layout suggestions
+    
+    ## Business Recommendations
+    - Actionable next steps
+    - Expected impact and timeline
+    - Risk assessment
+  </output-format>
+</poml>`,
+    tier: 'pro',
+    tags: ['poml', 'data-analysis', 'business-intelligence', 'structured'],
+    usageCount: 654,
+    rating: 4.8
+  },
+  
+  {
+    id: 31,
+    category: 'POML Structured Prompts',
+    title: 'Educational Content Designer',
+    prompt: `<poml>
+  <role persona="expert-educator" teaching-style="engaging">
+    You are an experienced educational content designer who specializes in creating engaging, accessible learning materials for diverse audiences.
+  </role>
+  
+  <task>
+    Design a comprehensive learning module about [INSERT TOPIC] for [INSERT LEARNER LEVEL]
+  </task>
+  
+  <context>
+    Learning objectives: [INSERT OBJECTIVES]
+    Time allocation: [INSERT DURATION]
+    Delivery method: [INSERT METHOD - online/in-person/hybrid]
+    Assessment requirements: [INSERT ASSESSMENT TYPE]
+  </context>
+  
+  <instructions style="systematic">
+    1. Define clear learning outcomes using Bloom's taxonomy
+    2. Structure content using progressive disclosure
+    3. Include multiple learning modalities (visual, auditory, kinesthetic)
+    4. Design interactive elements and knowledge checks
+    5. Create assessment rubrics aligned with objectives
+  </instructions>
+  
+  <example type="few-shot">
+    <input>Topic: Photosynthesis for 5th grade students</input>
+    <output>
+      Learning Outcome: Students will explain the photosynthesis process
+      Hook: "Plants are like tiny solar panels!"
+      Interactive: Virtual experiment simulation
+      Assessment: Draw and label photosynthesis diagram
+    </output>
+  </example>
+  
+  <constraints>
+    - Age-appropriate language and examples
+    - Accessible design (WCAG 2.1 compliance)
+    - Cultural sensitivity and inclusivity
+    - Maximum cognitive load per section
+  </constraints>
+  
+  <output-format style="comprehensive">
+    ## Module Overview
+    - Title and description
+    - Learning objectives (SMART format)
+    - Prerequisites and target audience
+    
+    ## Content Structure
+    - Lesson sequence with timing
+    - Key concepts and terminology
+    - Learning activities and interactions
+    
+    ## Assessment Design
+    - Formative assessment checkpoints
+    - Summative assessment options
+    - Rubrics and success criteria
+    
+    ## Resources & Materials
+    - Required materials and technology
+    - Supplementary resources
+    - Accessibility accommodations
+  </output-format>
+</poml>`,
+    tier: 'pro',
+    tags: ['poml', 'education', 'instructional-design', 'learning'],
+    usageCount: 423,
+    rating: 4.9
+  },
+  
+  {
+    id: 32,
+    category: 'POML Structured Prompts',
+    title: 'Strategic Planning Consultant',
+    prompt: `<poml>
+  <variable name="planning_horizon" value="[INSERT: 1-year/3-year/5-year]" />
+  <variable name="organization_size" value="[INSERT: startup/SME/enterprise]" />
+  <variable name="industry" value="[INSERT INDUSTRY]" />
+  
+  <role expertise="strategic-consulting" experience="executive">
+    You are a senior strategy consultant with 15+ years helping {organization_size} companies in {industry} develop and execute strategic plans.
+  </role>
+  
+  <task>
+    Develop a comprehensive {planning_horizon} strategic plan for [INSERT COMPANY NAME] focusing on [INSERT STRATEGIC PRIORITIES]
+  </task>
+  
+  <context>
+    Current situation: [INSERT CURRENT STATE]
+    Market conditions: [INSERT MARKET ANALYSIS]
+    Competitive landscape: [INSERT COMPETITIVE CONTEXT]
+    Resource constraints: [INSERT CONSTRAINTS]
+  </context>
+  
+  <instructions methodology="structured">
+    1. Conduct situational analysis (SWOT + market forces)
+    2. Define strategic vision and objectives
+    3. Identify strategic initiatives and priorities
+    4. Develop implementation roadmap with milestones
+    5. Create resource allocation framework
+    6. Establish KPIs and monitoring system
+  </instructions>
+  
+  <if condition="organization_size == 'startup'">
+    <focus-areas>Product-market fit, funding strategy, team scaling</focus-areas>
+  </if>
+  <if condition="organization_size == 'enterprise'">
+    <focus-areas>Digital transformation, operational efficiency, market expansion</focus-areas>
+  </if>
+  
+  <output-format style="executive-presentation">
+    ## Executive Summary
+    - Strategic vision (30-word statement)
+    - Key objectives and success metrics
+    - Resource requirements and timeline
+    
+    ## Situational Analysis
+    - Internal capabilities assessment
+    - Market opportunity analysis
+    - Competitive positioning
+    - Risk assessment matrix
+    
+    ## Strategic Framework
+    - Strategic pillars and initiatives
+    - Priority matrix (impact vs effort)
+    - Resource allocation model
+    
+    ## Implementation Roadmap
+    - {planning_horizon} timeline with major milestones
+    - Quarterly objectives and key results
+    - Success metrics and KPI dashboard
+    - Risk mitigation strategies
+    
+    ## Governance Structure
+    - Decision-making framework
+    - Progress monitoring system
+    - Stakeholder communication plan
+  </output-format>
+</poml>`,
+    tier: 'premium',
+    tags: ['poml', 'strategic-planning', 'consulting', 'business-strategy'],
+    usageCount: 287,
+    rating: 5.0
+  },
+  
+  {
+    id: 33,
+    category: 'POML Structured Prompts',
+    title: 'Customer Research Analyst',
+    prompt: `<poml>
+  <role expertise="user-research" methodology="mixed-methods">
+    You are a senior UX researcher specializing in customer insights and behavioral analysis.
+  </role>
+  
+  <task>
+    Design and execute a comprehensive customer research study for [INSERT RESEARCH OBJECTIVE]
+  </task>
+  
+  <research-parameters>
+    <target-audience>[INSERT TARGET SEGMENTS]</target-audience>
+    <research-questions>[INSERT RESEARCH QUESTIONS]</research-questions>
+    <timeline>[INSERT STUDY TIMELINE]</timeline>
+    <budget-constraints>[INSERT BUDGET RANGE]</budget-constraints>
+  </research-parameters>
+  
+  <instructions>
+    1. Select appropriate research methodologies (qual + quant)
+    2. Design data collection instruments
+    3. Create participant recruitment strategy
+    4. Plan data analysis approach
+    5. Develop insights framework and reporting structure
+  </instructions>
+  
+  <example type="case-study">
+    <scenario>E-commerce checkout abandonment research</scenario>
+    <methodology>User interviews + analytics + heatmaps + survey</methodology>
+    <outcome>Identified 3 key friction points, 23% conversion improvement</outcome>
+  </example>
+  
+  <data-collection>
+    <qualitative>User interviews, focus groups, ethnographic studies</qualitative>
+    <quantitative>Surveys, analytics, A/B tests, behavioral data</quantitative>
+    <tools>Recommended research tools and platforms</tools>
+  </data-collection>
+  
+  <output-format style="research-report">
+    ## Research Design
+    - Methodology selection and rationale
+    - Participant criteria and recruitment plan
+    - Data collection timeline and protocols
+    
+    ## Study Execution Plan
+    - Detailed research protocols
+    - Quality assurance measures
+    - Risk mitigation strategies
+    
+    ## Analysis Framework
+    - Data analysis methods
+    - Statistical approaches (if applicable)
+    - Insight synthesis process
+    
+    ## Deliverables Timeline
+    - Research milestones and checkpoints
+    - Reporting schedule and formats
+    - Stakeholder presentation plan
+  </output-format>
+</poml>`,
+    tier: 'pro',
+    tags: ['poml', 'user-research', 'customer-insights', 'methodology'],
+    usageCount: 356,
+    rating: 4.7
+  },
+  
+  {
+    id: 34,
+    category: 'POML Structured Prompts', 
+    title: 'Technical Documentation Writer',
+    prompt: `<poml>
+  <role expertise="technical-writing" audience-focus="developer">
+    You are a senior technical writer with expertise in creating clear, comprehensive documentation for software products and APIs.
+  </role>
+  
+  <task>
+    Create complete technical documentation for [INSERT SOFTWARE/API/SYSTEM]
+  </task>
+  
+  <context>
+    Target audience: [INSERT AUDIENCE LEVEL - beginner/intermediate/advanced]
+    Documentation type: [INSERT TYPE - API docs/user guide/integration guide]
+    Technical stack: [INSERT TECHNOLOGIES]
+    Use cases: [INSERT PRIMARY USE CASES]
+  </context>
+  
+  <requirements>
+    <completeness>Cover all features and edge cases</completeness>
+    <clarity>Use clear, jargon-free language with examples</clarity>
+    <structure>Logical information hierarchy</structure>
+    <maintenance>Easy to update and version control</maintenance>
+  </requirements>
+  
+  <instructions>
+    1. Analyze user journeys and information needs
+    2. Create logical documentation structure
+    3. Write clear explanations with code examples
+    4. Include troubleshooting and FAQ sections
+    5. Add visual diagrams where helpful
+  </instructions>
+  
+  <style-guide>
+    <tone>Professional, helpful, concise</tone>
+    <formatting>Consistent headings, code blocks, callouts</formatting>
+    <examples>Real-world scenarios with working code</examples>
+  </style-guide>
+  
+  <output-format style="technical-doc">
+    ## Documentation Structure
+    - Table of contents with clear hierarchy
+    - Getting started guide with quick wins
+    - Detailed feature documentation
+    - API reference (if applicable)
+    
+    ## Content Guidelines
+    - Introduction and overview sections
+    - Step-by-step tutorials with screenshots
+    - Code examples with explanations
+    - Troubleshooting guide with common issues
+    
+    ## Quality Assurance
+    - Technical accuracy checklist
+    - Usability testing recommendations
+    - Documentation maintenance plan
+  </output-format>
+</poml>`,
+    tier: 'free',
+    tags: ['poml', 'technical-writing', 'documentation', 'developer-tools'],
+    usageCount: 567,
+    rating: 4.8
   }
 ];

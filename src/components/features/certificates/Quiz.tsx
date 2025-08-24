@@ -135,7 +135,7 @@ export default function Quiz({ level }: { level: string }) {
 
     if (error) {
         return (
-            <div className="text-center text-red-500 p-8">
+            <div className="text-center text-slate-500 p-8">
                 {error} 
                 <Link href="/certificates" className="underline font-bold ml-2">
                     Go back
@@ -147,7 +147,7 @@ export default function Quiz({ level }: { level: string }) {
     if (quizState === 'passed') {
         return (
             <div className="flex flex-col items-center justify-center text-center p-8 bg-white dark:bg-neutral-800/50 rounded-lg">
-                <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+                <CheckCircle className="h-16 w-16 text-emerald-600 mb-4" />
                 <h2 className="text-2xl font-bold">Exam Passed!</h2>
                 <p className="text-lg mt-2">Finalizing your certificate, please wait...</p>
                 <Loader2 className="animate-spin inline-block h-8 w-8 mt-4" />
@@ -158,11 +158,11 @@ export default function Quiz({ level }: { level: string }) {
     if (quizState === 'failed' && results) {
          return (
             <div className="bg-white dark:bg-neutral-800/50 p-8 rounded-2xl shadow-lg border text-center">
-               <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+               <XCircle className="h-16 w-16 text-slate-500 mx-auto mb-4" />
                <h2 className="text-3xl font-bold text-center mb-4">
                     Exam Complete
                 </h2>
-                <p className="text-5xl font-bold text-center mb-6 text-red-500">
+                <p className="text-5xl font-bold text-center mb-6 text-slate-500">
                     {results.score.toFixed(1)}%
                 </p>
                 <p className="text-center text-lg text-neutral-600 dark:text-neutral-300">Unfortunately, you did not pass this time. Please review the materials and try again.</p>
@@ -180,7 +180,7 @@ export default function Quiz({ level }: { level: string }) {
              <div className="bg-white dark:bg-neutral-800/50 p-8 rounded-2xl shadow-lg border">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold">{levelTitleMap[level]}</h2>
-                    <div className="flex items-center text-lg font-semibold bg-red-500/10 text-red-500 px-3 py-1 rounded-full">
+                    <div className="flex items-center text-lg font-semibold bg-slate-500/10 text-slate-500 px-3 py-1 rounded-full">
                         <Timer className="mr-2 h-5 w-5" /> {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
                     </div>
                 </div>

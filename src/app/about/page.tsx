@@ -49,7 +49,7 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/smart-prompts">
-              <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+              <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-slate-600 hover:from-indigo-700 hover:to-purple-700">
                 <Brain className="w-5 h-5 mr-2" />
                 Explore Our Platform
               </Button>
@@ -80,7 +80,7 @@ export default function AboutPage() {
           </div>
           
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-8 rounded-2xl">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-slate-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6">
               <Rocket className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-4">Our Vision</h2>
@@ -97,7 +97,7 @@ export default function AboutPage() {
       <section className="max-w-4xl mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-h1 text-neutral-900 dark:text-white mb-6">Our Story</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto mb-8"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-slate-500 mx-auto mb-8"></div>
         </div>
         
         <div className="prose dark:prose-invert max-w-none">
@@ -135,7 +135,7 @@ export default function AboutPage() {
               const Icon = value.icon;
               return (
                 <div key={index} className="p-8 bg-white dark:bg-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700/50 hover:scale-105 transition-transform duration-300">
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-slate-500 rounded-xl flex items-center justify-center mb-6">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-h4 text-neutral-900 dark:text-white mb-4">{value.title}</h3>

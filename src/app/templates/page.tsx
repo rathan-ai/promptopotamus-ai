@@ -7,7 +7,7 @@ import { track } from '@vercel/analytics';
 
 export default function TemplatesPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterTier, setFilterTier] = useState<'all' | 'free' | 'pro' | 'premium'>('all');
+  // Removed tier filter - all templates are free
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
   // Get unique categories
@@ -17,10 +17,9 @@ export default function TemplatesPage() {
   const filteredTemplates = aiTemplates.filter(template => {
     const matchesSearch = template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          template.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesTier = filterTier === 'all' || template.tier === filterTier;
     const matchesCategory = filterCategory === 'all' || template.category === filterCategory;
     
-    return matchesSearch && matchesTier && matchesCategory;
+    return matchesSearch && matchesCategory;
   });
 
   // Group filtered templates
@@ -32,15 +31,10 @@ export default function TemplatesPage() {
     groupedTemplates[template.category].push(template);
   });
 
-  const tierCounts = {
-    all: aiTemplates.length,
-    free: aiTemplates.filter(t => t.tier === 'free').length,
-    pro: aiTemplates.filter(t => t.tier === 'pro').length,
-    premium: aiTemplates.filter(t => t.tier === 'premium').length
-  };
+  const templateCount = aiTemplates.length;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="w-full max-w-none">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-extrabold dark:text-white mb-4">AI Templates & Prompt Packs</h1>
@@ -75,32 +69,12 @@ export default function TemplatesPage() {
             </div>
           </div>
 
-          {/* Tier Filter */}
-          <div className="flex gap-2">
-            {Object.entries(tierCounts).map(([tier, count]) => (
-              <button
-                key={tier}
-                onClick={() => {
-                  setFilterTier(tier as 'all' | 'free' | 'pro' | 'premium');
-                  track('template_filter_tier', {
-                    selected_tier: tier,
-                    templates_count: tierCounts[tier as keyof typeof tierCounts]
-                  });
-                }}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filterTier === tier
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600'
-                }`}
-              >
-                <div className="flex items-center gap-1">
-                  {tier === 'pro' && <Star className="w-3 h-3" />}
-                  {tier === 'premium' && <Crown className="w-3 h-3" />}
-                  <span className="capitalize">{tier === 'pro' ? 'PromptCoins' : tier === 'premium' ? 'PromptCoins+' : tier}</span>
-                  <span className="text-xs opacity-75">({count})</span>
-                </div>
-              </button>
-            ))}
+          {/* Free Templates Badge */}
+          <div className="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-emerald-700 dark:text-green-300 rounded-lg text-sm font-medium">
+            <div className="flex items-center gap-2">
+              <Star className="w-4 h-4" />
+              <span>{templateCount} Free Templates Available</span>
+            </div>
           </div>
 
           {/* Category Filter */}

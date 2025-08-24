@@ -22,10 +22,10 @@ interface AffiliateRecommendationProps {
 }
 
 const PartnerIcons = {
-  openai: { icon: Sparkles, color: 'text-green-600 dark:text-green-400' },
-  anthropic: { icon: Zap, color: 'text-purple-600 dark:text-purple-400' },
+  openai: { icon: Sparkles, color: 'text-emerald-600 dark:text-emerald-500' },
+  anthropic: { icon: Zap, color: 'text-slate-600 dark:text-purple-400' },
   jasper: { icon: TrendingUp, color: 'text-orange-600 dark:text-orange-400' },
-  default: { icon: ExternalLink, color: 'text-blue-600 dark:text-blue-400' }
+  default: { icon: ExternalLink, color: 'text-slate-600 dark:text-slate-400' }
 };
 
 const ContextMessages = {
@@ -145,7 +145,7 @@ export default function AffiliateRecommendation({
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">{contextInfo.title}</h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">{contextInfo.description}</p>
+            <p className="text-sm text-slate-700 dark:text-blue-300">{contextInfo.description}</p>
           </div>
           <div className="flex gap-2 ml-4">
             {recommendations.map((partner) => {
@@ -204,7 +204,7 @@ export default function AffiliateRecommendation({
               <div className="flex items-center gap-3">
                 <Icon className={`w-5 h-5 ${color}`} />
                 <div className="text-left">
-                  <p className="font-medium dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                  <p className="font-medium dark:text-white group-hover:text-slate-600 dark:group-hover:text-slate-400">
                     {partner.partnerName}
                   </p>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -212,7 +212,7 @@ export default function AffiliateRecommendation({
                   </p>
                 </div>
               </div>
-              <ExternalLink className="w-4 h-4 text-neutral-400 group-hover:text-blue-500" />
+              <ExternalLink className="w-4 h-4 text-neutral-400 group-hover:text-slate-500" />
             </button>
           );
         })}

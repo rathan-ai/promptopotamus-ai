@@ -265,7 +265,7 @@ export default function AdminDashboardPage() {
                           <button 
                             key={cert.id}
                             onClick={() => handleReset(user.id, cert.certificate_slug)}
-                            className="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center"
+                            className="text-xs text-slate-500 hover:text-red-700 dark:hover:text-red-400 flex items-center"
                           >
                             <Zap className="mr-1 h-3 w-3" /> Reset {certDetails[cert.certificate_slug]?.level}
                           </button>

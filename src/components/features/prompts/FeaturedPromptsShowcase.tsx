@@ -45,7 +45,7 @@ const sections = [
     title: 'Trending Now',
     icon: TrendingUp,
     description: 'Hot Smart Prompts gaining popularity',
-    color: 'text-red-600 dark:text-red-400',
+    color: 'text-slate-600 dark:text-red-400',
     bgColor: 'bg-red-50 dark:bg-red-900/20'
   },
   {
@@ -53,7 +53,7 @@ const sections = [
     title: 'Top Rated',
     icon: Star,
     description: 'Highest rated prompts by our community',
-    color: 'text-yellow-600 dark:text-yellow-400',
+    color: 'text-yellow-600 dark:text-slate-400',
     bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
   },
   {
@@ -61,7 +61,7 @@ const sections = [
     title: 'Best Sellers',
     icon: ShoppingBag,
     description: 'Most purchased Smart Prompts',
-    color: 'text-green-600 dark:text-green-400',
+    color: 'text-emerald-600 dark:text-emerald-500',
     bgColor: 'bg-green-50 dark:bg-green-900/20'
   },
   {
@@ -69,7 +69,7 @@ const sections = [
     title: 'Recently Added',
     icon: Clock,
     description: 'Recently added prompts',
-    color: 'text-blue-600 dark:text-blue-400',
+    color: 'text-slate-600 dark:text-slate-400',
     bgColor: 'bg-blue-50 dark:bg-blue-900/20'
   },
   {
@@ -77,7 +77,7 @@ const sections = [
     title: 'Free Prompts',
     icon: Gift,
     description: 'Quality prompts at no cost',
-    color: 'text-purple-600 dark:text-purple-400',
+    color: 'text-slate-600 dark:text-purple-400',
     bgColor: 'bg-purple-50 dark:bg-purple-900/20'
   },
   {
@@ -183,7 +183,7 @@ export default function FeaturedPromptsShowcase() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-neutral-700">
               <div className="flex items-center justify-center mb-2">
-                <Brain className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                <Brain className="w-8 h-8 text-slate-600 dark:text-slate-400" />
               </div>
               <div className="text-3xl font-bold text-neutral-900 dark:text-white">
                 {data.stats.totalPrompts}+
@@ -193,7 +193,7 @@ export default function FeaturedPromptsShowcase() {
             
             <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-neutral-700">
               <div className="flex items-center justify-center mb-2">
-                <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
+                <Users className="w-8 h-8 text-emerald-600 dark:text-emerald-500" />
               </div>
               <div className="text-3xl font-bold text-neutral-900 dark:text-white">
                 1
@@ -203,7 +203,7 @@ export default function FeaturedPromptsShowcase() {
             
             <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-neutral-700">
               <div className="flex items-center justify-center mb-2">
-                <Download className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                <Download className="w-8 h-8 text-slate-600 dark:text-purple-400" />
               </div>
               <div className="text-3xl font-bold text-neutral-900 dark:text-white">
                 {data.stats.totalDownloads}+
@@ -215,7 +215,7 @@ export default function FeaturedPromptsShowcase() {
           {/* Main CTA */}
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/smart-prompts">
-              <Button size="lg" className="text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button size="lg" className="text-white bg-gradient-to-r from-blue-600 to-slate-600 hover:from-blue-700 hover:to-purple-700">
                 <Brain className="w-5 h-5 mr-2" />
                 Browse All Prompts
               </Button>

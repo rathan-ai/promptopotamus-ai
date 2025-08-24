@@ -25,19 +25,19 @@ const TIER_CONFIG = {
   pro: {
     icon: Zap,
     name: 'Creator',
-    color: 'text-blue-600 dark:text-blue-400',
+    color: 'text-slate-600 dark:text-slate-400',
     bgColor: 'bg-blue-50 dark:bg-blue-900/20',
     borderColor: 'border-blue-300 dark:border-blue-600',
-    gradient: 'from-blue-500 to-purple-600',
+    gradient: 'from-blue-500 to-slate-600',
     tagline: 'Building Excellence'
   },
   premium: {
     icon: Crown,
     name: 'Master',
-    color: 'text-yellow-600 dark:text-yellow-400',
+    color: 'text-yellow-600 dark:text-slate-400',
     bgColor: 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20',
-    borderColor: 'border-yellow-400 dark:border-yellow-500',
-    gradient: 'from-yellow-500 via-orange-500 to-red-500',
+    borderColor: 'border-slate-400 dark:border-slate-500',
+    gradient: 'from-slate-500 via-orange-500 to-slate-500',
     tagline: 'Premium Member'
   }
 };
@@ -137,7 +137,7 @@ export default function UserIdentityBadge({
       >
         <IconComponent className={clsx(sizes.icon, config.color)} />
         {(profile.tier || 'free') === 'premium' && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full border border-white dark:border-gray-900 animate-pulse" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-slate-400 to-orange-500 rounded-full border border-white dark:border-gray-900 animate-pulse" />
         )}
       </div>
     );
@@ -158,7 +158,7 @@ export default function UserIdentityBadge({
       <div className="relative">
         <IconComponent className={sizes.icon} />
         {(profile.tier || 'free') === 'premium' && (
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse" />
+          <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-slate-400 to-orange-500 rounded-full animate-pulse" />
         )}
       </div>
       
@@ -171,7 +171,7 @@ export default function UserIdentityBadge({
 
       {/* Subtle gradient border effect for premium */}
       {(profile.tier || 'free') === 'premium' && (
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400/20 via-orange-400/20 to-red-400/20 blur-sm -z-10" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-slate-400/20 via-orange-400/20 to-red-400/20 blur-sm -z-10" />
       )}
     </div>
   );

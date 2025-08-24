@@ -53,7 +53,7 @@ export class PromptService {
         example_inputs,
         created_at,
         user_id,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        profiles(full_name)
       `)
       .eq('is_marketplace', true)
       .eq('is_public', true);
@@ -142,7 +142,7 @@ export class PromptService {
         example_inputs,
         created_at,
         user_id,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        profiles(full_name)
       `)
       .eq('id', id)
       .eq('is_marketplace', true)
@@ -234,7 +234,7 @@ export class PromptService {
             example_inputs,
             example_outputs,
             user_id,
-            profiles!saved_prompts_user_id_fkey(full_name)
+            profiles(full_name)
           )
         `)
         .eq('buyer_id', userId)

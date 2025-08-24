@@ -486,7 +486,7 @@ export default function PromptCrafterWizard({
   const renderStage0 = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-slate-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <MessageSquare className="w-8 h-8 text-white" />
         </div>
         <h3 className="text-2xl font-bold dark:text-white mb-2">What would you like to create?</h3>
@@ -606,7 +606,7 @@ export default function PromptCrafterWizard({
         </Button>
         <Button 
           onClick={handleStage0Submit}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          className="bg-gradient-to-r from-blue-600 to-slate-600 hover:from-blue-700 hover:to-purple-700"
         >
           Continue
           <ChevronRight className="w-4 h-4 ml-2" />
@@ -618,7 +618,7 @@ export default function PromptCrafterWizard({
   const renderStage1 = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gradient-to-br from-slate-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Brain className="w-8 h-8 text-white" />
         </div>
         <h3 className="text-2xl font-bold dark:text-white mb-2">Framework & Model Analysis</h3>
@@ -629,7 +629,7 @@ export default function PromptCrafterWizard({
       
       {isAnalyzing ? (
         <div className="flex flex-col items-center justify-center py-12">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <div className="w-16 h-16 border-4 border-slate-500 border-t-transparent rounded-full animate-spin mb-4"></div>
           <p className="text-neutral-600 dark:text-neutral-400">Analyzing your request...</p>
         </div>
       ) : (
@@ -648,8 +648,8 @@ export default function PromptCrafterWizard({
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                  <CheckCircle className="w-5 h-5 text-emerald-600" />
+                  <span className="text-sm font-medium text-emerald-600 dark:text-emerald-500">
                     AI Selected
                   </span>
                 </div>
@@ -658,7 +658,7 @@ export default function PromptCrafterWizard({
               {wizardState.framework && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <Lightbulb className="w-5 h-5 text-purple-600" />
+                    <Lightbulb className="w-5 h-5 text-slate-600" />
                     <h5 className="font-medium text-purple-900 dark:text-purple-100">
                       {FRAMEWORKS[wizardState.framework].name}
                     </h5>
@@ -666,8 +666,8 @@ export default function PromptCrafterWizard({
                   <p className="text-purple-700 dark:text-purple-300 text-sm">
                     {FRAMEWORKS[wizardState.framework].description}
                   </p>
-                  <div className="bg-white dark:bg-neutral-800 p-3 rounded border border-purple-200 dark:border-purple-600">
-                    <p className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-1">
+                  <div className="bg-white dark:bg-neutral-800 p-3 rounded border border-purple-200 dark:border-slate-600">
+                    <p className="text-xs font-medium text-slate-600 dark:text-purple-400 mb-1">
                       When to use:
                     </p>
                     <p className="text-sm text-neutral-700 dark:text-neutral-300">
@@ -679,7 +679,7 @@ export default function PromptCrafterWizard({
               
               {/* Framework Options */}
               <details className="mt-4">
-                <summary className="cursor-pointer text-sm text-purple-600 dark:text-purple-400 hover:underline">
+                <summary className="cursor-pointer text-sm text-slate-600 dark:text-purple-400 hover:underline">
                   Choose a different framework
                 </summary>
                 <div className="mt-3 grid grid-cols-2 gap-2">
@@ -689,7 +689,7 @@ export default function PromptCrafterWizard({
                       onClick={() => setWizardState(prev => ({ ...prev, framework: key as Framework }))}
                       className={`p-2 text-left rounded border text-sm transition-colors
                         ${wizardState.framework === key 
-                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' 
+                          ? 'border-slate-500 bg-purple-50 dark:bg-purple-900/30' 
                           : 'border-neutral-300 dark:border-neutral-600 hover:border-purple-300'
                         }`}
                     >
@@ -711,13 +711,13 @@ export default function PromptCrafterWizard({
                   <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-lg">
                     Recommended Model
                   </h4>
-                  <p className="text-blue-700 dark:text-blue-300 text-sm">
+                  <p className="text-slate-700 dark:text-blue-300 text-sm">
                     Optimized for your specific use case
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                  <Zap className="w-5 h-5 text-slate-500" />
+                  <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
                     Best Match
                   </span>
                 </div>
@@ -726,7 +726,7 @@ export default function PromptCrafterWizard({
               {wizardState.model && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <Target className="w-5 h-5 text-blue-600" />
+                    <Target className="w-5 h-5 text-slate-600" />
                     <h5 className="font-medium text-blue-900 dark:text-blue-100">
                       {wizardState.model.name} ({wizardState.model.version})
                     </h5>
@@ -734,12 +734,12 @@ export default function PromptCrafterWizard({
                   <div className="flex flex-wrap gap-2">
                     {wizardState.model.strengths.map((strength, idx) => (
                       <span key={idx} className="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 
-                                               text-blue-700 dark:text-blue-300 text-xs rounded">
+                                               text-slate-700 dark:text-blue-300 text-xs rounded">
                         {strength}
                       </span>
                     ))}
                   </div>
-                  <div className="text-sm text-blue-700 dark:text-blue-300">
+                  <div className="text-sm text-slate-700 dark:text-blue-300">
                     Context: {wizardState.model.contextLength.toLocaleString()} tokens
                   </div>
                 </div>
@@ -747,7 +747,7 @@ export default function PromptCrafterWizard({
               
               {/* Model Options */}
               <details className="mt-4">
-                <summary className="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                <summary className="cursor-pointer text-sm text-slate-600 dark:text-slate-400 hover:underline">
                   Choose a different model
                 </summary>
                 <div className="mt-3 space-y-2">
@@ -811,7 +811,7 @@ export default function PromptCrafterWizard({
             </Button>
             <Button 
               onClick={() => setWizardState(prev => ({ ...prev, stage: 2 }))}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="bg-gradient-to-r from-blue-600 to-slate-600 hover:from-blue-700 hover:to-purple-700"
             >
               Continue
               <ChevronRight className="w-4 h-4 ml-2" />
@@ -828,7 +828,7 @@ export default function PromptCrafterWizard({
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <FileText className="w-8 h-8 text-white" />
           </div>
           <h3 className="text-2xl font-bold dark:text-white mb-2">Choose Output Format</h3>
@@ -840,20 +840,20 @@ export default function PromptCrafterWizard({
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 
                       p-4 rounded-lg border border-green-200 dark:border-green-700">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-green-600" />
+            <Sparkles className="w-5 h-5 text-emerald-600" />
             <span className="font-medium text-green-800 dark:text-green-200">
               Suggested Format
             </span>
           </div>
           <button
             onClick={() => setWizardState(prev => ({ ...prev, outputFormat: suggestedFormat }))}
-            className="w-full p-3 text-left bg-white dark:bg-neutral-800 rounded border-2 border-green-400 
-                     hover:border-green-500 transition-colors"
+            className="w-full p-3 text-left bg-white dark:bg-neutral-800 rounded border-2 border-emerald-500 
+                     hover:border-emerald-600 transition-colors"
           >
             <div className="font-medium text-green-800 dark:text-green-200 mb-1">
               {OUTPUT_FORMATS[suggestedFormat].name}
             </div>
-            <div className="text-sm text-green-700 dark:text-green-300">
+            <div className="text-sm text-emerald-700 dark:text-green-300">
               {OUTPUT_FORMATS[suggestedFormat].description}
             </div>
           </button>
@@ -917,7 +917,7 @@ export default function PromptCrafterWizard({
           <Button 
             onClick={generateFinalPrompt}
             disabled={!wizardState.outputFormat || (wizardState.outputFormat === 'custom' && !wizardState.customFormat)}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            className="bg-gradient-to-r from-emerald-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
           >
             <Wand2 className="w-4 h-4 mr-2" />
             Generate Prompt (15 PC)
@@ -930,7 +930,7 @@ export default function PromptCrafterWizard({
   const renderStage3 = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-slate-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <CheckCircle className="w-8 h-8 text-white" />
         </div>
         <h3 className="text-2xl font-bold dark:text-white mb-2">Your Crafted Prompt</h3>
@@ -974,7 +974,7 @@ export default function PromptCrafterWizard({
           <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
             Framework Used
           </h4>
-          <p className="text-blue-700 dark:text-blue-300 text-sm">
+          <p className="text-slate-700 dark:text-blue-300 text-sm">
             {wizardState.framework && FRAMEWORKS[wizardState.framework].name}
           </p>
         </div>
@@ -1007,7 +1007,7 @@ export default function PromptCrafterWizard({
               });
             }
           }}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+          className="bg-gradient-to-r from-indigo-600 to-slate-600 hover:from-indigo-700 hover:to-purple-700"
         >
           <CheckCircle className="w-4 h-4 mr-2" />
           Complete
@@ -1037,13 +1037,13 @@ export default function PromptCrafterWizard({
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-bold dark:text-white flex items-center gap-2">
-            <Wand2 className="w-6 h-6 text-purple-500" />
+            <Wand2 className="w-6 h-6 text-slate-500" />
             Prompt Crafter Wizard
           </h2>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowHelp(!showHelp)}
-              className="text-neutral-600 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="text-neutral-600 dark:text-neutral-400 hover:text-slate-600 dark:hover:text-slate-400 transition-colors"
             >
               <HelpCircle className="w-5 h-5" />
             </button>
@@ -1059,7 +1059,7 @@ export default function PromptCrafterWizard({
               key={step}
               className={`flex-1 h-2 rounded-full transition-colors ${
                 step <= wizardState.stage 
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500' 
+                  ? 'bg-gradient-to-r from-blue-500 to-slate-500' 
                   : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             />

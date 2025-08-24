@@ -95,7 +95,7 @@ export default function RecipeFlowVisualizer({
               <div key={step.id} className="relative">
                 <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    <div className="flex-shrink-0 w-8 h-8 bg-slate-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                       {index + 1}
                     </div>
                     <div className="flex-1">
@@ -117,7 +117,7 @@ export default function RecipeFlowVisualizer({
                             {step.variables.map(variable => (
                               <span
                                 key={variable}
-                                className="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded text-xs"
+                                className="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-slate-700 dark:text-blue-300 rounded text-xs"
                               >
                                 {variable}
                               </span>
@@ -129,13 +129,13 @@ export default function RecipeFlowVisualizer({
                   </div>
                   
                   {/* Output indicator */}
-                  <div className="mt-4 pt-3 border-t border-purple-200 dark:border-purple-600">
+                  <div className="mt-4 pt-3 border-t border-purple-200 dark:border-slate-600">
                     <div className="text-xs text-purple-700 dark:text-purple-300 mb-1">Produces:</div>
                     <div className="flex gap-2">
                       {getStepOutputVariables(index).map(output => (
                         <span
                           key={output}
-                          className="px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded text-xs"
+                          className="px-2 py-1 bg-green-100 dark:bg-green-900/50 text-emerald-700 dark:text-green-300 rounded text-xs"
                         >
                           {output}
                         </span>
@@ -148,7 +148,7 @@ export default function RecipeFlowVisualizer({
                 {index < steps.length - 1 && (
                   <div className="flex justify-center my-4">
                     <div className="w-0.5 h-8 bg-gradient-to-b from-purple-400 to-blue-400"></div>
-                    <ArrowDown className="w-6 h-6 text-purple-500 -mt-2" />
+                    <ArrowDown className="w-6 h-6 text-slate-500 -mt-2" />
                   </div>
                 )}
               </div>
@@ -227,7 +227,7 @@ export default function RecipeFlowVisualizer({
                     <div className="p-4 border-b border-neutral-200 dark:border-neutral-600">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          <div className="w-8 h-8 bg-slate-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                             {index + 1}
                           </div>
                           <div className="flex-1">
@@ -264,7 +264,7 @@ export default function RecipeFlowVisualizer({
                           )}
                           <button
                             onClick={() => onRemoveStep(step.id)}
-                            className="p-1 hover:bg-red-100 dark:hover:bg-red-900/50 rounded text-red-500"
+                            className="p-1 hover:bg-red-100 dark:hover:bg-red-900/50 rounded text-slate-500"
                             title="Remove step"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -296,7 +296,7 @@ export default function RecipeFlowVisualizer({
                             onChange={(e) => updateStep(step.id, { instruction: e.target.value })}
                             placeholder="Describe what this step does and how it uses previous results..."
                             rows={2}
-                            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-neutral-700 dark:text-white text-sm resize-none"
+                            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent dark:bg-neutral-700 dark:text-white text-sm resize-none"
                           />
                         </div>
 
@@ -310,7 +310,7 @@ export default function RecipeFlowVisualizer({
                             onChange={(e) => updateStep(step.id, { prompt_template: e.target.value })}
                             placeholder="Enter the prompt template for this step. Use {variable_name} for variables..."
                             rows={3}
-                            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-neutral-700 dark:text-white text-sm font-mono resize-none"
+                            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent dark:bg-neutral-700 dark:text-white text-sm font-mono resize-none"
                           />
                         </div>
 
@@ -352,7 +352,7 @@ export default function RecipeFlowVisualizer({
                     <div className="flex justify-center my-4">
                       <div className="flex flex-col items-center">
                         <div className="w-0.5 h-4 bg-gradient-to-b from-purple-400 to-blue-400"></div>
-                        <ArrowDown className="w-5 h-5 text-purple-500" />
+                        <ArrowDown className="w-5 h-5 text-slate-500" />
                         <div className="w-0.5 h-4 bg-gradient-to-b from-purple-400 to-blue-400"></div>
                       </div>
                     </div>

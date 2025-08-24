@@ -168,8 +168,8 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
 
   const getComplexityBadge = (level: string) => {
     const badges = {
-      simple: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-      smart: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+      simple: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-emerald-500',
+      smart: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-slate-400',
       recipe: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
     };
     return badges[level as keyof typeof badges] || badges.simple;
@@ -177,7 +177,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
 
   const getDifficultyBadge = (level: string) => {
     const badges = {
-      beginner: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+      beginner: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-slate-400',
       intermediate: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400',
       advanced: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
     };
@@ -200,7 +200,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-neutral-800/50 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center">
-            <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
+            <Brain className="w-5 h-5 text-slate-600 dark:text-slate-400 mr-2" />
             <div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">Created</p>
               <p className="text-xl font-semibold">{data?.created.length || 0}</p>
@@ -210,7 +210,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
         
         <div className="bg-white dark:bg-neutral-800/50 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center">
-            <ShoppingBag className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
+            <ShoppingBag className="w-5 h-5 text-emerald-600 dark:text-emerald-500 mr-2" />
             <div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">Purchased</p>
               <p className="text-xl font-semibold">{data?.purchased.length || 0}</p>
@@ -220,7 +220,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
 
         <div className="bg-white dark:bg-neutral-800/50 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center">
-            <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400 mr-2" />
+            <TrendingUp className="w-5 h-5 text-slate-600 dark:text-purple-400 mr-2" />
             <div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">Total Sales</p>
               <p className="text-xl font-semibold">{data?.salesStats.totalSales || 0}</p>
@@ -230,7 +230,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
 
         <div className="bg-white dark:bg-neutral-800/50 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center">
-            <DollarSign className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2" />
+            <DollarSign className="w-5 h-5 text-yellow-600 dark:text-slate-400 mr-2" />
             <div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">Revenue</p>
               <p className="text-xl font-semibold">${(data?.salesStats.totalRevenue || 0).toFixed(2)}</p>
@@ -268,7 +268,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
               onClick={() => setActiveTab(tab.id as any)}
               className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                  ? 'border-slate-500 text-slate-600 dark:text-purple-400'
                   : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
               }`}
             >
@@ -285,7 +285,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
             {!hasValidCertificate && (
               <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
                 <div className="flex items-center">
-                  <Lock className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2" />
+                  <Lock className="w-5 h-5 text-yellow-600 dark:text-slate-400 mr-2" />
                   <div>
                     <p className="font-medium text-yellow-800 dark:text-yellow-200">Certification Required for Marketplace</p>
                     <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
@@ -316,7 +316,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
                             {prompt.difficulty_level}
                           </span>
                           {prompt.is_marketplace ? (
-                            <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 rounded-full text-xs font-medium flex items-center">
+                            <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-emerald-500 rounded-full text-xs font-medium flex items-center">
                               <Globe className="w-3 h-3 mr-1" />
                               Published
                             </span>
@@ -494,11 +494,11 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-neutral-600 dark:text-neutral-400">Total Sales</p>
-                        <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-500">
                           {data?.salesStats.totalSales || 0}
                         </p>
                       </div>
-                      <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400" />
+                      <TrendingUp className="w-8 h-8 text-emerald-600 dark:text-emerald-500" />
                     </div>
                   </div>
                   
@@ -506,11 +506,11 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-neutral-600 dark:text-neutral-400">Total Revenue</p>
-                        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                        <p className="text-2xl font-bold text-slate-600 dark:text-slate-400">
                           ${(data?.salesStats.totalRevenue || 0).toFixed(2)}
                         </p>
                       </div>
-                      <DollarSign className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                      <DollarSign className="w-8 h-8 text-slate-600 dark:text-slate-400" />
                     </div>
                   </div>
                   
@@ -540,7 +540,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-green-600 dark:text-green-400">
+                            <p className="font-semibold text-emerald-600 dark:text-emerald-500">
                               +${sale.purchase_price}
                             </p>
                           </div>

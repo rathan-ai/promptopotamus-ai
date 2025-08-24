@@ -20,7 +20,7 @@ export async function GET(
         .from('saved_prompts')
         .select(`
           *,
-          profiles!saved_prompts_user_id_fkey(full_name)
+          profiles(full_name)
         `)
         .eq('id', promptId)
         .eq('user_id', user.id)
@@ -36,7 +36,7 @@ export async function GET(
           .from('saved_prompts')
           .select(`
             *,
-            profiles!saved_prompts_user_id_fkey(full_name)
+            profiles(full_name)
           `)
           .eq('id', promptId)
           .eq('is_marketplace', true)
@@ -52,7 +52,7 @@ export async function GET(
         .from('saved_prompts')
         .select(`
           *,
-          profiles!saved_prompts_user_id_fkey(full_name)
+          profiles(full_name)
         `)
         .eq('id', promptId)
         .eq('is_marketplace', true)

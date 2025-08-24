@@ -18,8 +18,7 @@ export async function GET() {
         price,
         downloads_count,
         rating_average,
-        rating_count,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        rating_count
       `)
       .eq('is_marketplace', true)
       .eq('is_public', true)
@@ -41,8 +40,7 @@ export async function GET() {
         price,
         downloads_count,
         rating_average,
-        rating_count,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        rating_count
       `)
       .eq('is_marketplace', true)
       .eq('is_public', true)
@@ -64,8 +62,7 @@ export async function GET() {
         price,
         downloads_count,
         rating_average,
-        rating_count,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        rating_count
       `)
       .eq('is_marketplace', true)
       .eq('is_public', true)
@@ -87,8 +84,7 @@ export async function GET() {
         downloads_count,
         rating_average,
         rating_count,
-        created_at,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        created_at
       `)
       .eq('is_marketplace', true)
       .eq('is_public', true)
@@ -108,8 +104,7 @@ export async function GET() {
         price,
         downloads_count,
         rating_average,
-        rating_count,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        rating_count
       `)
       .eq('is_marketplace', true)
       .eq('is_public', true)
@@ -131,8 +126,7 @@ export async function GET() {
         price,
         downloads_count,
         rating_average,
-        rating_count,
-        profiles!saved_prompts_user_id_fkey(full_name)
+        rating_count
       `)
       .eq('is_marketplace', true)
       .eq('is_public', true)

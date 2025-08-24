@@ -472,14 +472,14 @@ export default function SmartPromptsBuilder({
               return (
                 <div key={step.id} className="flex items-center flex-shrink-0 min-w-0">
                   <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                    isCompleted ? 'bg-green-500 border-green-500 text-white' :
-                    isActive ? 'border-blue-500 text-blue-500' : 
+                    isCompleted ? 'bg-emerald-600 border-emerald-600 text-white' :
+                    isActive ? 'border-blue-500 text-slate-500' : 
                     'border-neutral-300 text-neutral-400'
                   }`}>
                     <Icon className="w-5 h-5" />
                   </div>
                   <span className={`ml-2 text-xs sm:text-sm font-medium whitespace-nowrap ${
-                    isActive ? 'text-blue-600 dark:text-blue-400' : 
+                    isActive ? 'text-slate-600 dark:text-slate-400' : 
                     'text-neutral-600 dark:text-neutral-400'
                   }`}>
                     {step.title}
@@ -499,7 +499,7 @@ export default function SmartPromptsBuilder({
           {currentStep === 0 && (
             <div className="space-y-6">
               <div className="text-center">
-                <Target className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                <Target className="w-16 h-16 text-slate-500 mx-auto mb-4" />
                 <h2 className="text-2xl font-semibold dark:text-white mb-2">What do you want to create?</h2>
                 <p className="text-neutral-600 dark:text-neutral-400 mb-6">
                   Describe your goal and our AI will analyze your intent and recommend the best templates
@@ -523,23 +523,23 @@ export default function SmartPromptsBuilder({
                 {aiState.intentAnalysis && (
                   <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
                     <div className="flex items-start gap-4">
-                      <Sparkles className="w-6 h-6 text-blue-500 mt-1" />
+                      <Sparkles className="w-6 h-6 text-slate-500 mt-1" />
                       <div className="flex-1">
                         <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">AI Analysis</h3>
                         <div className="space-y-3">
                           <div>
-                            <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">Primary Intent:</span>
+                            <span className="text-sm text-slate-700 dark:text-blue-300 font-medium">Primary Intent:</span>
                             <span className="ml-2 text-blue-900 dark:text-blue-100 capitalize">{aiState.intentAnalysis.primaryIntent}</span>
                             <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
                               {Math.round(aiState.intentAnalysis.confidence * 100)}% confidence
                             </span>
                           </div>
                           <div>
-                            <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">Complexity:</span>
+                            <span className="text-sm text-slate-700 dark:text-blue-300 font-medium">Complexity:</span>
                             <span className="ml-2 text-blue-900 dark:text-blue-100 capitalize">{aiState.intentAnalysis.estimatedComplexity}</span>
                           </div>
                           <div>
-                            <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">Recommended Approach:</span>
+                            <span className="text-sm text-slate-700 dark:text-blue-300 font-medium">Recommended Approach:</span>
                             <p className="text-blue-900 dark:text-blue-100 mt-1">{aiState.intentAnalysis.recommendedApproach}</p>
                           </div>
                         </div>
@@ -656,7 +656,7 @@ export default function SmartPromptsBuilder({
               {/* Title */}
               <div>
                 <label className="block text-sm font-medium mb-2 dark:text-white">
-                  Title <span className="text-red-500">*</span>
+                  Title <span className="text-slate-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -754,7 +754,7 @@ export default function SmartPromptsBuilder({
                     </h3>
                     <button
                       onClick={() => setAiState(prev => ({ ...prev, showAIInsights: false }))}
-                      className="text-green-600 hover:text-green-800"
+                      className="text-emerald-600 hover:text-green-800"
                     >
                       <XCircle className="w-4 h-4" />
                     </button>
@@ -769,7 +769,7 @@ export default function SmartPromptsBuilder({
                       </div>
                       <div className="w-full bg-green-200 dark:bg-green-800 rounded-full h-2">
                         <div 
-                          className="bg-green-600 h-2 rounded-full transition-all" 
+                          className="bg-emerald-600 h-2 rounded-full transition-all" 
                           style={{ width: `${(aiState.qualityScore.overall / 10) * 100}%` }}
                         ></div>
                       </div>
@@ -780,7 +780,7 @@ export default function SmartPromptsBuilder({
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                     {Object.entries(aiState.qualityScore.breakdown).map(([key, value]) => (
                       <div key={key} className="text-center">
-                        <div className="text-xs text-green-700 dark:text-green-300 capitalize">{key}</div>
+                        <div className="text-xs text-emerald-700 dark:text-green-300 capitalize">{key}</div>
                         <div className="text-sm font-bold text-green-900 dark:text-green-100">{value}/10</div>
                       </div>
                     ))}
@@ -794,9 +794,9 @@ export default function SmartPromptsBuilder({
                       'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
                     }`}>
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-                        suggestion.severity === 'high' ? 'bg-red-500 text-white' :
-                        suggestion.severity === 'medium' ? 'bg-yellow-500 text-white' :
-                        'bg-blue-500 text-white'
+                        suggestion.severity === 'high' ? 'bg-slate-500 text-white' :
+                        suggestion.severity === 'medium' ? 'bg-slate-500 text-white' :
+                        'bg-slate-500 text-white'
                       }`}>
                         {suggestion.type === 'warning' ? '⚠️' : suggestion.type === 'tip' ? '💡' : '✨'}
                       </div>
@@ -818,7 +818,7 @@ export default function SmartPromptsBuilder({
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-sm font-medium dark:text-white">
-                    Prompt Text <span className="text-red-500">*</span>
+                    Prompt Text <span className="text-slate-500">*</span>
                   </label>
                   {!aiState.showAIInsights && (
                     <Button
@@ -929,7 +929,7 @@ export default function SmartPromptsBuilder({
                           </select>
                           <button
                             onClick={() => removeVariable(index)}
-                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                            className="p-2 text-slate-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -989,7 +989,7 @@ export default function SmartPromptsBuilder({
                   {formData.tags.map(tag => (
                     <span key={tag} className="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm flex items-center">
                       {tag}
-                      <button onClick={() => removeTag(tag)} className="ml-2 text-blue-600 hover:text-blue-800">
+                      <button onClick={() => removeTag(tag)} className="ml-2 text-slate-600 hover:text-blue-800">
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </span>
@@ -1017,7 +1017,7 @@ export default function SmartPromptsBuilder({
                   {formData.use_cases.map(useCase => (
                     <div key={useCase} className="flex items-center justify-between bg-neutral-50 dark:bg-neutral-700 p-2 rounded">
                       <span className="dark:text-white">{useCase}</span>
-                      <button onClick={() => removeUseCase(useCase)} className="text-red-500 hover:text-red-700">
+                      <button onClick={() => removeUseCase(useCase)} className="text-slate-500 hover:text-red-700">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -1064,7 +1064,7 @@ export default function SmartPromptsBuilder({
                         }))}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-neutral-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-neutral-600 peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-neutral-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-neutral-600 peer-checked:bg-slate-600"></div>
                     </label>
                   </div>
 
@@ -1152,7 +1152,7 @@ export default function SmartPromptsBuilder({
                               </div>
                               <div className="text-right">
                                 <div className="text-2xl font-bold">
-                                  <span className={`text-2xl font-bold ${formData.price === 0 ? 'text-green-600' : 'text-neutral-900 dark:text-white'}`}>
+                                  <span className={`text-2xl font-bold ${formData.price === 0 ? 'text-emerald-600' : 'text-neutral-900 dark:text-white'}`}>
                                     ${formData.price.toFixed(2)}
                                   </span>
                                 </div>

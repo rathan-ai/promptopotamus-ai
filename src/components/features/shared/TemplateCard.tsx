@@ -51,8 +51,8 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       template_category: template.category
     });
     
-    // Show premium templates require payment
-    toast.error('Premium templates require payment. This feature is coming soon.');
+    // Redirect to login or direct purchase
+    router.push('/login?redirect=templates');
   };
 
   const getTierConfig = (tier: string) => {
@@ -60,20 +60,20 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       case 'free':
         return { 
           icon: null, 
-          color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+          color: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
           label: 'Free' 
         };
       case 'pro':
         return { 
           icon: Star, 
-          color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+          color: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200',
           label: 'Paid' 
         };
       case 'premium':
         return { 
           icon: Crown, 
-          color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-          label: 'Paid' 
+          color: 'bg-slate-300 text-slate-900 dark:bg-slate-600 dark:text-slate-100',
+          label: 'Premium' 
         };
       default:
         return { 
@@ -91,7 +91,7 @@ export default function TemplateCard({ template }: TemplateCardProps) {
     <div className="bg-white dark:bg-neutral-800/50 p-6 rounded-xl shadow-md border border-neutral-200 dark:border-neutral-700 flex flex-col hover:shadow-lg transition-shadow">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
-        <h3 className="text-lg font-bold text-indigo-600 dark:text-indigo-400 flex-1">{title}</h3>
+        <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 flex-1">{title}</h3>
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${tierConfig.color}`}>
           {tierConfig.icon && <tierConfig.icon className="w-3 h-3" />}
           {tierConfig.label}
@@ -102,7 +102,7 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       <div className="flex items-center gap-4 mb-3 text-sm text-neutral-500 dark:text-neutral-400">
         {rating && (
           <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+            <Star className="w-4 h-4 text-slate-500 fill-current" />
             <span>{rating}</span>
           </div>
         )}
@@ -149,7 +149,7 @@ export default function TemplateCard({ template }: TemplateCardProps) {
         {isPremium ? (
           <Button onClick={handlePurchase} size="sm" className="flex-1">
             <Crown className="mr-2 h-4 w-4" />
-            Add Funds
+            Buy Template
           </Button>
         ) : (
           <Button onClick={handleCopy} variant="secondary" size="sm" className="flex-1">

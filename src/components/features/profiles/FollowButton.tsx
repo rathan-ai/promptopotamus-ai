@@ -125,7 +125,7 @@ export default function FollowButton({
       disabled={loading}
       className={`transition-all duration-200 ${
         isFollowing 
-          ? 'hover:bg-red-50 hover:border-red-300 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:border-red-600' 
+          ? 'hover:bg-red-50 hover:border-red-300 hover:text-slate-600 dark:hover:bg-red-900/20 dark:hover:border-slate-600' 
           : ''
       } ${className}`}
     >
@@ -230,8 +230,8 @@ export function IconFollowButton({ targetUserId, className }: { targetUserId: st
       disabled={loading}
       className={`p-2 rounded-full transition-colors duration-200 ${
         isFollowing
-          ? 'bg-blue-100 text-blue-600 hover:bg-red-100 hover:text-red-600 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-red-900/30 dark:hover:text-red-400'
-          : 'bg-neutral-100 text-neutral-600 hover:bg-blue-100 hover:text-blue-600 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400'
+          ? 'bg-blue-100 text-slate-600 hover:bg-red-100 hover:text-slate-600 dark:bg-blue-900/30 dark:text-slate-400 dark:hover:bg-red-900/30 dark:hover:text-red-400'
+          : 'bg-neutral-100 text-neutral-600 hover:bg-blue-100 hover:text-slate-600 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-blue-900/30 dark:hover:text-slate-400'
       } ${className}`}
       title={isFollowing ? 'Unfollow' : 'Follow'}
     >

@@ -262,7 +262,7 @@ export default function UniversalPaymentModal({
         <div className="flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-              <CreditCard className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <CreditCard className="w-5 h-5 text-slate-600 dark:text-slate-400" />
             </div>
             <div>
               <h2 className="text-xl font-bold dark:text-white">Purchase Smart Prompt</h2>
@@ -287,14 +287,14 @@ export default function UniversalPaymentModal({
             <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">by {sellerName}</p>
             <div className="flex justify-between items-center">
               <span className="text-sm text-neutral-600 dark:text-neutral-400">Price:</span>
-              <span className="text-lg font-bold text-green-600 dark:text-green-400">${price.toFixed(2)}</span>
+              <span className="text-lg font-bold text-emerald-600 dark:text-emerald-500">${price.toFixed(2)}</span>
             </div>
           </div>
 
           {/* Step-based content */}
           {step === 'loading' && (
             <div className="text-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-4" />
+              <Loader2 className="w-8 h-8 animate-spin text-slate-600 mx-auto mb-4" />
               <p className="text-neutral-600 dark:text-neutral-400">Loading payment options...</p>
             </div>
           )}
@@ -306,8 +306,8 @@ export default function UniversalPaymentModal({
               {availableProviders.map((provider) => {
                 const getProviderIcon = (id: string) => {
                   switch (id) {
-                    case 'paypal': return <Wallet className="w-5 h-5 text-blue-600" />;
-                    case 'stripe': return <CreditCard className="w-5 h-5 text-purple-600" />;
+                    case 'paypal': return <Wallet className="w-5 h-5 text-slate-600" />;
+                    case 'stripe': return <CreditCard className="w-5 h-5 text-slate-600" />;
                     default: return <Star className="w-5 h-5 text-amber-600" />;
                   }
                 };
@@ -358,7 +358,7 @@ export default function UniversalPaymentModal({
               <Button
                 onClick={initiatePayment}
                 disabled={!paymentProvider || loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                className="w-full bg-slate-600 hover:bg-indigo-700"
               >
                 {loading ? (
                   <>
@@ -374,7 +374,7 @@ export default function UniversalPaymentModal({
 
           {step === 'process' && (
             <div className="text-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-4" />
+              <Loader2 className="w-8 h-8 animate-spin text-slate-600 mx-auto mb-4" />
               <p className="text-neutral-600 dark:text-neutral-400">Processing your payment...</p>
               <p className="text-xs text-neutral-500 mt-2">Please do not close this window</p>
             </div>
@@ -382,16 +382,16 @@ export default function UniversalPaymentModal({
 
           {step === 'success' && (
             <div className="text-center py-8">
-              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-2">Payment Successful!</h3>
+              <CheckCircle className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-emerald-600 dark:text-emerald-500 mb-2">Payment Successful!</h3>
               <p className="text-neutral-600 dark:text-neutral-400">Your smart prompt has been added to your collection.</p>
             </div>
           )}
 
           {step === 'error' && (
             <div className="text-center py-8">
-              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">Payment Failed</h3>
+              <AlertTriangle className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-600 dark:text-red-400 mb-2">Payment Failed</h3>
               <p className="text-neutral-600 dark:text-neutral-400 mb-4">{errorMessage}</p>
               <Button
                 onClick={loadPaymentProviders}

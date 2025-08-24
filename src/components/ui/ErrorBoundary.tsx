@@ -79,7 +79,7 @@ function DefaultErrorFallback({ error, resetError }: DefaultErrorFallbackProps) 
       <div className="max-w-md w-full bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 p-6 text-center">
         <div className="flex justify-center mb-4">
           <div className="p-3 bg-red-100 dark:bg-red-900/20 rounded-full">
-            <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+            <AlertTriangle className="w-8 h-8 text-slate-600 dark:text-red-400" />
           </div>
         </div>
         
@@ -160,7 +160,7 @@ export function ComponentErrorBoundary({
       fallback={({ error, resetError }) => (
         <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+            <AlertTriangle className="w-4 h-4 text-slate-600 dark:text-red-400" />
             <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
               {componentName ? `${componentName} Error` : 'Component Error'}
             </h3>
@@ -172,7 +172,7 @@ export function ComponentErrorBoundary({
             onClick={resetError}
             size="sm"
             variant="outline"
-            className="text-red-700 dark:text-red-300 border-red-300 dark:border-red-600 hover:bg-red-100 dark:hover:bg-red-900/20"
+            className="text-red-700 dark:text-red-300 border-red-300 dark:border-slate-600 hover:bg-red-100 dark:hover:bg-red-900/20"
           >
             <RefreshCw className="w-3 h-3 mr-1" />
             Retry

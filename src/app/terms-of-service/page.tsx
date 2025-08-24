@@ -11,7 +11,7 @@ export default function TermsOfService() {
     <div className="max-w-4xl mx-auto px-6 py-12">
       {/* Header */}
       <div className="text-center mb-12">
-        <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-slate-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
           <FileText className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-display text-neutral-900 dark:text-white mb-4">
@@ -44,7 +44,7 @@ export default function TermsOfService() {
         {/* Service Description */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <Users className="w-6 h-6 text-green-600" />
+            <Users className="w-6 h-6 text-emerald-600" />
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-0">Service Description</h2>
           </div>
           
@@ -62,7 +62,7 @@ export default function TermsOfService() {
         {/* User Accounts */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <Shield className="w-6 h-6 text-purple-600" />
+            <Shield className="w-6 h-6 text-slate-600" />
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-0">User Accounts</h2>
           </div>
           
@@ -82,7 +82,7 @@ export default function TermsOfService() {
         {/* Payment Terms */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <CreditCard className="w-6 h-6 text-red-600" />
+            <CreditCard className="w-6 h-6 text-slate-600" />
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-0">Payment and Billing</h2>
           </div>
           
@@ -173,7 +173,7 @@ export default function TermsOfService() {
         {/* Limitation of Liability */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <Shield className="w-6 h-6 text-red-600" />
+            <Shield className="w-6 h-6 text-slate-600" />
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-0">Limitation of Liability</h2>
           </div>
           
@@ -187,7 +187,7 @@ export default function TermsOfService() {
         {/* Termination */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <AlertTriangle className="w-6 h-6 text-purple-600" />
+            <AlertTriangle className="w-6 h-6 text-slate-600" />
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-0">Termination</h2>
           </div>
           
@@ -214,7 +214,7 @@ export default function TermsOfService() {
         {/* Contact */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <Users className="w-6 h-6 text-green-600" />
+            <Users className="w-6 h-6 text-emerald-600" />
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-0">Contact Information</h2>
           </div>
           

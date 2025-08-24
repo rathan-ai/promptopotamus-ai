@@ -9,7 +9,7 @@ export default function VariableGuide() {
       {/* Header */}
       <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Settings className="w-6 h-6 text-blue-500" />
+          <Settings className="w-6 h-6 text-slate-500" />
           <h3 className="text-xl font-bold dark:text-white">Understanding Variables</h3>
         </div>
         <p className="text-neutral-600 dark:text-neutral-400 mb-4">
@@ -18,7 +18,7 @@ export default function VariableGuide() {
         
         <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-400">
           <div className="flex items-start gap-2">
-            <Lightbulb className="w-5 h-5 text-blue-600 mt-0.5" />
+            <Lightbulb className="w-5 h-5 text-slate-600 mt-0.5" />
             <div>
               <h4 className="font-medium text-blue-900 dark:text-blue-100">How Variables Work</h4>
               <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
@@ -41,7 +41,7 @@ export default function VariableGuide() {
           {/* Text Variables */}
           <div className="p-4 bg-neutral-50 dark:bg-neutral-700/50 rounded-lg">
             <div className="flex items-center gap-2 mb-3">
-              <Type className="w-5 h-5 text-blue-600" />
+              <Type className="w-5 h-5 text-slate-600" />
               <h5 className="font-semibold dark:text-white">Text Variables</h5>
             </div>
             <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
@@ -58,7 +58,7 @@ export default function VariableGuide() {
           {/* Textarea Variables */}
           <div className="p-4 bg-neutral-50 dark:bg-neutral-700/50 rounded-lg">
             <div className="flex items-center gap-2 mb-3">
-              <FileText className="w-5 h-5 text-green-600" />
+              <FileText className="w-5 h-5 text-emerald-600" />
               <h5 className="font-semibold dark:text-white">Textarea Variables</h5>
             </div>
             <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
@@ -75,7 +75,7 @@ export default function VariableGuide() {
           {/* Select Variables */}
           <div className="p-4 bg-neutral-50 dark:bg-neutral-700/50 rounded-lg">
             <div className="flex items-center gap-2 mb-3">
-              <List className="w-5 h-5 text-purple-600" />
+              <List className="w-5 h-5 text-slate-600" />
               <h5 className="font-semibold dark:text-white">Select Variables</h5>
             </div>
             <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
@@ -124,7 +124,7 @@ export default function VariableGuide() {
 
           <div>
             <h6 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Final Result:</h6>
-            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border-l-4 border-green-400">
+            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border-l-4 border-emerald-500">
               <p className="text-sm text-green-800 dark:text-green-200">
                 Write a <strong>professional</strong> marketing email for <strong>Smart Fitness Tracker Pro</strong> targeting <strong>health-conscious professionals aged 25-40</strong>. 
                 The email should highlight <strong>24/7 heart rate monitoring with AI insights</strong> and include a <strong>free trial</strong> call-to-action. 
@@ -136,7 +136,7 @@ export default function VariableGuide() {
 
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <div className="flex items-start gap-2">
-            <Lightbulb className="w-5 h-5 text-blue-600 mt-0.5" />
+            <Lightbulb className="w-5 h-5 text-slate-600 mt-0.5" />
             <div>
               <h6 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Pro Tip</h6>
               <p className="text-sm text-blue-800 dark:text-blue-200">

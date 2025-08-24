@@ -9,7 +9,7 @@ interface ComplexityGuidanceProps {
 const complexityGuides = {
   simple: {
     icon: Zap,
-    color: 'text-green-600',
+    color: 'text-emerald-600',
     bgColor: 'bg-green-50 dark:bg-green-900/20',
     borderColor: 'border-green-200 dark:border-green-700',
     title: 'Simple Prompt Guide',
@@ -32,7 +32,7 @@ const complexityGuides = {
   },
   smart: {
     icon: Brain,
-    color: 'text-blue-600',
+    color: 'text-slate-600',
     bgColor: 'bg-blue-50 dark:bg-blue-900/20',
     borderColor: 'border-blue-200 dark:border-blue-700',
     title: 'Smart Prompt Guide',
@@ -56,7 +56,7 @@ const complexityGuides = {
   },
   recipe: {
     icon: BookOpen,
-    color: 'text-purple-600',
+    color: 'text-slate-600',
     bgColor: 'bg-purple-50 dark:bg-purple-900/20',
     borderColor: 'border-purple-200 dark:border-purple-700',
     title: 'Prompt Recipe Guide',
@@ -101,13 +101,13 @@ export default function ComplexityGuidance({ complexityLevel }: ComplexityGuidan
             {/* Tips */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Lightbulb className="w-4 h-4 text-yellow-500" />
+                <Lightbulb className="w-4 h-4 text-slate-500" />
                 <h5 className="font-medium text-neutral-900 dark:text-white text-sm">Best Practices</h5>
               </div>
               <ul className="space-y-2">
                 {guide.tips.map((tip, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                    <CheckCircle className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 text-emerald-600 mt-0.5 flex-shrink-0" />
                     <span>{tip}</span>
                   </li>
                 ))}
@@ -117,7 +117,7 @@ export default function ComplexityGuidance({ complexityLevel }: ComplexityGuidan
             {/* Example */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Info className="w-4 h-4 text-blue-500" />
+                <Info className="w-4 h-4 text-slate-500" />
                 <h5 className="font-medium text-neutral-900 dark:text-white text-sm">Example</h5>
               </div>
               <div className="bg-white dark:bg-neutral-800 rounded-lg p-3 border border-neutral-200 dark:border-neutral-600">

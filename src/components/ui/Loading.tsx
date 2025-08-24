@@ -74,10 +74,10 @@ export function LoadingBar({
 }: LoadingBarProps) {
   const colors = {
     blue: 'bg-blue-500',
-    green: 'bg-green-500',
-    yellow: 'bg-yellow-500',
-    red: 'bg-red-500',
-    purple: 'bg-purple-500'
+    green: 'bg-emerald-600',
+    yellow: 'bg-slate-500',
+    red: 'bg-slate-500',
+    purple: 'bg-slate-500'
   };
 
   return (
@@ -188,7 +188,7 @@ export function LoadingState({
         {errorComponent || (
           <div className="text-center space-y-2">
             <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto">
-              <span className="text-red-600 text-xl">⚠</span>
+              <span className="text-slate-600 text-xl">⚠</span>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">

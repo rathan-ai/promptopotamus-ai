@@ -1,565 +1,378 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Wand2, Copy, RefreshCw, Lightbulb, Code2, FileText, ToggleLeft, ToggleRight } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { createClient } from '@/lib/supabase/client';
-import type { User } from '@supabase/supabase-js';
-import { Save, Wand2, Lightbulb, Copy, RefreshCw, ExternalLink, Sparkles, Crown, Calendar, Bell, BookOpen, Zap, Coins } from 'lucide-react';
-import { track } from '@vercel/analytics';
-import { getSettings, type LimitSettings } from '@/lib/admin-settings';
-import dynamic from 'next/dynamic';
-
-// Lazy load the PromptCrafterWizard
-const PromptCrafterWizard = dynamic(() => import('./PromptCrafterWizard'), {
-  loading: () => <div className="flex justify-center p-8"><div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div></div>,
-  ssr: false
-});
 
 const promptSuggestions = [
-    { persona: "Marketing Expert", task: "Create a compelling email campaign", context: "For a new product launch targeting millennials", format: "Subject line and 3-paragraph email" },
-    { persona: "Data Scientist", task: "Analyze customer behavior patterns", context: "From e-commerce website data", format: "Executive summary with key insights" },
-    { persona: "Creative Writer", task: "Write a short story", context: "Set in a dystopian future where AI runs everything", format: "500-word narrative" },
-    { persona: "Business Consultant", task: "Develop a growth strategy", context: "For a small tech startup with limited funding", format: "5-point action plan" }
+  "Write a professional email to",
+  "Create a social media post about",
+  "Generate a product description for",
+  "Draft a blog outline for",
+  "Write code comments for",
+  "Create a marketing headline for",
+  "Generate interview questions for",
+  "Write a summary of",
 ];
 
-const aiPlatforms = [
-    { name: "ChatGPT", url: "https://chat.openai.com?ref=promptopotamus", free: true },
-    { name: "Claude", url: "https://claude.ai?ref=promptopotamus", free: true },
-    { name: "Gemini", url: "https://gemini.google.com?ref=promptopotamus", free: true },
-    { name: "Perplexity", url: "https://perplexity.ai?ref=promptopotamus", free: true }
+const pomlTemplates = [
+  {
+    title: "Content Creation",
+    template: `<poml>
+  <role expertise="content-marketing" tone="professional">
+    You are a content marketing specialist
+  </role>
+  
+  <task>
+    Create [INSERT CONTENT TYPE] about [INSERT TOPIC]
+  </task>
+  
+  <instructions>
+    1. Research the topic thoroughly
+    2. Craft engaging headlines
+    3. Structure content clearly
+    4. Include compelling CTAs
+  </instructions>
+  
+  <output-format style="structured" length="comprehensive">
+    - Attention-grabbing headline
+    - Well-organized sections
+    - Clear call-to-action
+  </output-format>
+</poml>`
+  },
+  {
+    title: "Data Analysis", 
+    template: `<poml>
+  <role expertise="data-science" experience="senior">
+    You are a senior data scientist
+  </role>
+  
+  <task>
+    Analyze [INSERT DATASET] and provide insights
+  </task>
+  
+  <data>
+    <table src="[INSERT DATA SOURCE]" />
+  </data>
+  
+  <output-format format="structured">
+    ## Key Findings
+    - Main insights
+    
+    ## Recommendations
+    - Actionable next steps
+  </output-format>
+</poml>`
+  },
+  {
+    title: "Educational Content",
+    template: `<poml>
+  <role persona="expert-educator" teaching-style="engaging">
+    You are an experienced educator
+  </role>
+  
+  <task>
+    Explain [INSERT TOPIC] for [INSERT AUDIENCE LEVEL]
+  </task>
+  
+  <example type="demonstration">
+    <input>Complex concept</input>
+    <output>Simple, clear explanation</output>
+  </example>
+  
+  <constraints>
+    - Age-appropriate language
+    - Include practical examples
+    - Maximum cognitive load per section
+  </constraints>
+</poml>`
+  }
 ];
 
 export default function PromptBuilder() {
-    const [generatedPrompt, setGeneratedPrompt] = useState('');
-    const [user, setUser] = useState<User | null>(null);
-    const [enhancedPrompt, setEnhancedPrompt] = useState('');
-    const [isEnhancing, setIsEnhancing] = useState(false);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [promptCoins, setPromptCoins] = useState(0); // Will be fetched from user profile
-    const [showWizardMode, setShowWizardMode] = useState(false);
-    const [limitSettings, setLimitSettings] = useState<LimitSettings>({
-        prompt_builder_free_daily: 3,
-        prompt_analyzer_free_daily: 5,
-        prompt_builder_pro_daily: 25,
-        prompt_analyzer_pro_daily: 50,
-        prompt_builder_premium_daily: -1,
-        prompt_analyzer_premium_daily: -1,
-    });
+  const [prompt, setPrompt] = useState('');
+  const [enhancedPrompt, setEnhancedPrompt] = useState('');
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isPomlMode, setIsPomlMode] = useState(false);
+  const [showPomlTemplates, setShowPomlTemplates] = useState(false);
 
-    useEffect(() => {
-        const fetchUserAndBalance = async () => {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-            
-            if (user) {
-                // Fetch user's actual PromptCoin balance
-                try {
-                    const response = await fetch('/api/user/balance');
-                    if (response.ok) {
-                        const data = await response.json();
-                        setPromptCoins(data.balance || 0);
-                    }
-                } catch (error) {
-                    console.error('Error fetching PromptCoin balance:', error);
-                }
+  const handleEnhancePrompt = async () => {
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt to enhance');
+      return;
+    }
+
+    setIsEnhancing(true);
+    
+    // Simple enhancement logic (in a real app, this would call an AI service)
+    setTimeout(() => {
+      let enhanced;
+      
+      if (isPomlMode) {
+        // Convert traditional prompt to POML structure
+        enhanced = `<poml>
+  <role expertise="assistant" tone="helpful">
+    You are an expert assistant specialized in the requested domain
+  </role>
+  
+  <task>
+    ${prompt}
+  </task>
+  
+  <instructions>
+    1. Provide clear, accurate information
+    2. Use examples where helpful
+    3. Structure your response logically
+    4. Be comprehensive yet concise
+  </instructions>
+  
+  <output-format style="structured" length="appropriate">
+    - Start with key points
+    - Provide detailed explanations
+    - Include practical examples
+    - End with actionable next steps
+  </output-format>
+</poml>`;
+      } else {
+        // Traditional enhancement
+        enhanced = `Enhanced: ${prompt}\n\nPlease provide a detailed, well-structured response that includes:\n- Clear explanations\n- Relevant examples\n- Step-by-step guidance where applicable\n- Professional tone and format`;
+      }
+      
+      setEnhancedPrompt(enhanced);
+      setIsEnhancing(false);
+      toast.success(`Prompt enhanced ${isPomlMode ? 'with POML structure' : 'successfully'}!`);
+    }, 2000);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
+  };
+
+  const clearPrompts = () => {
+    setPrompt('');
+    setEnhancedPrompt('');
+  };
+
+  const addSuggestion = (suggestion: string) => {
+    setPrompt(prev => prev + (prev ? ' ' : '') + suggestion);
+    setShowSuggestions(false);
+  };
+
+  const addPomlTemplate = (template: string) => {
+    setPrompt(template);
+    setShowPomlTemplates(false);
+  };
+
+  return (
+    <div className="card">
+      <div className="card-header">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="card-title flex items-center">
+              {isPomlMode ? <Code2 className="w-5 h-5 mr-2" /> : <Wand2 className="w-5 h-5 mr-2" />}
+              {isPomlMode ? 'POML Prompt Builder' : 'Prompt Builder'}
+            </h2>
+            <p className="card-description">
+              {isPomlMode 
+                ? 'Create structured prompts using Microsoft\'s POML framework' 
+                : 'Build and enhance your AI prompts for better results'
+              }
+            </p>
+          </div>
+          
+          {/* Mode Toggle */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-gray-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">Traditional</span>
+            </div>
+            <button
+              onClick={() => setIsPomlMode(!isPomlMode)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 ${
+                isPomlMode ? 'bg-slate-600' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isPomlMode ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <div className="flex items-center gap-2">
+              <Code2 className="w-4 h-4 text-slate-500" />
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">POML</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="card-content space-y-6">
+        {/* Input Section */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="form-label">
+              {isPomlMode ? 'POML Prompt Structure' : 'Your Prompt'}
+            </label>
+            <div className="flex gap-2">
+              {isPomlMode && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowPomlTemplates(!showPomlTemplates)}
+                >
+                  <Code2 className="w-4 h-4 mr-1" />
+                  Templates
+                </Button>
+              )}
+              {!isPomlMode && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowSuggestions(!showSuggestions)}
+                >
+                  <Lightbulb className="w-4 h-4 mr-1" />
+                  Ideas
+                </Button>
+              )}
+            </div>
+          </div>
+          
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder={isPomlMode 
+              ? "Enter POML structured prompt or select a template..." 
+              : "Enter your prompt here..."
             }
-        };
-        fetchUserAndBalance();
+            className={`form-input min-h-[100px] resize-y ${isPomlMode ? 'font-mono text-sm' : ''}`}
+            rows={isPomlMode ? 12 : 4}
+          />
+          
+          {/* Traditional Suggestions */}
+          {showSuggestions && !isPomlMode && (
+            <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-800/20 rounded-lg border border-slate-200 dark:border-slate-600">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-100 mb-2">
+                Prompt Starters:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {promptSuggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => addSuggestion(suggestion)}
+                    className="px-2 py-1 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded hover:bg-slate-200 dark:hover:bg-slate-600"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-        // Load limit settings from admin configuration
-        const loadLimitSettings = async () => {
-            try {
-                const settings = await getSettings('limits') as LimitSettings;
-                setLimitSettings(settings);
-            } catch (error) {
-                console.error('Failed to load limit settings:', error);
-                // Keep default values if loading fails
-            }
-        };
-        
-        loadLimitSettings();
-    }, []);
+          {/* POML Templates */}
+          {showPomlTemplates && isPomlMode && (
+            <div className="mt-2 p-4 bg-slate-50 dark:bg-slate-800/20 rounded-lg border border-slate-200 dark:border-slate-600">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-100 mb-3">
+                POML Templates:
+              </p>
+              <div className="space-y-3">
+                {pomlTemplates.map((template, index) => (
+                  <div key={index} className="bg-white dark:bg-gray-800 p-3 rounded border">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                        {template.title}
+                      </h4>
+                      <button
+                        onClick={() => addPomlTemplate(template.template)}
+                        className="px-3 py-1 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded hover:bg-slate-200 dark:hover:bg-slate-600"
+                      >
+                        Use Template
+                      </button>
+                    </div>
+                    <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-x-auto bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                      {template.template.split('\n').slice(0, 4).join('\n')}...
+                    </pre>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
-    const buildPromptText = () => {
-        const persona = (document.getElementById('generic-persona') as HTMLInputElement)?.value;
-        const task = (document.getElementById('generic-task') as HTMLInputElement)?.value;
-        const context = (document.getElementById('generic-context') as HTMLTextAreaElement)?.value;
-        const format = (document.getElementById('generic-format') as HTMLInputElement)?.value;
-
-        let p = '';
-        if (persona) p += `Act as ${persona}.\\n`;
-        if (task) p += `Your task is to: ${task}.\\n`;
-        if (context) p += `Context: ${context}.\\n`;
-        if (format) p += `Format your response as: ${format}.`;
-        return p.trim();
-    };
-
-    const handleGenerate = () => {
-        const finalPrompt = buildPromptText();
-        
-        if (finalPrompt) {
-            // Track successful prompt generation
-            track('prompt_generated', {
-                prompt_length: finalPrompt.length,
-                has_persona: finalPrompt.includes('Act as'),
-                has_context: finalPrompt.includes('Context:'),
-                has_format: finalPrompt.includes('Format:')
-            });
-            
-            setGeneratedPrompt(finalPrompt);
-            navigator.clipboard.writeText(finalPrompt);
-            toast.success('Prompt copied to clipboard!');
-        } else {
-            track('prompt_generation_failed', {
-                reason: 'empty_fields'
-            });
-            toast.error('Please fill out at least one field to generate a prompt.');
-        }
-    };
-
-    const handleEnhancePrompt = async () => {
-        if (promptCoins < 15) { // Need 15 PC for enhancement
-            track('prompt_enhancement_limit_reached', {
-                source: 'prompt_builder'
-            });
-            toast.info('Payment required for this feature');
-            return;
-        }
-
-        const basePrompt = buildPromptText();
-        if (!basePrompt) {
-            track('prompt_enhancement_failed', {
-                reason: 'no_base_prompt'
-            });
-            toast.error('Please create a basic prompt first.');
-            return;
-        }
-
-        // Track enhancement start
-        track('prompt_enhancement_started', {
-            base_prompt_length: basePrompt.length,
-            remaining_promptcoins: promptCoins - 15
-        });
-
-        setIsEnhancing(true);
-        setPromptCoins(prev => prev - 15); // Deduct 15 PC for enhancement
-
-        // Simulate AI enhancement - in real app, would call actual AI API
-        setTimeout(() => {
-            const enhanced = enhancePromptWithAI(basePrompt);
-            
-            // Track successful enhancement
-            track('prompt_enhanced', {
-                original_length: basePrompt.length,
-                enhanced_length: enhanced.length,
-                enhancement_ratio: enhanced.length / basePrompt.length
-            });
-            
-            setEnhancedPrompt(enhanced);
-            setIsEnhancing(false);
-            toast.success('Prompt enhanced with AI suggestions!');
-        }, 2000);
-    };
-
-    const enhancePromptWithAI = (prompt: string) => {
-        // This simulates AI enhancement - replace with actual AI API calls
-        const enhancements = [
-            "Be specific about the output format and length.",
-            "Include examples or templates for better guidance.",
-            "Add constraints or requirements to focus the response.",
-            "Specify the target audience or expertise level.",
-            "Include a call-to-action or next steps."
-        ];
-        
-        return `${prompt}\n\n--- AI Enhanced Version ---\n${prompt}\n\nAdditional Instructions:\n${enhancements.slice(0, 2).map(e => `• ${e}`).join('\n')}\n\nPlease ensure the response is actionable and tailored to the specific context provided.`;
-    };
-
-    const applySuggestion = (suggestion: typeof promptSuggestions[0]) => {
-        // Track suggestion usage
-        track('prompt_suggestion_applied', {
-            persona: suggestion.persona,
-            task_type: suggestion.task.split(' ')[0].toLowerCase()
-        });
-        
-        (document.getElementById('generic-persona') as HTMLInputElement).value = suggestion.persona;
-        (document.getElementById('generic-task') as HTMLInputElement).value = suggestion.task;
-        (document.getElementById('generic-context') as HTMLTextAreaElement).value = suggestion.context;
-        (document.getElementById('generic-format') as HTMLInputElement).value = suggestion.format;
-        setShowSuggestions(false);
-        toast.success('Suggestion applied! Click Generate to create your prompt.');
-    };
-
-    const handleWizardComplete = (craftedPrompt: string, metadata: any) => {
-        setGeneratedPrompt(craftedPrompt);
-        setEnhancedPrompt(craftedPrompt); // Treat wizard output as enhanced
-        setShowWizardMode(false);
-        
-        // Track wizard completion
-        track('prompt_crafter_used', {
-            framework: metadata.framework,
-            model: metadata.model?.id,
-            output_format: metadata.outputFormat,
-            prompt_length: craftedPrompt.length
-        });
-        
-        // Copy to clipboard
-        navigator.clipboard.writeText(craftedPrompt);
-        toast.success('Crafted prompt copied to clipboard!');
-    };
-
-    const handleSave = async () => {
-        const title = (document.getElementById('prompt-title') as HTMLInputElement)?.value;
-        const task = (document.getElementById('generic-task') as HTMLInputElement)?.value;
-        const finalPrompt = enhancedPrompt || buildPromptText();
-
-        if (!task || !finalPrompt) {
-            toast.error('A "Task" is required to save a prompt.');
-            return;
-        }
-
-        const res = await fetch('/api/prompts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                title: title || 'Untitled Prompt',
-                persona: (document.getElementById('generic-persona') as HTMLInputElement)?.value,
-                task: task,
-                context: (document.getElementById('generic-context') as HTMLTextAreaElement)?.value,
-                format: (document.getElementById('generic-format') as HTMLInputElement)?.value,
-                prompt_text: finalPrompt
-            }),
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-            // Track successful prompt save
-            track('prompt_saved', {
-                title: title || 'Untitled Prompt',
-                prompt_length: finalPrompt.length,
-                has_enhancement: !!enhancedPrompt
-            });
-            toast.success(data.message);
-        } else {
-            track('prompt_save_failed', {
-                error: data.error
-            });
-            toast.error(data.error);
-        }
-    };
-
-    return (
-        <>
-            {showWizardMode ? (
-                <PromptCrafterWizard
-                    onComplete={handleWizardComplete}
-                    onCancel={() => setShowWizardMode(false)}
-                    promptCoins={promptCoins}
-                    onUseCoins={(amount) => setPromptCoins(prev => prev - amount)}
-                />
+        {/* Actions */}
+        <div className="flex gap-3">
+          <Button 
+            onClick={handleEnhancePrompt}
+            disabled={isEnhancing || !prompt.trim()}
+            className="flex-1"
+          >
+            {isEnhancing ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                Enhancing...
+              </>
             ) : (
-                <section id="generator" className="bg-white dark:bg-neutral-800/50 p-6 md:p-8 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Interactive Prompt Builder</h2>
-                            <p className="text-neutral-600 dark:text-neutral-300">Construct detailed prompts with AI assistance.</p>
-                        </div>
-                        <div className="text-right">
-                            <div className="flex items-center justify-end gap-2 mb-1">
-                            </div>
-                            <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                                ({Math.floor(promptCoins / 15)} enhancements left)
-                            </div>
-                            {promptCoins < 30 && ( // Show warning when less than 2 enhancements left
-                                <button 
-                                    onClick={() => toast.info('Payment required for this feature')}
-                                    className="text-xs text-amber-600 dark:text-amber-400 mt-1 hover:underline cursor-pointer"
-                                >
-                                    <Crown className="w-3 h-3 inline mr-1" />
-                                    Buy More PromptCoins
-                                </button>
-                            )}
-                        </div>
-                    </div>
+              <>
+                <Wand2 className="w-4 h-4 mr-2" />
+                Enhance Prompt
+              </>
+            )}
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={clearPrompts}
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Clear
+          </Button>
+        </div>
 
-            {/* Mode Toggle and Suggestions */}
-            <div className="mb-6 flex gap-3">
-                <Button
-                    onClick={() => setShowWizardMode(true)}
-                    variant="secondary"
-                    size="sm"
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-                >
-                    <Zap className="w-4 h-4 mr-2" />
-                    Guided Crafting
-                </Button>
-                <Button
-                    onClick={() => setShowSuggestions(!showSuggestions)}
-                    variant="outline"
-                    size="sm"
-                >
-                    <Lightbulb className="w-4 h-4 mr-2" />
-                    {showSuggestions ? 'Hide' : 'Show'} Suggestions
-                </Button>
+        {/* Enhanced Prompt Output */}
+        {enhancedPrompt && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="form-label">
+                {isPomlMode ? 'POML Structured Output' : 'Enhanced Prompt'}
+              </label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(enhancedPrompt)}
+              >
+                <Copy className="w-4 h-4 mr-1" />
+                Copy
+              </Button>
             </div>
-
-            {/* Quick Suggestions */}
-            {showSuggestions && (
-                <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-3">✨ Quick Start Ideas</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {promptSuggestions.map((suggestion, index) => (
-                            <div
-                                key={index}
-                                onClick={() => applySuggestion(suggestion)}
-                                className="p-3 bg-white dark:bg-neutral-800 rounded border border-blue-200 dark:border-blue-700 cursor-pointer hover:shadow-md transition-shadow"
-                            >
-                                <div className="font-medium text-blue-700 dark:text-blue-300">{suggestion.persona}</div>
-                                <div className="text-sm text-neutral-600 dark:text-neutral-400 truncate">{suggestion.task}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Form Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div className="md:col-span-2">
-                    <label htmlFor="prompt-title" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Title (Optional)</label>
-                    <input id="prompt-title" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., My Marketing Campaign Prompt" />
-                </div>
-                <div>
-                    <label htmlFor="generic-persona" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Persona</label>
-                    <input id="generic-persona" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., Marketing Expert" />
-                </div>
-                <div>
-                    <label htmlFor="generic-task" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Task</label>
-                    <input id="generic-task" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., Create compelling email content" />
-                </div>
-                <div className="md:col-span-2">
-                    <label htmlFor="generic-context" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Context</label>
-                    <textarea id="generic-context" rows={3} className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., For a product launch targeting young professionals"></textarea>
-                </div>
-                <div className="md:col-span-2">
-                    <label htmlFor="generic-format" className="block text-sm font-medium text-neutral-700 dark:text-neutral-400">Format</label>
-                    <input id="generic-format" type="text" className="mt-1 block w-full rounded-lg border-neutral-300 dark:border-neutral-600 focus:border-indigo-500 focus:ring-indigo-500/50 bg-neutral-100 dark:bg-neutral-700 px-3 py-2" placeholder="e.g., Subject line + 3-paragraph email body" />
-                </div>
+            
+            <div className={`p-4 border rounded-lg ${
+              isPomlMode 
+                ? 'bg-slate-50 dark:bg-slate-800/20 border-slate-200 dark:border-slate-600' 
+                : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700'
+            }`}>
+              <pre className={`whitespace-pre-wrap text-sm ${
+                isPomlMode 
+                  ? 'text-slate-700 dark:text-slate-100 font-mono'
+                  : 'text-green-900 dark:text-green-100'
+              }`}>
+                {enhancedPrompt}
+              </pre>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-2 mb-6">
-                <Button onClick={handleGenerate} className="flex-1 min-w-fit">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate Prompt
-                </Button>
-                <Button
-                    onClick={handleEnhancePrompt}
-                    variant="secondary"
-                    disabled={isEnhancing}
-                    className="flex-1 min-w-fit"
-                >
-                    {isEnhancing ? (
-                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    ) : promptCoins < 15 ? (
-                        <Crown className="mr-2 h-4 w-4" />
-                    ) : (
-                        <Wand2 className="mr-2 h-4 w-4" />
-                    )}
-                    {promptCoins < 15 ? 'Buy PromptCoins for AI' : 'Enhance with AI'}
-                </Button>
-                {user && (
-                    <Button onClick={handleSave} variant="outline">
-                        <Save className="mr-2 h-4 w-4" />
-                        Save
-                    </Button>
-                )}
-            </div>
-
-            {/* Generated Prompt Display */}
-            {(generatedPrompt || enhancedPrompt) && (
-                <div className="space-y-4">
-                    {generatedPrompt && (
-                        <div className="bg-neutral-100 dark:bg-neutral-900/50 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
-                            <div className="flex items-center justify-between mb-2">
-                                <h3 className="font-semibold text-lg text-neutral-800 dark:text-neutral-200">Generated Prompt:</h3>
-                                <Button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(generatedPrompt);
-                                        toast.success('Copied to clipboard!');
-                                    }}
-                                    size="sm"
-                                    variant="outline"
-                                >
-                                    <Copy className="w-4 h-4" />
-                                </Button>
-                            </div>
-                            <pre className="font-mono whitespace-pre-wrap text-sm text-neutral-600 dark:text-neutral-300">{generatedPrompt}</pre>
-                        </div>
-                    )}
-
-                    {enhancedPrompt && (
-                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-                            <div className="flex items-center justify-between mb-2">
-                                <h3 className="font-semibold text-lg text-purple-800 dark:text-purple-200 flex items-center">
-                                    <Wand2 className="w-5 h-5 mr-2" />
-                                    AI Enhanced Prompt:
-                                </h3>
-                                <Button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(enhancedPrompt);
-                                        toast.success('Enhanced prompt copied!');
-                                    }}
-                                    size="sm"
-                                    variant="outline"
-                                >
-                                    <Copy className="w-4 h-4" />
-                                </Button>
-                            </div>
-                            <pre className="font-mono whitespace-pre-wrap text-sm text-purple-700 dark:text-purple-300">{enhancedPrompt}</pre>
-                        </div>
-                    )}
-
-                    {/* Try with AI Platforms */}
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-                        <h3 className="font-semibold text-green-800 dark:text-green-200 mb-3">🚀 Try your prompt with these AI platforms:</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {aiPlatforms.map((platform) => (
-                                <a
-                                    key={platform.name}
-                                    href={platform.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={() => {
-                                        // Track affiliate click from prompt builder
-                                        track('affiliate_click_builder', {
-                                            platform: platform.name,
-                                            source: 'prompt_builder',
-                                            has_generated_prompt: !!generatedPrompt,
-                                            has_enhanced_prompt: !!enhancedPrompt
-                                        });
-                                    }}
-                                    className="inline-flex items-center px-3 py-1 bg-white dark:bg-neutral-800 border border-green-200 dark:border-green-700 rounded-full text-sm text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors"
-                                >
-                                    {platform.name}
-                                    <ExternalLink className="w-3 h-3 ml-1" />
-                                </a>
-                            ))}
-                        </div>
-                        <p className="text-xs text-green-600 dark:text-green-400 mt-2">
-                            💡 All platforms have free tiers perfect for testing your prompts!
-                        </p>
-                    </div>
-
-                    {/* Engagement CTAs */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                        {/* Save & Return Strategy */}
-                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
-                            <div className="flex items-center gap-2 mb-2">
-                                <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                                <h4 className="font-semibold text-blue-800 dark:text-blue-200">
-                                    Save Your Work
-                                </h4>
-                            </div>
-                            <p className="text-blue-700 dark:text-blue-300 text-sm mb-3">
-                                Save this prompt to your library and create variations for different use cases.
-                            </p>
-                            <Button
-                                size="sm"
-                                onClick={handleSave}
-                                disabled={!user}
-                                className="w-full bg-blue-600 hover:bg-blue-700"
-                            >
-                                <Save className="w-4 h-4 mr-2" />
-                                {user ? 'Save to My Prompts' : 'Login to Save'}
-                            </Button>
-                        </div>
-
-                        {/* Daily Return Hook */}
-                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                                <h4 className="font-semibold text-purple-800 dark:text-purple-200">
-                                    Daily Prompt Challenge
-                                </h4>
-                            </div>
-                            <p className="text-purple-700 dark:text-purple-300 text-sm mb-3">
-                                Join our daily challenge! Get a new prompt idea delivered to your inbox every morning.
-                            </p>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                className="w-full border-purple-300 text-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/30"
-                                onClick={() => {
-                                    // Track newsletter signup interest
-                                    track('newsletter_signup_intent', { source: 'prompt_builder' });
-                                    toast.success('Feature coming soon! We\'ll notify you when it\'s ready.');
-                                }}
-                            >
-                                <Bell className="w-4 h-4 mr-2" />
-                                Subscribe to Daily Tips
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+            
+            {isPomlMode && (
+              <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-800/20 rounded border border-slate-200 dark:border-slate-600">
+                <p className="text-xs text-slate-600 dark:text-slate-200">
+                  💡 <strong>POML Benefits:</strong> Structured format improves AI understanding, 
+                  enables better version control, and makes prompts more maintainable and reusable.
+                </p>
+              </div>
             )}
-
-            {/* Usage Limit Reached - Engagement Strategy */}
-            {promptCoins < 15 && (
-                <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
-                    <div className="flex items-start gap-3">
-                        <Crown className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-1" />
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
-                                You've used all your free AI enhancements today!
-                            </h3>
-                            <p className="text-amber-700 dark:text-amber-300 text-sm mb-4">
-                                Don't let your creativity stop here. Choose your next step:
-                            </p>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <Button
-                                    size="sm"
-                                    onClick={() => toast.info('Payment required for this feature')}
-                                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                                >
-                                    <Crown className="w-4 h-4 mr-2" />
-                                    Buy More PromptCoins
-                                </Button>
-                                
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                        track('browse_templates_from_builder');
-                                        window.location.href = '/templates';
-                                    }}
-                                    className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
-                                >
-                                    <Sparkles className="w-4 h-4 mr-2" />
-                                    Browse Templates
-                                </Button>
-                                
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                        track('tomorrow_reminder_set');
-                                        toast.success(`Come back tomorrow for ${limitSettings.prompt_builder_free_daily * 15} more free PromptCoins!`);
-                                    }}
-                                    className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
-                                >
-                                    <Calendar className="w-4 h-4 mr-2" />
-                                    Remind Tomorrow
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-                </section>
-            )}
-        </>
-    );
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

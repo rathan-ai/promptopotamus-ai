@@ -13,7 +13,7 @@ export default function RefundPolicy() {
     <div className="max-w-4xl mx-auto px-6 py-12">
       {/* Header */}
       <div className="text-center mb-12">
-        <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
           <Shield className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-display text-neutral-900 dark:text-white mb-4">
@@ -27,7 +27,7 @@ export default function RefundPolicy() {
       {/* Quick Summary */}
       <div className="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-700/50 p-6 mb-8">
         <div className="flex items-start gap-4">
-          <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-1" />
+          <AlertCircle className="w-6 h-6 text-slate-600 dark:text-red-400 flex-shrink-0 mt-1" />
           <div>
             <h2 className="font-semibold text-red-900 dark:text-red-200 mb-2">No Refunds Policy</h2>
             <p className="text-red-800 dark:text-red-300">

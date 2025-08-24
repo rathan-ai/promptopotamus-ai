@@ -179,13 +179,12 @@ export default function SmartPromptDetailPage() {
     
     setIsPurchasing(true);
     try {
-      // Use the PromptCoin purchase endpoint
-      const response = await fetch('/api/smart-prompts/purchase-with-pc', {
+      // Use the standard purchase endpoint
+      const response = await fetch('/api/smart-prompts/purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          promptId: prompt.id,
-          amount: prompt.price // price is already in PromptCoins
+          promptId: prompt.id
         })
       });
 
@@ -195,12 +194,8 @@ export default function SmartPromptDetailPage() {
         toast.success(data.message || 'Smart Prompt purchased successfully!');
         setHasAccess(true);
       } else if (data.shortage) {
-        // User doesn't have enough PromptCoins
-        toast.error(`You need ${data.shortage} more PromptCoins to purchase this prompt.`);
-        // Optionally redirect to purchase page
-        if (confirm('Would you like to buy more PromptCoins?')) {
-          window.location.href = '/purchase';
-        }
+        // User doesn't have enough funds
+        toast.error('Insufficient funds to purchase this prompt.');
       } else {
         toast.error(data.error || 'Error processing purchase');
       }
@@ -224,7 +219,7 @@ export default function SmartPromptDetailPage() {
       stars.push(
         <Star
           key={i}
-          className={`w-4 h-4 ${i <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+          className={`w-4 h-4 ${i <= rating ? 'text-slate-400 fill-current' : 'text-gray-300'}`}
         />
       );
     }
@@ -333,7 +328,7 @@ export default function SmartPromptDetailPage() {
 
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+            <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-500">
               {prompt.price > 0 ? (
                 <span className="flex items-center gap-1">
                   {prompt.price}
@@ -520,7 +515,7 @@ export default function SmartPromptDetailPage() {
                         <div key={index} className="space-y-2">
                           <label className="block text-sm font-medium dark:text-white">
                             {variable.name}
-                            {variable.required && <span className="text-red-500 ml-1">*</span>}
+                            {variable.required && <span className="text-slate-500 ml-1">*</span>}
                           </label>
                           {variable.description && (
                             <p className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -615,7 +610,7 @@ export default function SmartPromptDetailPage() {
           <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-neutral-700">
             <h3 className="font-semibold mb-4 dark:text-white">Creator</h3>
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-slate-500 rounded-full flex items-center justify-center text-white font-bold">
                 {prompt.profiles?.full_name?.charAt(0) || 'U'}
               </div>
               <div className="ml-3">
@@ -689,7 +684,7 @@ export default function SmartPromptDetailPage() {
               <div className="space-y-2">
                 {prompt.ai_model_compatibility.map((model, index) => (
                   <div key={index} className="flex items-center text-sm">
-                    <Brain className="w-4 h-4 text-green-500 mr-2" />
+                    <Brain className="w-4 h-4 text-emerald-600 mr-2" />
                     <span className="dark:text-neutral-300">{model}</span>
                   </div>
                 ))}
@@ -699,7 +694,7 @@ export default function SmartPromptDetailPage() {
         </div>
       </div>
 
-      {/* Payment handled with PromptCoins directly */}
+      {/* Payment handled with USD */}
     </div>
   );
 }

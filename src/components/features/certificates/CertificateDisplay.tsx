@@ -30,7 +30,7 @@ const levelStyles = {
   },
   'Master': {
     name: 'Gold',
-    gradient: 'from-yellow-500 to-yellow-600',
+    gradient: 'from-slate-500 to-yellow-600',
     textColor: 'text-yellow-100',
     iconColor: 'text-yellow-200',
   },
@@ -76,7 +76,7 @@ export default function CertificateDisplay({ level, badgeName, userName, credent
     <div className="w-full">
       <div ref={certificateRef} className={`relative bg-gradient-to-br ${styles.gradient} p-8 rounded-2xl shadow-2xl max-w-2xl mx-auto overflow-hidden border-2 border-white/20`}>
         {isExpired && (
-            <div className="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-4 py-1 rounded-full flex items-center z-10">
+            <div className="absolute top-4 left-4 bg-slate-600 text-white text-sm font-bold px-4 py-1 rounded-full flex items-center z-10">
                 <AlertTriangle className="mr-2 h-4 w-4" /> EXPIRED
             </div>
         )}
@@ -95,7 +95,7 @@ export default function CertificateDisplay({ level, badgeName, userName, credent
           {/* Expiry Date - Prominent Display */}
           {expiryDate && (
             <div className={`mt-6 p-3 rounded-lg border ${isExpired 
-              ? 'bg-red-100/20 border-red-300/50 dark:bg-red-900/20 dark:border-red-600/50' 
+              ? 'bg-red-100/20 border-red-300/50 dark:bg-red-900/20 dark:border-slate-600/50' 
               : 'bg-white/10 border-white/20'
             }`}>
               <p className={`text-sm font-semibold ${isExpired ? 'text-red-200' : styles.textColor}`}>

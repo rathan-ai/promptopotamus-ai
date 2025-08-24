@@ -67,7 +67,7 @@ export default function PrivacyPolicy() {
         {/* How We Use Information */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <Database className="w-6 h-6 text-green-600" />
+            <Database className="w-6 h-6 text-emerald-600" />
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-0">How We Use Your Information</h2>
           </div>
           
@@ -87,7 +87,7 @@ export default function PrivacyPolicy() {
         {/* Information Sharing */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <Lock className="w-6 h-6 text-purple-600" />
+            <Lock className="w-6 h-6 text-slate-600" />
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-0">Information Sharing</h2>
           </div>
           
@@ -105,7 +105,7 @@ export default function PrivacyPolicy() {
         {/* Data Security */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
-            <Shield className="w-6 h-6 text-red-600" />
+            <Shield className="w-6 h-6 text-slate-600" />
             <h2 className="text-h2 text-neutral-900 dark:text-white mb-0">Data Security</h2>
           </div>
           

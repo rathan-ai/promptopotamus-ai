@@ -51,32 +51,30 @@ export default function ResourcesPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="text-center py-12">
-          <div className="text-lg text-neutral-600 dark:text-neutral-400">Loading affiliate resources...</div>
-        </div>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="spinner"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="w-full max-w-none space-y-8">
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-slate-600 bg-clip-text text-transparent">
           AI Tools & Resources
         </h1>
-        <p className="text-xl text-neutral-600 dark:text-neutral-300 max-w-3xl mx-auto">
+        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
           Curated AI tools and platforms to enhance your prompt engineering workflow.
         </p>
       </div>
 
       {/* Featured Banner */}
-      <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r from-blue-500 to-slate-600 rounded-xl p-8 text-white shadow-lg">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold mb-2">🚀 Start Your AI Journey Today!</h2>
-            <p className="text-indigo-100 mb-4">
+            <p className="text-blue-100 mb-4">
               These tools are what our top-certified prompt engineers use daily. Start with any free tier and upgrade as you grow!
             </p>
             <div className="flex gap-2">
@@ -90,10 +88,130 @@ export default function ResourcesPage() {
         </div>
       </div>
 
+      {/* POML Resources Section */}
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-8 border border-indigo-200 dark:border-indigo-700/50">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="text-3xl">🔧</div>
+          <h2 className="text-2xl font-bold text-indigo-900 dark:text-indigo-200">
+            POML Resources & Tools
+          </h2>
+        </div>
+        <p className="text-indigo-800 dark:text-indigo-300 mb-6">
+          Master Microsoft's Prompt Orchestration Markup Language with these essential resources and documentation.
+        </p>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <a 
+            href="https://microsoft.github.io/poml/latest/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-indigo-200 dark:border-indigo-700 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="text-2xl">📚</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Official POML Docs</h3>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Complete specification, syntax guide, and examples from Microsoft
+            </p>
+            <div className="flex items-center mt-2 text-indigo-600 dark:text-indigo-400">
+              <ExternalLink className="w-4 h-4 mr-1" />
+              <span className="text-xs">microsoft.github.io</span>
+            </div>
+          </a>
+
+          <a 
+            href="https://github.com/microsoft/poml" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-indigo-200 dark:border-indigo-700 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="text-2xl">⚙️</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">POML GitHub Repo</h3>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Source code, tools, and community contributions
+            </p>
+            <div className="flex items-center mt-2 text-indigo-600 dark:text-indigo-400">
+              <ExternalLink className="w-4 h-4 mr-1" />
+              <span className="text-xs">github.com/microsoft</span>
+            </div>
+          </a>
+
+          <Link 
+            href="/tools"
+            className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-indigo-200 dark:border-indigo-700 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="text-2xl">🧪</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">POML Analyzer</h3>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Analyze and validate your POML prompts for best practices
+            </p>
+            <div className="flex items-center mt-2 text-indigo-600 dark:text-indigo-400">
+              <span className="text-xs">Interactive Tool</span>
+            </div>
+          </Link>
+
+          <Link 
+            href="/guides"
+            className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-indigo-200 dark:border-indigo-700 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="text-2xl">🎓</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">POML Learning Guides</h3>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Comprehensive tutorials and best practices for POML
+            </p>
+            <div className="flex items-center mt-2 text-indigo-600 dark:text-indigo-400">
+              <span className="text-xs">Educational Content</span>
+            </div>
+          </Link>
+
+          <Link 
+            href="/templates"
+            className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-indigo-200 dark:border-indigo-700 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="text-2xl">📋</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">POML Templates</h3>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Ready-to-use POML prompt templates and examples
+            </p>
+            <div className="flex items-center mt-2 text-indigo-600 dark:text-indigo-400">
+              <span className="text-xs">Template Library</span>
+            </div>
+          </Link>
+
+          <a 
+            href="https://learn.microsoft.com/en-us/semantic-kernel/prompts/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-indigo-200 dark:border-indigo-700 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="text-2xl">🔗</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Semantic Kernel</h3>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Microsoft's AI orchestration framework that uses POML
+            </p>
+            <div className="flex items-center mt-2 text-indigo-600 dark:text-indigo-400">
+              <ExternalLink className="w-4 h-4 mr-1" />
+              <span className="text-xs">learn.microsoft.com</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
       {/* Resource Cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {affiliateResources.map((resource) => (
-          <div key={resource.id} className="group relative bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div key={resource.id} className="card group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
             {/* Badge */}
             <div className={`absolute top-4 right-4 ${resource.color} text-white px-3 py-1 rounded-full text-xs font-semibold z-10`}>
               {resource.badge}
@@ -123,7 +241,7 @@ export default function ResourcesPage() {
                       key={i}
                       className={`w-4 h-4 ${
                         i < Math.floor(resource.rating)
-                          ? 'text-yellow-400 fill-current'
+                          ? 'text-slate-400 fill-current'
                           : 'text-neutral-300'
                       }`}
                     />

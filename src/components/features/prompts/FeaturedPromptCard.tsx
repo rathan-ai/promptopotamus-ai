@@ -27,8 +27,8 @@ interface FeaturedPromptCardProps {
 }
 
 const complexityColors = {
-  simple: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  smart: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  simple: 'bg-green-100 text-emerald-700 dark:bg-green-900/30 dark:text-green-300',
+  smart: 'bg-blue-100 text-slate-700 dark:bg-blue-900/30 dark:text-blue-300',
   recipe: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
 };
 
@@ -54,7 +54,7 @@ export default function FeaturedPromptCard({
             key={star}
             className={`${starSize} ${
               star <= rating
-                ? 'fill-yellow-400 text-yellow-400'
+                ? 'fill-slate-400 text-slate-400'
                 : 'text-neutral-300 dark:text-neutral-600'
             }`}
           />
@@ -69,7 +69,7 @@ export default function FeaturedPromptCard({
         <div className="p-4">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
-              <ComplexityIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <ComplexityIcon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
               <span className={`px-2 py-0.5 rounded text-xs font-medium ${complexityColors[prompt.complexity_level]}`}>
                 {prompt.complexity_level}
               </span>
@@ -81,14 +81,14 @@ export default function FeaturedPromptCard({
                   <span className="text-sm font-semibold">{prompt.price} PC</span>
                 </div>
               ) : (
-                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
                   Free
                 </span>
               )}
             </div>
           </div>
 
-          <h3 className="font-semibold text-sm dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 overflow-hidden" 
+          <h3 className="font-semibold text-sm dark:text-white mb-2 group-hover:text-slate-600 dark:group-hover:text-slate-400 overflow-hidden" 
               style={{
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -137,7 +137,7 @@ export default function FeaturedPromptCard({
       <div className="p-6">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
-            <ComplexityIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <ComplexityIcon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${complexityColors[prompt.complexity_level]}`}>
               {prompt.complexity_level}
             </span>
@@ -152,14 +152,14 @@ export default function FeaturedPromptCard({
                 <span className="font-semibold">{prompt.price} PC</span>
               </div>
             ) : (
-              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
                 Free
               </span>
             )}
           </div>
         </div>
 
-        <h3 className="font-semibold text-lg dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 overflow-hidden"
+        <h3 className="font-semibold text-lg dark:text-white mb-2 group-hover:text-slate-600 dark:group-hover:text-slate-400 overflow-hidden"
             style={{
               display: '-webkit-box',
               WebkitLineClamp: 2,
@@ -202,7 +202,7 @@ export default function FeaturedPromptCard({
           </div>
           
           <Link href={`/smart-prompts/${prompt.id}`}>
-            <Button size="sm" className="group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <Button size="sm" className="group-hover:bg-slate-600 group-hover:text-white transition-colors">
               View Details
             </Button>
           </Link>

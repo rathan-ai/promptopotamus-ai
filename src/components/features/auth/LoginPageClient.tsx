@@ -64,7 +64,7 @@ export function LoginPageClient() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-100 dark:bg-neutral-900 px-4">
       <div className="w-full max-w-md p-8 bg-white dark:bg-neutral-800/50 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700">
-        <h1 className="text-3xl font-bold text-center mb-6 text-indigo-600 dark:text-indigo-400">Welcome to Promptopotamus</h1>
+        <h1 className="text-3xl font-bold text-center mb-6 text-slate-600 dark:text-slate-400">Welcome to Promptopotamus</h1>
         <Auth
           supabaseClient={supabase}
           appearance={{
@@ -89,7 +89,7 @@ export function LoginPageClient() {
         <div className="mt-4 text-center">
           <button
             onClick={() => setShowForgotPassword(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+            className="text-sm text-slate-600 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-300"
           >
             Forgot your password?
           </button>

@@ -19,7 +19,7 @@ const steps = [
     description: "Use our Prompt Builder and Analyzer tools to craft effective prompts, or modify existing templates to fit your needs.",
     action: "Try Prompt Builder",
     href: "/#generator",
-    color: "from-purple-500 to-pink-500",
+    color: "from-slate-500 to-pink-500",
     bgColor: "bg-neutral-50 dark:bg-neutral-800/50"
   },
   {
@@ -28,7 +28,7 @@ const steps = [
     description: "Test your prompts across different AI platforms, gather feedback, and iterate to achieve perfect results.",
     action: "Learn Best Practices",
     href: "/#best-practices",
-    color: "from-green-500 to-emerald-500",
+    color: "from-emerald-600 to-emerald-500",
     bgColor: "bg-neutral-50 dark:bg-neutral-800/50"
   },
   {
@@ -37,7 +37,7 @@ const steps = [
     description: "Take our certification exams to validate your skills and unlock the ability to sell your own Smart Prompts.",
     action: "Get Certified",
     href: "/certificates",
-    color: "from-orange-500 to-red-500",
+    color: "from-orange-500 to-slate-500",
     bgColor: "bg-neutral-50 dark:bg-neutral-800/50"
   }
 ];
@@ -48,7 +48,7 @@ const HowItWorks = () => {
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full text-small font-medium text-indigo-700 dark:text-indigo-300 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-slate-500/10 rounded-full text-small font-medium text-indigo-700 dark:text-indigo-300 mb-6">
             <PlayCircle className="w-4 h-4" />
             How It Works
           </div>
@@ -68,7 +68,7 @@ const HowItWorks = () => {
             return (
               <div key={index} className="relative group">
                 {/* Step Number */}
-                <div className="absolute -top-4 -left-4 w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white text-small font-bold z-10">
+                <div className="absolute -top-4 -left-4 w-8 h-8 bg-gradient-to-r from-indigo-600 to-slate-600 rounded-full flex items-center justify-center text-white text-small font-bold z-10">
                   {index + 1}
                 </div>
                 
@@ -102,8 +102,8 @@ const HowItWorks = () => {
 
                 {/* Connector Line (except for last item) */}
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-indigo-300 to-purple-300 dark:from-indigo-600 dark:to-purple-600 transform -translate-y-1/2 z-10">
-                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-purple-400 dark:bg-purple-600 rounded-full"></div>
+                  <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-indigo-300 to-purple-300 dark:from-indigo-600 dark:to-slate-600 transform -translate-y-1/2 z-10">
+                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-purple-400 dark:bg-slate-600 rounded-full"></div>
                   </div>
                 )}
               </div>

@@ -71,23 +71,23 @@ export default function XPProgress({
 
   const getLevelColor = (level: number): string => {
     if (level < 5) return 'text-gray-600';
-    if (level < 10) return 'text-green-600';
-    if (level < 20) return 'text-blue-600';
-    if (level < 35) return 'text-purple-600';
+    if (level < 10) return 'text-emerald-600';
+    if (level < 20) return 'text-slate-600';
+    if (level < 35) return 'text-slate-600';
     if (level < 50) return 'text-yellow-600';
-    return 'text-red-600';
+    return 'text-slate-600';
   };
 
   if (compact) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         <div className="flex items-center gap-1">
-          <Zap className="w-4 h-4 text-yellow-500" />
+          <Zap className="w-4 h-4 text-slate-500" />
           <span className="font-medium text-sm">{userXP.total_xp}</span>
         </div>
         <div className="w-16 bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
           <div 
-            className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+            className="bg-gradient-to-r from-blue-500 to-slate-500 h-2 rounded-full transition-all duration-500"
             style={{ width: `${progress.percentage}%` }}
           />
         </div>
@@ -102,7 +102,7 @@ export default function XPProgress({
     <div className={`bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 ${className}`}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg">
+          <div className="p-2 bg-gradient-to-br from-slate-400 to-orange-500 rounded-lg">
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -131,7 +131,7 @@ export default function XPProgress({
         </div>
         <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-3 overflow-hidden">
           <div 
-            className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-3 rounded-full transition-all duration-700 ease-out relative"
+            className="bg-gradient-to-r from-blue-500 via-slate-500 to-pink-500 h-3 rounded-full transition-all duration-700 ease-out relative"
             style={{ width: `${progress.percentage}%` }}
           >
             <div className="absolute inset-0 bg-white/20 animate-pulse rounded-full"></div>

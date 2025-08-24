@@ -147,7 +147,7 @@ export function ConfirmModal({
   loading = false
 }: ConfirmModalProps) {
   const variantStyles = {
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
+    danger: 'bg-slate-600 hover:bg-red-700 text-white',
     warning: 'bg-yellow-600 hover:bg-yellow-700 text-white',
     info: 'bg-blue-600 hover:bg-blue-700 text-white'
   };

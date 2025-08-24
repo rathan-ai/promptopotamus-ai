@@ -100,14 +100,14 @@ export function ResetPasswordClient() {
 
   const passwordStrength = getPasswordStrength(password);
   const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+  const strengthColors = ['bg-slate-500', 'bg-orange-500', 'bg-slate-500', 'bg-slate-500', 'bg-emerald-600'];
 
   if (!accessToken || !refreshToken) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-8 max-w-md w-full text-center">
           <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+            <AlertCircle className="w-6 h-6 text-slate-600 dark:text-red-400" />
           </div>
           <h1 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
             Invalid Reset Link
@@ -130,7 +130,7 @@ export function ResetPasswordClient() {
           <>
             <div className="text-center mb-8">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <Lock className="w-6 h-6 text-slate-600 dark:text-slate-400" />
               </div>
               <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">
                 Set New Password
@@ -209,7 +209,7 @@ export function ResetPasswordClient() {
                 </div>
                 
                 {confirmPassword && password !== confirmPassword && (
-                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                  <p className="text-xs text-slate-600 dark:text-red-400 mt-1">
                     Passwords do not match
                   </p>
                 )}
@@ -219,17 +219,17 @@ export function ResetPasswordClient() {
                 <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-1">
                   Password Requirements:
                 </p>
-                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-                  <li className={password.length >= 8 ? 'text-green-600 dark:text-green-400' : ''}>
+                <ul className="text-xs text-slate-700 dark:text-blue-300 space-y-1">
+                  <li className={password.length >= 8 ? 'text-emerald-600 dark:text-emerald-500' : ''}>
                     • At least 8 characters long
                   </li>
-                  <li className={/[A-Z]/.test(password) ? 'text-green-600 dark:text-green-400' : ''}>
+                  <li className={/[A-Z]/.test(password) ? 'text-emerald-600 dark:text-emerald-500' : ''}>
                     • Contains uppercase letter
                   </li>
-                  <li className={/[a-z]/.test(password) ? 'text-green-600 dark:text-green-400' : ''}>
+                  <li className={/[a-z]/.test(password) ? 'text-emerald-600 dark:text-emerald-500' : ''}>
                     • Contains lowercase letter
                   </li>
-                  <li className={/[0-9]/.test(password) ? 'text-green-600 dark:text-green-400' : ''}>
+                  <li className={/[0-9]/.test(password) ? 'text-emerald-600 dark:text-emerald-500' : ''}>
                     • Contains number
                   </li>
                 </ul>
@@ -254,7 +254,7 @@ export function ResetPasswordClient() {
         ) : (
           <div className="text-center">
             <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+              <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-500" />
             </div>
             
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">

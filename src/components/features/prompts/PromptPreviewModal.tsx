@@ -185,7 +185,7 @@ export default function PromptPreviewModal({
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
               <div className="flex items-center">
-                <Eye className="w-6 h-6 text-blue-500 mr-2" />
+                <Eye className="w-6 h-6 text-slate-500 mr-2" />
                 <h2 className="text-2xl font-bold dark:text-white">Preview Smart Prompt</h2>
               </div>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${complexityColors[prompt.complexity_level]}`}>
@@ -230,7 +230,7 @@ export default function PromptPreviewModal({
                     <div key={index} className="space-y-2">
                       <label className="block text-sm font-medium dark:text-white">
                         {variable.name}
-                        {variable.required && <span className="text-red-500 ml-1">*</span>}
+                        {variable.required && <span className="text-slate-500 ml-1">*</span>}
                       </label>
                       {variable.description && (
                         <p className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -319,7 +319,7 @@ export default function PromptPreviewModal({
                       </p>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-500">
                         {prompt.price > 0 ? (
                           <PromptCoinDisplay amount={prompt.price} size="lg" />
                         ) : (

@@ -39,7 +39,7 @@ const promptTypes: PromptType[] = [
     id: 'simple',
     name: 'Simple Prompts',
     icon: Zap,
-    color: 'text-green-600',
+    color: 'text-emerald-600',
     bgColor: 'bg-green-50 dark:bg-green-900/20',
     description: 'Direct, single-purpose prompts that perform one specific task without customization.',
     features: ['One-time use', 'Fixed text', 'Immediate results', 'No variables'],
@@ -57,7 +57,7 @@ const promptTypes: PromptType[] = [
     id: 'smart',
     name: 'Smart Prompts',
     icon: Brain,
-    color: 'text-blue-600',
+    color: 'text-slate-600',
     bgColor: 'bg-blue-50 dark:bg-blue-900/20',
     description: 'Enhanced prompts with variables that adapt to different inputs, making them reusable and customizable.',
     features: ['Reusable template', 'Custom variables', 'Flexible inputs', 'Consistent structure'],
@@ -82,7 +82,7 @@ const promptTypes: PromptType[] = [
     id: 'recipe',
     name: 'Prompt Recipes',
     icon: BookOpen,
-    color: 'text-purple-600',
+    color: 'text-slate-600',
     bgColor: 'bg-purple-50 dark:bg-purple-900/20',
     description: 'Multi-step workflows that guide you through complex processes, with each step building on previous results.',
     features: ['Multi-step process', 'Sequential logic', 'Complex workflows', 'Step dependencies'],
@@ -137,7 +137,7 @@ export default function PromptTypesGuide({ onTypeSelect, selectedType }: PromptT
     <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700">
       <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
         <div className="flex items-center gap-3 mb-3">
-          <Lightbulb className="w-6 h-6 text-yellow-500" />
+          <Lightbulb className="w-6 h-6 text-slate-500" />
           <h3 className="text-xl font-bold dark:text-white">Understanding Prompt Types</h3>
         </div>
         <p className="text-neutral-600 dark:text-neutral-400">
@@ -212,7 +212,7 @@ export default function PromptTypesGuide({ onTypeSelect, selectedType }: PromptT
                       <div className="grid grid-cols-2 gap-2">
                         {type.features.map((feature, index) => (
                           <div key={index} className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
+                            <CheckCircle className="w-4 h-4 text-emerald-600" />
                             <span className="text-sm text-neutral-600 dark:text-neutral-400">{feature}</span>
                           </div>
                         ))}
@@ -277,7 +277,7 @@ export default function PromptTypesGuide({ onTypeSelect, selectedType }: PromptT
 
                         <div>
                           <h6 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Expected Output:</h6>
-                          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border-l-4 border-green-400">
+                          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border-l-4 border-emerald-500">
                             <p className="text-sm text-neutral-700 dark:text-neutral-300">{type.example.output}</p>
                           </div>
                         </div>
@@ -291,7 +291,7 @@ export default function PromptTypesGuide({ onTypeSelect, selectedType }: PromptT
                         {type.benefits.map((benefit, index) => (
                           <span
                             key={index}
-                            className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-sm rounded-full"
+                            className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-slate-700 dark:text-blue-300 text-sm rounded-full"
                           >
                             {benefit}
                           </span>
@@ -308,22 +308,22 @@ export default function PromptTypesGuide({ onTypeSelect, selectedType }: PromptT
 
       <div className="p-6 bg-neutral-50 dark:bg-neutral-700/50 rounded-b-lg">
         <div className="flex items-center gap-3 mb-3">
-          <Target className="w-5 h-5 text-blue-500" />
+          <Target className="w-5 h-5 text-slate-500" />
           <h4 className="font-semibold text-neutral-900 dark:text-white">Recommended Learning Path</h4>
         </div>
         <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
             Start with Simple
           </span>
           <ArrowRight className="w-4 h-4" />
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-slate-500 rounded-full"></span>
             Progress to Smart
           </span>
           <ArrowRight className="w-4 h-4" />
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-slate-500 rounded-full"></span>
             Master Recipes
           </span>
         </div>

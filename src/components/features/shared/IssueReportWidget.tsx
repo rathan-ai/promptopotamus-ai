@@ -60,7 +60,7 @@ export default function IssueReportWidget() {
       label: 'Bug Report', 
       icon: Bug, 
       description: 'Something is broken or not working',
-      color: 'text-red-500',
+      color: 'text-slate-500',
       bgColor: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
     },
     { 
@@ -68,7 +68,7 @@ export default function IssueReportWidget() {
       label: 'Feature Request', 
       icon: Lightbulb, 
       description: 'Suggest a new feature',
-      color: 'text-blue-500',
+      color: 'text-slate-500',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
     },
     { 
@@ -76,7 +76,7 @@ export default function IssueReportWidget() {
       label: 'Improvement', 
       icon: Zap, 
       description: 'Suggest an enhancement',
-      color: 'text-green-500',
+      color: 'text-emerald-600',
       bgColor: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
     },
     { 
@@ -92,7 +92,7 @@ export default function IssueReportWidget() {
   const priorities = [
     { id: 'low', label: 'Low', color: 'text-gray-600' },
     { id: 'medium', label: 'Medium', color: 'text-yellow-600' },
-    { id: 'high', label: 'High', color: 'text-red-600' }
+    { id: 'high', label: 'High', color: 'text-slate-600' }
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -168,7 +168,7 @@ This report was submitted via the Promptopotamus platform issue reporting system
       <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="bg-slate-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           aria-label="Report an issue"
           title="Report an issue or share feedback"
         >
@@ -311,7 +311,7 @@ This report was submitted via the Promptopotamus platform issue reporting system
             <Button
               type="submit"
               disabled={isSubmitting || !formData.title.trim() || !formData.description.trim()}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+              className="flex-1 bg-slate-600 hover:bg-indigo-700"
             >
               {isSubmitting ? (
                 <>

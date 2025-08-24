@@ -65,17 +65,23 @@ export default function RootLayout({
   return (
     // Add suppressHydrationWarning to fix client-side interactivity
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${roboto_mono.variable} font-sans text-neutral-800 dark:text-neutral-200`}>
+      <body className={`${inter.variable} ${roboto_mono.variable}`}>
         <Provider>
           <Toaster />
-          <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-900">
-            <Sidebar />
-            <div className="flex-1 flex flex-col md:ml-72">
-              <Header />
-              <main className="flex-1 p-4 md:p-8">
+          <div className="flex min-h-screen">
+            <aside className="sidebar">
+              <Sidebar />
+            </aside>
+            <div className="main-content">
+              <header className="page-header">
+                <Header />
+              </header>
+              <main className="page-content">
                 {children}
               </main>
-              <Footer />
+              <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-8 py-4 mt-auto">
+                <Footer />
+              </footer>
             </div>
           </div>
           

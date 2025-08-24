@@ -36,7 +36,7 @@ export const Input = forwardRef<HTMLInputElement, BaseInputProps>(({
       {label && (
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {label}
-          {props.required && <span className="text-red-500 ml-1">*</span>}
+          {props.required && <span className="text-slate-500 ml-1">*</span>}
         </label>
       )}
       
@@ -58,8 +58,8 @@ export const Input = forwardRef<HTMLInputElement, BaseInputProps>(({
             "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
             leftIcon && "pl-10",
             rightIcon && "pr-10",
-            error && "border-red-500 focus:ring-red-500",
-            success && "border-green-500 focus:ring-green-500",
+            error && "border-slate-500 focus:ring-slate-500",
+            success && "border-emerald-600 focus:ring-emerald-600",
             disabled && "opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-900",
             className
           )}
@@ -74,13 +74,13 @@ export const Input = forwardRef<HTMLInputElement, BaseInputProps>(({
         )}
         
         {error && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500">
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500">
             <AlertCircle className="w-4 h-4" />
           </div>
         )}
         
         {success && !error && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500">
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-emerald-600">
             <CheckCircle className="w-4 h-4" />
           </div>
         )}
@@ -93,14 +93,14 @@ export const Input = forwardRef<HTMLInputElement, BaseInputProps>(({
       )}
       
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+        <p className="text-sm text-slate-600 dark:text-red-400 flex items-center gap-1">
           <AlertCircle className="w-3 h-3" />
           {error}
         </p>
       )}
       
       {success && !error && (
-        <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+        <p className="text-sm text-emerald-600 dark:text-emerald-500 flex items-center gap-1">
           <CheckCircle className="w-3 h-3" />
           {success}
         </p>
@@ -133,7 +133,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(({
   
   const passwordStrength = showStrength && props.value ? getPasswordStrength(String(props.value)) : 0;
   
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+  const strengthColors = ['bg-slate-500', 'bg-orange-500', 'bg-slate-500', 'bg-blue-500', 'bg-emerald-600'];
   const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
 
   return (
@@ -202,7 +202,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
       {label && (
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {label}
-          {props.required && <span className="text-red-500 ml-1">*</span>}
+          {props.required && <span className="text-slate-500 ml-1">*</span>}
         </label>
       )}
       
@@ -216,8 +216,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
             "text-gray-900 dark:text-white",
             "placeholder-gray-500 dark:placeholder-gray-400",
             "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-            error && "border-red-500 focus:ring-red-500",
-            success && "border-green-500 focus:ring-green-500",
+            error && "border-slate-500 focus:ring-slate-500",
+            success && "border-emerald-600 focus:ring-emerald-600",
             disabled && "opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-900",
             !resize && "resize-none",
             className
@@ -227,13 +227,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
         />
         
         {error && (
-          <div className="absolute right-3 top-3 text-red-500">
+          <div className="absolute right-3 top-3 text-slate-500">
             <AlertCircle className="w-4 h-4" />
           </div>
         )}
         
         {success && !error && (
-          <div className="absolute right-3 top-3 text-green-500">
+          <div className="absolute right-3 top-3 text-emerald-600">
             <CheckCircle className="w-4 h-4" />
           </div>
         )}
@@ -246,14 +246,14 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
       )}
       
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+        <p className="text-sm text-slate-600 dark:text-red-400 flex items-center gap-1">
           <AlertCircle className="w-3 h-3" />
           {error}
         </p>
       )}
       
       {success && !error && (
-        <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+        <p className="text-sm text-emerald-600 dark:text-emerald-500 flex items-center gap-1">
           <CheckCircle className="w-3 h-3" />
           {success}
         </p>
@@ -291,7 +291,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
       {label && (
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {label}
-          {props.required && <span className="text-red-500 ml-1">*</span>}
+          {props.required && <span className="text-slate-500 ml-1">*</span>}
         </label>
       )}
       
@@ -304,8 +304,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
             "border-gray-300 dark:border-gray-600",
             "text-gray-900 dark:text-white",
             "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-            error && "border-red-500 focus:ring-red-500",
-            success && "border-green-500 focus:ring-green-500",
+            error && "border-slate-500 focus:ring-slate-500",
+            success && "border-emerald-600 focus:ring-emerald-600",
             disabled && "opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-900",
             className
           )}
@@ -342,14 +342,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
       )}
       
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+        <p className="text-sm text-slate-600 dark:text-red-400 flex items-center gap-1">
           <AlertCircle className="w-3 h-3" />
           {error}
         </p>
       )}
       
       {success && !error && (
-        <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+        <p className="text-sm text-emerald-600 dark:text-emerald-500 flex items-center gap-1">
           <CheckCircle className="w-3 h-3" />
           {success}
         </p>

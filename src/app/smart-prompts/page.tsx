@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { Plus, Search, Grid, List, Star, Download, Coins, Eye, ExternalLink, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
+import { Plus, Search, Grid, List, Star, Download, DollarSign, Eye, ExternalLink, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
 import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ui/ErrorBoundary';
@@ -359,7 +359,7 @@ export default function SmartPromptsPage() {
       if (previewPrompt.price === 0) {
         handlePurchase(previewPrompt.id);
       } else {
-        // For paid prompts, show PromptCoin purchase modal
+        // For paid prompts, show purchase modal
         setShowPurchaseModal(true);
       }
     }
@@ -380,7 +380,7 @@ export default function SmartPromptsPage() {
       stars.push(
         <Star
           key={i}
-          className={`w-4 h-4 ${i <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+          className={`w-4 h-4 ${i <= rating ? 'text-slate-400 fill-current' : 'text-gray-300'}`}
         />
       );
     }
@@ -416,7 +416,7 @@ export default function SmartPromptsPage() {
             </div>
           ) : (
             <div>
-              <span className="inline-block px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full mb-2">
+              <span className="inline-block px-2 py-1 bg-green-100 dark:bg-green-900/30 text-emerald-700 dark:text-green-300 text-xs font-medium rounded-full mb-2">
                 Purchased
               </span>
               {(prompt as any).purchase_info && (
@@ -521,9 +521,9 @@ export default function SmartPromptsPage() {
           <div className="text-right ml-4">
             <div className="text-2xl font-bold">
               {prompt.price > 0 ? (
-                <PromptCoinPrice amount={prompt.price} />
+                <span className="text-blue-600 dark:text-blue-400">${prompt.price}</span>
               ) : (
-                <span className="text-green-600 dark:text-green-400">Free</span>
+                <span className="text-emerald-600 dark:text-emerald-500">Free</span>
               )}
             </div>
             <div className="text-sm text-neutral-500">
@@ -573,7 +573,7 @@ export default function SmartPromptsPage() {
               <Button 
                 size="sm"
                 variant="outline"
-                className="min-w-20 text-green-600 border-green-300 hover:bg-green-50"
+                className="min-w-20 text-emerald-600 border-green-300 hover:bg-green-50"
                 disabled
               >
                 Purchased
@@ -639,7 +639,7 @@ export default function SmartPromptsPage() {
             </a>
             <a
               href="/#prompt-recipes"
-              className="inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
+              className="inline-flex items-center text-sm font-medium text-slate-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
             >
               <Sparkles className="w-4 h-4 mr-1" />
               View Prompt Recipes
@@ -659,7 +659,7 @@ export default function SmartPromptsPage() {
             onClick={() => setActiveView('my-prompts')}
             variant={activeView === 'my-prompts' ? 'default' : 'outline'}
           >
-            <Coins className="w-4 h-4 mr-2" />
+            <DollarSign className="w-4 h-4 mr-2" />
             My Prompts
           </Button>
           <Button
@@ -678,6 +678,25 @@ export default function SmartPromptsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Pay Once Banner */}
+      {activeView === 'marketplace' && (
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-500" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-semibold text-green-900 dark:text-green-100">Pay Once, Use Forever</h4>
+              <p className="text-sm text-emerald-700 dark:text-green-300">
+                All prompts are one-time purchases with lifetime access. No subscriptions, no expiry dates, no hidden fees.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeView === 'builder' ? (
         <ComponentErrorBoundary componentName="SmartPromptsBuilder">
@@ -739,11 +758,11 @@ export default function SmartPromptsPage() {
                 <span>Interactive examples</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
                 <span>Hands-on practice</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="flex items-center gap-2 text-sm text-emerald-700 dark:text-green-300">
+                <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
                 <span>Best practices</span>
               </div>
             </div>
@@ -865,7 +884,7 @@ export default function SmartPromptsPage() {
                 {userPurchasedPrompts.length === 0 ? (
                   <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-8 text-center">
                     <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Coins className="w-8 h-8 text-neutral-400" />
+                      <DollarSign className="w-8 h-8 text-neutral-400" />
                     </div>
                     <h4 className="text-lg font-semibold dark:text-white mb-2">No purchased prompts yet</h4>
                     <p className="text-neutral-600 dark:text-neutral-400 mb-4">
@@ -933,8 +952,10 @@ export default function SmartPromptsPage() {
                 >
                   <option value="all">All Prices</option>
                   <option value="free">Free</option>
-                  <option value="paid">Paid (1-99 PC)</option>
-                  <option value="premium">Premium (100+ PC)</option>
+                  <option value="budget">Under $10</option>
+                  <option value="standard">$10-$50</option>
+                  <option value="professional">$50-$100</option>
+                  <option value="enterprise">$100+</option>
                 </select>
 
                 <select
