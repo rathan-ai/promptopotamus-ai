@@ -42,7 +42,7 @@ export default function TemplateCard({ template }: TemplateCardProps) {
     toast.success('Prompt copied to clipboard!');
   };
 
-  const handlePurchase = () => {
+  const handlePurchase = async () => {
     // Track purchase button click
     track('template_purchase_clicked', {
       template_id: template.id,
@@ -51,8 +51,27 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       template_category: template.category
     });
     
-    // Redirect to login or direct purchase
-    router.push('/login?redirect=templates');
+    try {
+      // Check if user is authenticated first
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        // User not authenticated, redirect to login
+        router.push('/login?redirect=templates');
+        return;
+      }
+      
+      // User is authenticated, proceed with purchase
+      // TODO: Implement actual purchase flow for premium templates
+      toast.success('Purchase feature coming soon! For now, all templates are free.');
+      
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      // Fallback to login redirect
+      router.push('/login?redirect=templates');
+    }
   };
 
   const getTierConfig = (tier: string) => {
