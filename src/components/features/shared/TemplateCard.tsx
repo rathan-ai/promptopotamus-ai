@@ -17,6 +17,8 @@ export default function TemplateCard({ template }: TemplateCardProps) {
   const router = useRouter();
   
   const handleCopy = () => {
+    console.log('handleCopy called for template:', title, 'tier:', tier);
+    
     if (tier === 'premium' || tier === 'pro') {
       // Track premium template access attempt
       track('template_premium_blocked', {
@@ -43,6 +45,8 @@ export default function TemplateCard({ template }: TemplateCardProps) {
   };
 
   const handlePurchase = async () => {
+    console.log('handlePurchase called for template:', title);
+    
     // Track purchase button click
     track('template_purchase_clicked', {
       template_id: template.id,
