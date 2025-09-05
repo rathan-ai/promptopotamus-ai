@@ -57,18 +57,27 @@ export default function TemplateCard({ template }: TemplateCardProps) {
       const supabase = createClient();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
-      if (authError || !user) {
+      if (authError) {
+        console.error('Auth error:', authError);
+        toast.error('Authentication check failed. Please try logging in again.');
+        router.push('/login?redirect=templates');
+        return;
+      }
+      
+      if (!user) {
         // User not authenticated, redirect to login
+        toast.error('Please log in to purchase templates.');
         router.push('/login?redirect=templates');
         return;
       }
       
       // User is authenticated, proceed with purchase
       // TODO: Implement actual purchase flow for premium templates
-      toast.success('Purchase feature coming soon! For now, all templates are free.');
+      toast.success(`Purchase feature coming soon! For now, all templates are free. Welcome, ${user.email}!`);
       
     } catch (error) {
       console.error('Error checking authentication:', error);
+      toast.error('Something went wrong. Please try again.');
       // Fallback to login redirect
       router.push('/login?redirect=templates');
     }
