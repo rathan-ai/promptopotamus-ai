@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2, CheckCircle, History, FileText, Award, ShoppingCart, Brain, DollarSign, TrendingUp } from 'lucide-react';
+import { CheckCircle, History, FileText, Award, Brain } from 'lucide-react';
 import { LoadingSkeleton } from '@/components/ui/Loading';
 import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ui/ErrorBoundary';
 import toast from 'react-hot-toast';
@@ -38,24 +38,10 @@ interface DashboardData {
   profile: Profile;
 }
 
-interface SellerData {
-  totalRevenue: number;
-  totalSales: number;
-  hasActiveListings: boolean;
-  recentSales: Array<{
-    prompt_id: number;
-    purchase_price: number;
-    purchased_at: string;
-    saved_prompts: { title: string };
-  }>;
-}
-
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [sellerData, setSellerData] = useState<SellerData | null>(null);
-  const [sellerLoading, setSellerLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
@@ -67,7 +53,6 @@ export default function DashboardPage() {
           console.error('Auth error:', userError);
           toast.error('Authentication error. Please refresh the page.');
           setLoading(false);
-          setSellerLoading(false);
           return;
         }
         
@@ -84,32 +69,13 @@ export default function DashboardPage() {
           toast.error(errorData.error || 'Could not load your dashboard data.');
         }
 
-        // Fetch seller data if user has smart prompts
-        try {
-          const sellerRes = await fetch('/api/smart-prompts/my-prompts');
-          if (sellerRes.ok) {
-            const smartPromptsData = await sellerRes.json();
-            
-            // Check if user is a seller (has created prompts or sales)
-            if (smartPromptsData.salesStats && (smartPromptsData.salesStats.totalSales > 0 || smartPromptsData.created?.length > 0)) {
-              setSellerData({
-                totalRevenue: smartPromptsData.salesStats.totalRevenue || 0,
-                totalSales: smartPromptsData.salesStats.totalSales || 0,
-                hasActiveListings: smartPromptsData.created?.some((p: { is_marketplace?: boolean }) => p.is_marketplace) || false,
-                recentSales: smartPromptsData.salesStats.recentSales || []
-              });
-            }
-          }
-        } catch (sellerError) {
-          console.error('Seller data fetch error:', sellerError);
-          // Don't show error toast for seller data, just don't show the section
-        }
+        // Note: Seller data is now fetched by UserSmartPromptsManager component
+        // to avoid duplicate API calls
       } catch (error) {
         console.error('Dashboard fetch error:', error);
         toast.error('Network error loading dashboard. Please check your connection.');
       } finally {
         setLoading(false);
-        setSellerLoading(false);
       }
     };
 
@@ -215,74 +181,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-      {/* Seller Dashboard Section - Only shown for users who sell prompts */}
-      {sellerData && sellerData.hasActiveListings && (
-        <div className="mb-8">
-          <h2 className="card-title mb-4 flex items-center">
-            <DollarSign className="w-5 h-5 mr-2" /> Seller Earnings
-          </h2>
-          <div className="grid-container grid-2">
-            {/* Earnings Card */}
-            <div className="card">
-              <div className="card-content">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="card-title">Total Earnings</h3>
-                  <DollarSign className="w-8 h-8" />
-                </div>
-                {sellerLoading ? (
-                  <div className="flex items-center">
-                    <Loader2 className="w-6 h-6 animate-spin mr-3" />
-                    <span>Loading...</span>
-                  </div>
-                ) : (
-                  <>
-                    <div className="stat-value mb-2">
-                      ${(sellerData.totalRevenue || 0).toFixed(2)}
-                    </div>
-                    <p className="card-description">
-                      From {sellerData.totalSales || 0} sales
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Recent Sales */}
-            <div className="card">
-              <div className="card-header">
-                <h3 className="card-title flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2" />
-                  Recent Sales
-                </h3>
-              </div>
-              <div className="card-content">
-                {sellerData.recentSales.length > 0 ? (
-                  <div>
-                    {sellerData.recentSales.slice(0, 3).map((sale, idx) => (
-                      <div key={idx} className="flex justify-between items-center mb-4">
-                        <div>
-                          <p className="font-medium">{sale.saved_prompts.title}</p>
-                          <p className="text-xs card-description">
-                            {new Date(sale.purchased_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <p className="font-semibold">
-                          ${sale.purchase_price.toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <ShoppingCart className="w-8 h-8 mx-auto mb-2" />
-                    <p className="card-description">No sales yet</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Seller earnings info is now in the Smart Prompts Management section below */}
 
         {/* Quick Actions */}
         <div className="card-grid">
