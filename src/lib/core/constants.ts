@@ -37,7 +37,6 @@ export const ROUTES = {
   PURCHASE_CANCEL: '/purchase/cancel',
   
   // Help routes
-  HELP_PROMPTCOINS: '/help/promptcoins',
   REFUND_POLICY: '/refund-policy',
   
   // Admin routes
@@ -52,9 +51,6 @@ export const API_ROUTES = {
   SMART_PROMPTS: '/api/smart-prompts',
   SMART_PROMPTS_MY: '/api/smart-prompts/my-prompts',
   SMART_PROMPTS_PURCHASE: '/api/smart-prompts/purchase',
-  
-  // Payments
-  PURCHASE_PROMPTCOINS: '/api/purchase/promptcoins',
   
   // Admin
   ADMIN_STATS: '/api/admin/stats',

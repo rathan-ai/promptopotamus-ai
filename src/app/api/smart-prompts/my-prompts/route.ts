@@ -22,8 +22,8 @@ export async function GET(req: NextRequest) {
 
     const hasValidCertificate = hasAnyValidCertificate(userCertificates || []);
 
-    let createdPrompts = [];
-    let purchasedPrompts = [];
+    let createdPrompts: any[] = [];
+    let purchasedPrompts: any[] = [];
 
     // Get created prompts
     if (type === 'created' || type === 'all') {
@@ -92,12 +92,12 @@ export async function GET(req: NextRequest) {
         .order('purchased_at', { ascending: false });
 
       if (purchaseError) {
-        console.error('Error fetching purchased prompts:', purchaseError);
+        // TODO: Consider structured logging for purchase fetch errors
       }
 
       purchasedPrompts = purchased?.map(purchase => {
         if (!purchase.saved_prompts) {
-          console.warn('Purchase missing saved_prompts data:', purchase);
+          // TODO: Consider structured logging for data integrity issues
           return null;
         }
         return {
@@ -109,12 +109,7 @@ export async function GET(req: NextRequest) {
         };
       }).filter(Boolean) || [];
 
-      console.log('Purchased prompts processed:', purchasedPrompts.length, 'from', purchased?.length || 0, 'raw purchases');
-      console.log('Raw purchased data:', purchased?.map(p => ({ 
-        id: p.id, 
-        prompt_id: p.prompt_id, 
-        saved_prompts: p.saved_prompts ? { id: p.saved_prompts.id, title: p.saved_prompts.title } : null 
-      })));
+      // TODO: Consider structured logging for purchase processing metrics
     }
 
     // Get sales analytics for created marketplace prompts

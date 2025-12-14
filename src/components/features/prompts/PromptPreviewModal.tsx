@@ -321,7 +321,7 @@ export default function PromptPreviewModal({
                     <div className="text-right">
                       <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-500">
                         {prompt.price > 0 ? (
-                          <PromptCoinDisplay amount={prompt.price} size="lg" />
+                          <span>{prompt.price} PC</span>
                         ) : (
                           'Free'
                         )}

@@ -99,7 +99,7 @@ export class ServerAchievementEngine {
         .eq('user_id', userId);
 
       if (updateError) {
-        console.error('Error updating user XP:', updateError);
+
         return { newLevel: oldLevel, achievements: [] };
       }
 
@@ -115,7 +115,7 @@ export class ServerAchievementEngine {
 
       return { newLevel, achievements: newAchievements };
     } catch (error) {
-      console.error('Error awarding XP:', error);
+
       return { newLevel: 1, achievements: [] };
     }
   }
@@ -144,7 +144,7 @@ export class ServerAchievementEngine {
         .eq('is_active', true);
 
       if (error || !achievements) {
-        console.error('Error fetching achievements:', error);
+
         return [];
       }
 
@@ -189,7 +189,7 @@ export class ServerAchievementEngine {
 
       return newAchievements;
     } catch (error) {
-      console.error('Error checking achievements:', error);
+
       return [];
     }
   }
@@ -274,7 +274,7 @@ export class ServerAchievementEngine {
           return false;
       }
     } catch (error) {
-      console.error('Error checking achievement criteria:', error);
+
       return false;
     }
   }
@@ -304,7 +304,7 @@ export class ServerAchievementEngine {
           // Already awarded
           return true;
         }
-        console.error('Error awarding achievement:', insertError);
+
         return false;
       }
 
@@ -327,7 +327,7 @@ export class ServerAchievementEngine {
 
       return true;
     } catch (error) {
-      console.error('Error awarding achievement:', error);
+
       return false;
     }
   }
@@ -366,7 +366,7 @@ export class ServerAchievementEngine {
           .single();
 
         if (error) {
-          console.error('Error creating streak:', error);
+
           return 0;
         }
 
@@ -404,13 +404,13 @@ export class ServerAchievementEngine {
         .eq('id', streak.id);
 
       if (updateError) {
-        console.error('Error updating streak:', updateError);
+
         return streak.current_count;
       }
 
       return newCurrentCount;
     } catch (error) {
-      console.error('Error updating streak:', error);
+
       return 0;
     }
   }
@@ -446,7 +446,7 @@ export class ServerAchievementEngine {
 
       return streak.current_count;
     } catch (error) {
-      console.error('Error getting current streak:', error);
+
       return 0;
     }
   }
@@ -465,13 +465,13 @@ export class ServerAchievementEngine {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching user experience:', error);
+
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Error getting user experience:', error);
+
       return null;
     }
   }
@@ -495,13 +495,13 @@ export class ServerAchievementEngine {
         .single();
 
       if (error) {
-        console.error('Error creating user experience:', error);
+
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Error creating user experience:', error);
+
       return null;
     }
   }
@@ -523,13 +523,13 @@ export class ServerAchievementEngine {
         .order('earned_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching user achievements:', error);
+
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting user achievements:', error);
+
       return [];
     }
   }

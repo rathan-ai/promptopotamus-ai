@@ -83,7 +83,7 @@ export async function getSettings(category?: string): Promise<Record<string, any
     const response = await fetch(`/api/public/settings?${params}`);
     
     if (!response.ok) {
-      console.error('Error fetching settings from API:', response.statusText);
+
       return category ? DEFAULT_SETTINGS[category as keyof typeof DEFAULT_SETTINGS] || {} : DEFAULT_SETTINGS;
     }
     
@@ -106,7 +106,7 @@ export async function getSettings(category?: string): Promise<Record<string, any
 
     return category ? settings[category] || {} : settings;
   } catch (error) {
-    console.error('Error in getSettings:', error);
+
     return category ? DEFAULT_SETTINGS[category as keyof typeof DEFAULT_SETTINGS] || {} : DEFAULT_SETTINGS;
   }
 }

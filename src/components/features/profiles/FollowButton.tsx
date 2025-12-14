@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { UserPlus, UserMinus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { followUser, unfollowUser, checkFollowStatus } from '@/lib/user-profiles';
-import { useUser } from '@/lib/auth';
+import { useUser } from '@/lib/hooks/useUser';
 import toast from 'react-hot-toast';
 
 interface FollowButtonProps {
@@ -44,7 +44,7 @@ export default function FollowButton({
       const following = await checkFollowStatus(currentUser.id, targetUserId);
       setIsFollowing(following);
     } catch (error) {
-      console.error('Error checking follow status:', error);
+      // Error('Error checking follow status:', error);
     } finally {
       setInitialLoading(false);
     }
@@ -90,7 +90,7 @@ export default function FollowButton({
         toast.error('Something went wrong');
       }
     } catch (error) {
-      console.error('Error toggling follow:', error);
+      // Error('Error toggling follow:', error);
       toast.error('Failed to update follow status');
     } finally {
       setLoading(false);
@@ -105,7 +105,7 @@ export default function FollowButton({
   if (initialLoading) {
     return (
       <Button
-        size={size}
+        size={size === 'md' ? 'default' : size as any}
         variant="outline"
         disabled
         className={className}
@@ -119,8 +119,8 @@ export default function FollowButton({
 
   return (
     <Button
-      size={size}
-      variant={buttonVariant}
+      size={size === 'md' ? 'default' : size as any}
+      variant={buttonVariant === 'primary' ? 'default' : buttonVariant as any}
       onClick={handleFollowToggle}
       disabled={loading}
       className={`transition-all duration-200 ${
@@ -181,7 +181,7 @@ export function IconFollowButton({ targetUserId, className }: { targetUserId: st
       const following = await checkFollowStatus(currentUser.id, targetUserId);
       setIsFollowing(following);
     } catch (error) {
-      console.error('Error checking follow status:', error);
+      // Error('Error checking follow status:', error);
     }
   };
 
@@ -213,7 +213,7 @@ export function IconFollowButton({ targetUserId, className }: { targetUserId: st
         toast.error('Something went wrong');
       }
     } catch (error) {
-      console.error('Error toggling follow:', error);
+      // Error('Error toggling follow:', error);
       toast.error('Failed to update follow status');
     } finally {
       setLoading(false);

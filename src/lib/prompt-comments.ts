@@ -53,7 +53,7 @@ export class PromptCommentManager {
       // Verify user has purchased the prompt
       const hasPurchased = await this.userHasPurchasedPrompt(userId, commentInput.prompt_id);
       if (!hasPurchased) {
-        console.error('User has not purchased this prompt');
+
         return null;
       }
 
@@ -74,13 +74,13 @@ export class PromptCommentManager {
         .single();
 
       if (error) {
-        console.error('Error adding comment:', error);
+
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Error adding comment:', error);
+
       return null;
     }
   }
@@ -99,7 +99,7 @@ export class PromptCommentManager {
       if (userId) {
         const hasPurchased = await this.userHasPurchasedPrompt(userId, promptId);
         if (!hasPurchased) {
-          console.error('User has not purchased this prompt');
+
           return [];
         }
       }
@@ -118,7 +118,7 @@ export class PromptCommentManager {
         .range(offset, offset + limit - 1);
 
       if (error) {
-        console.error('Error fetching comments:', error);
+
         return [];
       }
 
@@ -139,7 +139,7 @@ export class PromptCommentManager {
 
       return commentsWithReplies;
     } catch (error) {
-      console.error('Error getting prompt comments:', error);
+
       return [];
     }
   }
@@ -160,13 +160,13 @@ export class PromptCommentManager {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Error fetching comment replies:', error);
+
         return [];
       }
 
       return replies || [];
     } catch (error) {
-      console.error('Error getting comment replies:', error);
+
       return [];
     }
   }
@@ -198,13 +198,13 @@ export class PromptCommentManager {
         .single();
 
       if (error) {
-        console.error('Error updating comment:', error);
+
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Error updating comment:', error);
+
       return null;
     }
   }
@@ -221,13 +221,13 @@ export class PromptCommentManager {
         .eq('user_id', userId); // Ensure only author can delete
 
       if (error) {
-        console.error('Error deleting comment:', error);
+
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error deleting comment:', error);
+
       return false;
     }
   }
@@ -243,13 +243,13 @@ export class PromptCommentManager {
         .eq('prompt_id', promptId);
 
       if (error) {
-        console.error('Error getting comment count:', error);
+
         return 0;
       }
 
       return count || 0;
     } catch (error) {
-      console.error('Error getting comment count:', error);
+
       return 0;
     }
   }
@@ -274,13 +274,13 @@ export class PromptCommentManager {
         .range(offset, offset + limit - 1);
 
       if (error) {
-        console.error('Error fetching user comments:', error);
+
         return [];
       }
 
       return comments || [];
     } catch (error) {
-      console.error('Error getting user comments:', error);
+
       return [];
     }
   }
@@ -316,13 +316,13 @@ export class PromptCommentManager {
         .limit(limit);
 
       if (error) {
-        console.error('Error searching comments:', error);
+
         return [];
       }
 
       return comments || [];
     } catch (error) {
-      console.error('Error searching comments:', error);
+
       return [];
     }
   }
@@ -343,13 +343,13 @@ export class PromptCommentManager {
         .limit(limit);
 
       if (error) {
-        console.error('Error fetching recent comment activity:', error);
+
         return [];
       }
 
       return comments || [];
     } catch (error) {
-      console.error('Error getting recent comment activity:', error);
+
       return [];
     }
   }
@@ -380,7 +380,7 @@ export class PromptCommentManager {
 
       return !!purchase;
     } catch (error) {
-      console.error('Error checking prompt purchase:', error);
+
       return false;
     }
   }
@@ -444,7 +444,7 @@ export class PromptCommentManager {
           const prompt = topPrompts?.find(p => p.prompt_id === promptId);
           return {
             prompt_id: promptId,
-            title: prompt?.saved_prompts?.title || 'Unknown',
+            title: (prompt?.saved_prompts as any)?.title || 'Unknown',
             comment_count: count
           };
         });
@@ -471,7 +471,7 @@ export class PromptCommentManager {
           const user = activeUsers?.find(u => u.user_id === userId);
           return {
             user_id: userId,
-            name: user?.profiles?.name || 'Unknown',
+            name: (user?.profiles as any)?.name || 'Unknown',
             comment_count: count
           };
         });
@@ -484,7 +484,7 @@ export class PromptCommentManager {
         active_commenters: activeCommenters
       };
     } catch (error) {
-      console.error('Error getting comment stats:', error);
+
       return {
         total_comments: 0,
         comments_today: 0,

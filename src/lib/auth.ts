@@ -15,7 +15,7 @@ export async function isAdmin(supabase: SupabaseClient): Promise<boolean> {
         
         return profile?.role === 'admin';
     } catch (error) {
-        console.error('Error checking admin status:', error);
+
         return false;
     }
 }
@@ -36,7 +36,7 @@ export async function getUserRole(supabase: SupabaseClient, userId: string): Pro
         
         return profile?.role || null;
     } catch (error) {
-        console.error('Error fetching user role:', error);
+
         return null;
     }
 }

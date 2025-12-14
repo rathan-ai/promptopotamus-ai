@@ -39,7 +39,7 @@ export function useLocalStorage<T>(
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
+
       return initialValue;
     }
   });
@@ -52,7 +52,7 @@ export function useLocalStorage<T>(
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
+
     }
   }, [key, storedValue]);
 
@@ -74,20 +74,20 @@ export function useSessionStorage<T>(
       const item = window.sessionStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.error(`Error reading sessionStorage key "${key}":`, error);
+
       return initialValue;
     }
   });
 
   const setValue = useCallback((value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : storedValue;
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
       if (typeof window !== 'undefined') {
         window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {
-      console.error(`Error setting sessionStorage key "${key}":`, error);
+
     }
   }, [key, storedValue]);
 
@@ -97,7 +97,7 @@ export function useSessionStorage<T>(
 /**
  * Hook for handling loading states
  */
-export function useAsyncState<T = any>() {
+export function useAsyncState<T = unknown>() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<T | null>(null);
@@ -136,7 +136,7 @@ export function useAsyncState<T = any>() {
 /**
  * Hook for handling form state
  */
-export function useForm<T extends Record<string, any>>(
+export function useForm<T extends Record<string, unknown>>(
   initialValues: T,
   validate?: (values: T) => Record<string, string>
 ) {
@@ -144,7 +144,7 @@ export function useForm<T extends Record<string, any>>(
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const setValue = useCallback((name: keyof T, value: any) => {
+  const setValue = useCallback((name: keyof T, value: unknown) => {
     setValues(prev => ({ ...prev, [name]: value }));
     if (touched[name as string]) {
       if (validate) {
@@ -218,7 +218,7 @@ export function useClickOutside(
 export function useKeyboardShortcut(
   keys: string[],
   callback: () => void,
-  deps: any[] = []
+  deps: unknown[] = []
 ) {
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -280,7 +280,7 @@ export function useClipboard(duration: number = 2000) {
         setCopied(false);
       }, duration);
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+
     }
   }, [duration]);
 
@@ -396,12 +396,12 @@ export function usePagination(totalItems: number, itemsPerPage: number) {
  */
 export function useOptimistic<T>(
   initial: T,
-  updateFn: (state: T, action: any) => T
+  updateFn: (state: T, action: unknown) => T
 ) {
   const [optimisticState, setOptimisticState] = useState(initial);
   const [realState, setRealState] = useState(initial);
 
-  const addOptimistic = useCallback((action: any) => {
+  const addOptimistic = useCallback((action: unknown) => {
     setOptimisticState(prevState => updateFn(prevState, action));
   }, [updateFn]);
 

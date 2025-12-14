@@ -1,6 +1,7 @@
 // Server-side only payment service
 import { createServerClient } from '@/lib/supabase/server';
 import { PaymentTransaction, UserProfile } from '@/shared/types';
+import { FEATURE_PRICING } from './payment-constants';
 
 // Re-export pricing constants
 export { FEATURE_PRICING } from './payment-constants';
@@ -249,7 +250,7 @@ export class PaymentService {
       return 0;
     }
 
-    const totalEarnings = data?.reduce((sum, purchase) => sum + purchase.seller_earnings, 0) || 0;
+    const totalEarnings = data?.reduce((sum: number, purchase: any) => sum + purchase.seller_earnings, 0) || 0;
     return Math.round(totalEarnings * 100) / 100;
   }
 }

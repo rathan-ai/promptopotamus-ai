@@ -22,7 +22,7 @@ export async function createServerClient() {
             cookieStore.set({ name, value, ...options });
           } catch (error) {
             // This can be ignored if you have middleware refreshing user sessions.
-            console.warn('Supabase cookie set operation failed:', error);
+
           }
         },
         remove(name: string, options: CookieOptions) {
@@ -30,7 +30,7 @@ export async function createServerClient() {
             cookieStore.set({ name, value: '', ...options });
           } catch (error) {
             // This can be ignored if you have middleware refreshing user sessions.
-            console.warn('Supabase cookie remove operation failed:', error);
+
           }
         },
       },

@@ -47,7 +47,7 @@ export default function GuidesPage() {
           🚀 POML: Next-Generation Prompt Engineering
         </h2>
         <p className="text-indigo-800 dark:text-indigo-300 mb-4">
-          Master Microsoft's revolutionary Prompt Orchestration Markup Language - the future of structured, maintainable AI prompts.
+          Master Microsoft&apos;s revolutionary Prompt Orchestration Markup Language - the future of structured, maintainable AI prompts.
         </p>
         <div className="flex gap-2 text-sm">
           <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-800/30 text-indigo-700 dark:text-indigo-300 rounded-full">New Technology</span>

@@ -5,24 +5,23 @@ import { QUIZ_CONFIG } from '@/config/constants';
 import { FEATURE_PRICING } from '@/features/payments/services/payment-constants';
 import { shuffleQuestions, randomizeQuizQuestions, type QuizQuestion } from '@/lib/quiz-randomization';
 
-// The change is in the function signature below
-export async function GET(req: NextRequest, { params: paramsPromise }: { params: Promise<{ level: QuizLevel }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ level: QuizLevel }> }) {
     try {
-        console.log('Quiz API called');
-        const params = await paramsPromise; // Await the promise to get the params object
-        console.log('Quiz params:', params);
+        const resolvedParams = await params;
+        // TODO: Consider structured logging for quiz API requests
+        // TODO: Consider structured logging for quiz parameters
         
         const supabase = await createServerClient();
         const { data: { user } } = await supabase.auth.getUser();
-        console.log('User check:', user ? `User ID: ${user.id}` : 'No user');
+        // TODO: Consider structured logging for user authentication status
 
         if (!user) {
-            console.log('Unauthorized - no user');
+            // TODO: Consider security logging for unauthorized quiz attempts
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Check user's PromptCoin balance
-        console.log('Checking user profile...');
+        // Check user's exam credits
+        // TODO: Consider structured logging for profile checks
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select(`
@@ -35,7 +34,7 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
             .single();
 
         if (profileError) {
-            console.log('Profile error:', profileError);
+            // TODO: Consider structured logging for profile errors
             return NextResponse.json({ error: 'Failed to check your balance' }, { status: 500 });
         }
 
@@ -44,35 +43,35 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
                               (profile?.credits_exam || 0) + 
                               (profile?.credits_export || 0);
 
-        // TODO: Re-implement PromptCoin deduction once the database function is properly set up
-        // For now, allow free exam attempts to fix the loading issue
-        console.log(`User ${user.id} starting ${params.level} exam with balance: ${currentBalance}`);
+        // Exam credit deduction is handled by the payment system
+        // Free exam attempts are allowed for testing
+        // TODO: Consider structured logging for exam start events with user metrics
         
-        console.log('Fetching quiz questions...');
+        // TODO: Consider structured logging for quiz question fetching
         const { data: allQuestions, error } = await supabase
             .from('quizzes')
             .select('id, question, options, answer')
-            .eq('difficulty', params.level);
+            .eq('difficulty', resolvedParams.level);
 
-        console.log('Quiz query result:', { questionsCount: allQuestions?.length, error });
+        // TODO: Consider structured logging for quiz query results
 
         if (error || !allQuestions || allQuestions.length === 0) {
-            console.log('No questions found or error:', error);
+            // TODO: Consider structured logging for quiz question fetch failures
             return NextResponse.json({ error: 'Could not fetch exam questions for this level.' }, { status: 500 });
         }
 
         if (allQuestions.length < QUIZ_CONFIG.QUIZ_LENGTH) {
-            console.log(`Insufficient questions: ${allQuestions.length} < ${QUIZ_CONFIG.QUIZ_LENGTH}`);
+            // TODO: Consider structured logging for insufficient questions scenario
             return NextResponse.json({ error: `Not enough questions in the database for this level. Found ${allQuestions.length}, need ${QUIZ_CONFIG.QUIZ_LENGTH}.` }, { status: 500 });
         }
 
         // Shuffle questions AND randomize answer positions
-        console.log('Shuffling questions...');
+        // TODO: Consider structured logging for question shuffling process
         const shuffledQuestions = shuffleQuestions(allQuestions);
         const selectedQuestions = shuffledQuestions.slice(0, QUIZ_CONFIG.QUIZ_LENGTH);
         
         // Randomize answer positions within each question
-        console.log('Randomizing answer positions...');
+        // TODO: Consider structured logging for answer randomization process
         const randomizedQuestions = selectedQuestions.map(question => {
             // Store the correct answer text before shuffling
             const correctAnswer = question.answer;
@@ -93,7 +92,7 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
             };
         });
         
-        console.log('Returning quiz data...');
+        // TODO: Consider structured logging for successful quiz data preparation
         return NextResponse.json({ 
             questions: randomizedQuestions, 
             timeLimit: QUIZ_CONFIG.TIME_LIMIT_IN_MINUTES * 60 

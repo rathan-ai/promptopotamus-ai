@@ -68,9 +68,9 @@ export default function Quiz({ level }: { level: string }) {
     useEffect(() => {
         const startQuiz = async () => {
             try {
-                console.log(`Starting quiz for level: ${level}`);
+                // TODO: Consider structured logging for quiz start events
                 const res = await fetch(`/api/quiz/start/${level}`);
-                console.log(`Quiz API response status: ${res.status}`);
+                // TODO: Consider structured logging for quiz API response status
                 
                 if (!res.ok) {
                     const data = await res.json();
@@ -81,7 +81,7 @@ export default function Quiz({ level }: { level: string }) {
                 }
                 
                 const data = await res.json();
-                console.log('Quiz data received:', data);
+                // TODO: Consider structured logging for quiz data reception
                 
                 if (!data.questions || data.questions.length === 0) {
                     setError('No questions available for this exam level.');

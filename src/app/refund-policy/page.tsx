@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
-import { Shield, Clock, CheckCircle, AlertCircle, RefreshCw, ArrowRight } from 'lucide-react';
+import { Shield, Clock, AlertCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 
 export const metadata: Metadata = {
   title: 'Refund Policy - Promptopotamus',
-  description: 'Our refund policy for PromptCoin purchases. All PromptCoin purchases are final and non-refundable.',
+  description: 'Our refund policy for digital purchases. All digital product purchases are final and non-refundable.',
 };
 
 export default function RefundPolicy() {
@@ -20,7 +20,7 @@ export default function RefundPolicy() {
           Refund Policy
         </h1>
         <p className="text-body-large text-neutral-600 dark:text-neutral-400 leading-relaxed">
-          Our clear and transparent policy regarding PromptCoin purchases and usage.
+          Our clear and transparent policy regarding purchases and usage.
         </p>
       </div>
 
@@ -31,7 +31,7 @@ export default function RefundPolicy() {
           <div>
             <h2 className="font-semibold text-red-900 dark:text-red-200 mb-2">No Refunds Policy</h2>
             <p className="text-red-800 dark:text-red-300">
-              All PromptCoin purchases are final and non-refundable. Please carefully consider your needs before purchasing.
+              All digital product purchases are final and non-refundable. Please carefully consider your needs before purchasing.
             </p>
           </div>
         </div>
@@ -43,19 +43,18 @@ export default function RefundPolicy() {
           <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Policy Details</h2>
           <div className="space-y-4">
             <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700/50">
-              <h3 className="font-semibold text-red-900 dark:text-red-200 mb-2">❌ No Refunds Available</h3>
+              <h3 className="font-semibold text-red-900 dark:text-red-200 mb-2">No Refunds Available</h3>
               <ul className="text-red-800 dark:text-red-300 space-y-1">
-                <li>• All PromptCoin purchases are final and non-refundable</li>
-                <li>• Credits used for completed services (analyses, enhancements, exports)</li>
-                <li>• Smart Prompt purchases (digital goods policy)</li>
-                <li>• Credits remain valid and never expire once purchased</li>
+                <li>• All digital product purchases are final and non-refundable</li>
+                <li>• Smart Recipe and template purchases (digital goods policy)</li>
+                <li>• Exam and certification fees</li>
               </ul>
             </div>
-            
+
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700/50">
-              <h3 className="font-semibold text-yellow-900 dark:text-yellow-200 mb-2">⚠️ Exception Cases</h3>
+              <h3 className="font-semibold text-yellow-900 dark:text-yellow-200 mb-2">Exception Cases</h3>
               <ul className="text-yellow-800 dark:text-yellow-300 space-y-1">
-                <li>• Technical issues preventing use of purchased credits (case-by-case evaluation)</li>
+                <li>• Technical issues preventing use of purchased products (case-by-case evaluation)</li>
                 <li>• Billing errors or unauthorized charges (full investigation required)</li>
                 <li>• Accidental duplicate purchases (immediate contact required)</li>
               </ul>
@@ -83,7 +82,7 @@ export default function RefundPolicy() {
                 </div>
                 <div>
                   <h3 className="font-medium text-neutral-900 dark:text-white">Investigation</h3>
-                  <p className="text-neutral-600 dark:text-neutral-400 text-sm">We'll investigate technical or billing issues within 2 business days</p>
+                  <p className="text-neutral-600 dark:text-neutral-400 text-sm">We&apos;ll investigate technical or billing issues within 2 business days</p>
                 </div>
               </div>
 
@@ -115,25 +114,25 @@ export default function RefundPolicy() {
           <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Important Information</h2>
           <div className="space-y-4">
             <div className="p-4 bg-white dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700/50">
-              <h3 className="font-semibold text-neutral-900 dark:text-white mb-2">PromptCoin Usage</h3>
+              <h3 className="font-semibold text-neutral-900 dark:text-white mb-2">Digital Products</h3>
               <p className="text-neutral-600 dark:text-neutral-400">
-                PromptCoins are used for various platform features including prompt analysis, enhancement, 
-                Smart Prompt purchases, and other premium services. Credits never expire once purchased.
+                Our platform offers digital products including Smart Recipes, templates, and certification exams.
+                Once purchased, these products are immediately accessible in your account.
               </p>
             </div>
 
             <div className="p-4 bg-white dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700/50">
               <h3 className="font-semibold text-neutral-900 dark:text-white mb-2">Purchase Consideration</h3>
               <p className="text-neutral-600 dark:text-neutral-400">
-                Since all purchases are final, please carefully review pricing and ensure you understand 
-                how PromptCoins work before making a purchase. Visit our help center for detailed guidance.
+                Since all purchases are final, please carefully review product details and pricing
+                before making a purchase. Preview options are available for many products.
               </p>
             </div>
 
             <div className="p-4 bg-white dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700/50">
               <h3 className="font-semibold text-neutral-900 dark:text-white mb-2">Account Security</h3>
               <p className="text-neutral-600 dark:text-neutral-400">
-                Keep your account secure and report any unauthorized activity immediately. 
+                Keep your account secure and report any unauthorized activity immediately.
                 We take security seriously and will investigate any suspicious transactions.
               </p>
             </div>
@@ -149,7 +148,7 @@ export default function RefundPolicy() {
               <li>• Transaction ID or purchase date</li>
               <li>• Detailed description of the issue</li>
               <li>• Any supporting screenshots or documentation</li>
-              <li>• Steps you've already tried to resolve the issue</li>
+              <li>• Steps you&apos;ve already tried to resolve the issue</li>
             </ul>
           </div>
         </section>
@@ -159,10 +158,10 @@ export default function RefundPolicy() {
           <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-6">
             <h3 className="font-semibold text-indigo-900 dark:text-indigo-200 mb-3">Get Help With Issues</h3>
             <div className="space-y-2 text-indigo-800 dark:text-indigo-300">
-              <p>📧 Email: <a href="mailto:contact@innorag.com" className="underline">contact@innorag.com</a></p>
-              <p>📧 Billing Issues: <a href="mailto:contact@innorag.com" className="underline">contact@innorag.com</a></p>
-              <p>⏰ Response Time: Within 24 hours</p>
-              <p>🕒 Business Hours: Monday-Friday, 9 AM - 6 PM EST</p>
+              <p>Email: <a href="mailto:contact@innorag.com" className="underline">contact@innorag.com</a></p>
+              <p>Billing Issues: <a href="mailto:contact@innorag.com" className="underline">contact@innorag.com</a></p>
+              <p>Response Time: Within 24 hours</p>
+              <p>Business Hours: Monday-Friday, 9 AM - 6 PM EST</p>
             </div>
           </div>
         </section>
@@ -175,7 +174,7 @@ export default function RefundPolicy() {
             Questions About This Policy?
           </h2>
           <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-            We're here to help clarify any questions about this policy or PromptCoins.
+            We&apos;re here to help clarify any questions about this policy.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="mailto:contact@innorag.com">
@@ -184,9 +183,9 @@ export default function RefundPolicy() {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Link href="/help/promptcoins">
+            <Link href="/guides">
               <Button variant="outline">
-                PromptCoin Help
+                View Guides
               </Button>
             </Link>
           </div>
@@ -195,7 +194,7 @@ export default function RefundPolicy() {
 
       {/* Policy Update Info */}
       <div className="mt-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
-        <p>This policy was last updated on January 27, 2025.</p>
+        <p>This policy was last updated on December 14, 2025.</p>
         <p>We may update this policy from time to time. Changes will be posted on this page.</p>
       </div>
     </div>

@@ -23,49 +23,9 @@ export default function RecipePurchaseButton({
   className = ''
 }: RecipePurchaseButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [purchaseMethod, setPurchaseMethod] = useState<'usd' | null>(null);
 
   const handlePurchase = async () => {
     setIsLoading(true);
-    setPurchaseMethod('usd');
-
-    try {
-      const response = await fetch('/api/smart-prompts/purchase', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          promptId: recipeId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (data.insufficientFunds) {
-          toast.error(data.error || 'Insufficient PromptCoins');
-        } else {
-          toast.error(data.error || 'Purchase failed');
-        }
-        return;
-      }
-
-      toast.success(data.message || 'Recipe purchased successfully!');
-      onPurchaseSuccess?.();
-
-    } catch (error) {
-      console.error('PromptCoin purchase error:', error);
-      toast.error('Purchase failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-      setPurchaseMethod(null);
-    }
-  };
-
-  const handleUsdPurchase = async () => {
-    setIsLoading(true);
-    setPurchaseMethod('usd');
 
     try {
       const response = await fetch('/api/smart-prompts/purchase', {
@@ -99,11 +59,10 @@ export default function RecipePurchaseButton({
       }
 
     } catch (error) {
-      console.error('USD purchase error:', error);
+      console.error('Purchase error:', error);
       toast.error('Purchase failed. Please try again.');
     } finally {
       setIsLoading(false);
-      setPurchaseMethod(null);
     }
   };
 
@@ -111,7 +70,7 @@ export default function RecipePurchaseButton({
   if (price === 0) {
     return (
       <Button
-        onClick={handleUsdPurchase}
+        onClick={handlePurchase}
         disabled={isLoading}
         className={`w-full ${className}`}
       >
@@ -130,46 +89,24 @@ export default function RecipePurchaseButton({
     );
   }
 
+  // Paid recipe
   return (
-    <div className={`space-y-3 ${className}`}>
-      {/* Purchase with PromptCoins - Primary option */}
-      <Button
-        onClick={handlePromptCoinPurchase}
-        disabled={isLoading || !hasEnoughPromptCoins}
-        className={`w-full ${
-          hasEnoughPromptCoins 
-            ? 'bg-amber-600 hover:bg-amber-700 text-white' 
-            : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400 cursor-not-allowed'
-        }`}
-        variant={hasEnoughPromptCoins ? "default" : "outline"}
-      >
-        {isLoading && purchaseMethod === 'promptcoins' ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Purchasing...
-          </>
-        ) : (
-          <>
-            <Coins className="w-4 h-4 mr-2" />
-            Buy with {promptCoinPrice} PromptCoins
-            {!hasEnoughPromptCoins && (
-              <span className="ml-1 text-xs">
-                (Need {promptCoinPrice - userPromptCoins} more)
-              </span>
-            )}
-          </>
-        )}
-      </Button>
-
-      {/* User's PromptCoin balance info */}
-      <div className="text-xs text-center text-neutral-500 dark:text-neutral-400">
-        Your balance: {userPromptCoins} PromptCoins
-        {!hasEnoughPromptCoins && (
-          <span className="block text-amber-600 dark:text-amber-400 mt-1">
-            Need {promptCoinPrice - userPromptCoins} more PromptCoins • <a href="/purchase" className="underline hover:text-amber-500">Buy More</a>
-          </span>
-        )}
-      </div>
-    </div>
+    <Button
+      onClick={handlePurchase}
+      disabled={isLoading}
+      className={`w-full ${className}`}
+    >
+      {isLoading ? (
+        <>
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          Processing...
+        </>
+      ) : (
+        <>
+          <DollarSign className="w-4 h-4 mr-2" />
+          Buy for ${price.toFixed(2)}
+        </>
+      )}
+    </Button>
   );
 }

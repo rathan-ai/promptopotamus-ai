@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
-import { Toaster } from 'react-hot-toast';
-import { Provider } from 'jotai';
 import Sidebar from "@/components/features/layout/Sidebar";
 import Header from "@/components/features/layout/Header";
 import Footer from "@/components/features/layout/Footer";
-import { Analytics } from "@vercel/analytics/react";
-import IssueReportWidget from "@/components/features/shared/IssueReportWidget";
-import PerformanceOptimizer from "@/components/features/shared/PerformanceOptimizer";
+import ClientProviders from "@/components/features/layout/ClientProviders";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
@@ -66,8 +62,7 @@ export default function RootLayout({
     // Add suppressHydrationWarning to fix client-side interactivity
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${roboto_mono.variable}`}>
-        <Provider>
-          <Toaster />
+        <ClientProviders>
           <div className="flex min-h-screen">
             <aside className="sidebar">
               <Sidebar />
@@ -84,14 +79,7 @@ export default function RootLayout({
               </footer>
             </div>
           </div>
-          
-          {/* Global Issue Report Widget */}
-          <IssueReportWidget />
-          
-          {/* Performance Optimization */}
-          <PerformanceOptimizer />
-        </Provider>
-        <Analytics />
+        </ClientProviders>
       </body>
     </html>
   );

@@ -14,31 +14,26 @@ export async function GET(req: NextRequest) {
   const supabase = await createServerClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  // Log auth status for debugging
-  console.log('Smart Prompts API - Auth Status:', { 
-    hasUser: !!user, 
-    userId: user?.id, 
-    authError: authError?.message 
-  });
+  // TODO: Consider structured logging for auth status in production monitoring
 
   // For marketplace prompts, allow public access
   // Marketplace prompts should be publicly viewable
   if (!user) {
-    console.log('Smart Prompts API - No authenticated user, proceeding with public access to marketplace');
+    // TODO: Consider structured logging for public marketplace access
     // Continue with public access - marketplace prompts should be viewable by everyone
   }
 
   const searchParams = req.nextUrl.searchParams;
   const filters: SmartPromptFilters = {
     category: searchParams.get('category') || undefined,
-    complexity: searchParams.get('complexity') as any || undefined,
-    difficulty: searchParams.get('difficulty') as any || undefined,
-    priceRange: searchParams.get('priceRange') as any || undefined,
+    complexity: searchParams.get('complexity') as 'simple' | 'smart' | 'recipe' | undefined,
+    difficulty: searchParams.get('difficulty') as 'beginner' | 'intermediate' | 'advanced' | undefined,
+    priceRange: searchParams.get('priceRange') as 'free' | 'paid' | 'premium' | undefined,
     tags: searchParams.get('tags')?.split(',').filter(Boolean) || undefined,
   };
 
   try {
-    console.log('Smart Prompts API - Fetching with filters:', filters);
+    // TODO: Consider structured logging for filter usage analytics
 
     // Build query based on filters - simplified to avoid potential join issues
     // Use basic columns that should definitely exist
@@ -67,13 +62,13 @@ export async function GET(req: NextRequest) {
     try {
       query = query.eq('is_marketplace', true);
     } catch (e) {
-      console.warn('is_marketplace column may not exist, skipping filter');
+      // TODO: Handle missing is_marketplace column gracefully
     }
     
     try {
       query = query.eq('is_public', true);
     } catch (e) {
-      console.warn('is_public column may not exist, skipping filter');
+      // TODO: Handle missing is_public column gracefully
     }
 
     // Apply filters
@@ -112,7 +107,7 @@ export async function GET(req: NextRequest) {
       query = query.order('rating_average', { ascending: false, nullsFirst: false })
                    .order('downloads_count', { ascending: false, nullsFirst: false });
     } catch (e) {
-      console.warn('Rating columns may not exist, using created_at for ordering');
+      // TODO: Handle missing rating columns gracefully
       query = query.order('created_at', { ascending: false });
     }
     
@@ -120,11 +115,7 @@ export async function GET(req: NextRequest) {
 
     const { data: prompts, error } = await query;
 
-    console.log('Smart Prompts API - Query result:', { 
-      promptsCount: prompts?.length, 
-      error: error?.message,
-      errorDetails: error 
-    });
+    // TODO: Consider structured logging for query results monitoring
 
     if (error) {
       console.error('Error fetching smart prompts:', error);
@@ -136,7 +127,7 @@ export async function GET(req: NextRequest) {
 
     // If no prompts found, still return success with empty array
     const result = prompts || [];
-    console.log('Smart Prompts API - Returning:', result.length, 'prompts');
+    // TODO: Consider structured logging for API response metrics
     
     return NextResponse.json({ prompts: result });
   } catch (error) {

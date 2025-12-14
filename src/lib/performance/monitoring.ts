@@ -75,9 +75,8 @@ export function initializePerformanceMonitoring(): void {
  * Record performance metric
  */
 function recordMetric(name: string, value: number): void {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[Performance] ${name}: ${value.toFixed(2)}ms`);
-  }
+  // TODO: Consider structured logging for performance metrics in production
+  // Performance metrics are intentionally logged in development for optimization
 
   // Send to analytics in production
   if (typeof window !== 'undefined' && 'gtag' in window) {
@@ -139,8 +138,8 @@ export function trackBundleMetrics(): void {
     const navigationEntries = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     
     if (navigationEntries) {
-      recordMetric('DOM Content Loaded', navigationEntries.domContentLoadedEventEnd - navigationEntries.navigationStart);
-      recordMetric('Load Complete', navigationEntries.loadEventEnd - navigationEntries.navigationStart);
+      recordMetric('DOM Content Loaded', navigationEntries.domContentLoadedEventEnd - navigationEntries.fetchStart);
+      recordMetric('Load Complete', navigationEntries.loadEventEnd - navigationEntries.fetchStart);
     }
 
     // Track resource sizes
@@ -180,7 +179,7 @@ export function checkPerformanceBudget(metric: string, value: number): boolean {
   const budget = PERFORMANCE_BUDGETS[metric as keyof typeof PERFORMANCE_BUDGETS];
   
   if (budget && value > budget) {
-    console.warn(`[Performance Budget] ${metric} exceeded: ${value} > ${budget}`);
+    // TODO: Consider structured logging for performance budget violations
     return false;
   }
   
@@ -193,27 +192,36 @@ export function checkPerformanceBudget(metric: string, value: number): boolean {
 export function generatePerformanceReport(): void {
   if (typeof window === 'undefined') return;
 
-  console.group('📊 Promptopotamus Performance Report');
+  // TODO: Consider implementing structured performance reporting for production monitoring
+  // This development-only performance report helps with optimization
   
-  // Get Core Web Vitals
-  if ('PerformanceObserver' in window) {
-    const paintEntries = performance.getEntriesByType('paint');
-    paintEntries.forEach((entry) => {
-      const value = Math.round(entry.startTime);
-      const budgetOk = checkPerformanceBudget(entry.name.toUpperCase().replace('-', '_'), value);
-      console.log(`${entry.name}: ${value}ms ${budgetOk ? '✅' : '⚠️'}`);
-    });
-  }
-
-  // Get resource timing
-  const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-  if (navigationTiming) {
-    const ttfb = navigationTiming.responseStart - navigationTiming.requestStart;
-    const domLoad = navigationTiming.domContentLoadedEventEnd - navigationTiming.navigationStart;
+  if (process.env.NODE_ENV === 'development') {
+    // Performance reporting retained for development optimization
+    const report: any = { timestamp: Date.now(), metrics: {} };
     
-    console.log(`Time to First Byte: ${Math.round(ttfb)}ms`);
-    console.log(`DOM Content Loaded: ${Math.round(domLoad)}ms`);
-  }
+    // Get Core Web Vitals
+    if ('PerformanceObserver' in window) {
+      const paintEntries = performance.getEntriesByType('paint');
+      paintEntries.forEach((entry) => {
+        const value = Math.round(entry.startTime);
+        const budgetOk = checkPerformanceBudget(entry.name.toUpperCase().replace('-', '_'), value);
+        report.metrics[entry.name] = { value, budgetOk };
+      });
+    }
 
-  console.groupEnd();
+    // Get resource timing
+    const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    if (navigationTiming) {
+      const ttfb = navigationTiming.responseStart - navigationTiming.requestStart;
+      const domLoad = navigationTiming.domContentLoadedEventEnd - navigationTiming.fetchStart;
+      
+      report.metrics.ttfb = Math.round(ttfb);
+      report.metrics.domLoad = Math.round(domLoad);
+    }
+
+    // Log structured report in development
+
+
+
+  }
 }

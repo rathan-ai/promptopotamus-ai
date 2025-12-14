@@ -29,14 +29,14 @@ export function LoginPageClient() {
         router.refresh();
       }
       
-      if (event === 'SIGNED_UP' && session?.user) {
+      if ((event as string) === 'SIGNED_UP' && session?.user) {
         // Trigger welcome email for new registrations
         try {
           const userName = session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'New User';
           toast.success('Welcome to Promptopotamus! Check your email for getting started tips.');
           
           // Note: In a real implementation, this would be called from a server-side hook
-          console.log('New user registered:', session.user.id, userName);
+          // TODO: Consider structured logging for user registration events
         } catch (error) {
           console.error('Error handling new user registration:', error);
         }

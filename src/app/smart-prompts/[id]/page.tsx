@@ -155,7 +155,7 @@ export default function SmartPromptDetailPage() {
       prompt.variables?.forEach(variable => {
         const placeholder = `{${variable.name}}`;
         const value = variableValues[variable.name] || `[${variable.name}]`;
-        preview = preview.replace(new RegExp(placeholder, 'g'), value);
+        preview = preview.replace(new RegExp(placeholder, 'g'), String(value));
       });
       
       setPreviewText(preview);

@@ -21,12 +21,7 @@ interface UniversalPaymentModalProps {
   onSuccess: () => void;
 }
 
-declare global {
-  interface Window {
-    paypal?: any;
-    Stripe?: any;
-  }
-}
+// Type declarations moved to avoid conflicts with @paypal/react-paypal-js
 
 export default function UniversalPaymentModal({
   isOpen,

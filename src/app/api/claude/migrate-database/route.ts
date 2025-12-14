@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 const execAsync = promisify(exec);
@@ -103,7 +102,7 @@ async function createAndApplyMigration(
   name: string, 
   content: string, 
   dryRun: boolean,
-  autoApprove: boolean
+  _autoApprove: boolean
 ): Promise<{success: boolean, output?: string, error?: string, details?: string, migrationApplied?: boolean}> {
   try {
     // Validate migration name
@@ -121,11 +120,11 @@ async function createAndApplyMigration(
     }
 
     // Write migration file
-    const fs = require('fs');
+    const fs = await import('fs');
     fs.writeFileSync(migrationPath, content);
 
     // Apply migration using Supabase CLI
-    const { stdout, stderr } = await execAsync('supabase db push', { 
+    const { stdout } = await execAsync('supabase db push', { 
       cwd: process.cwd(),
       env: { ...process.env, SUPABASE_ACCESS_TOKEN: process.env.SUPABASE_ACCESS_TOKEN }
     });
@@ -136,11 +135,11 @@ async function createAndApplyMigration(
       migrationApplied: true
     };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
       error: 'Migration failed',
-      details: error.message || 'Unknown error occurred'
+      details: error instanceof Error ? error.message : 'Unknown error occurred'
     };
   }
 }
@@ -164,7 +163,7 @@ async function applyPendingMigrations(
     }
 
     // Apply pending migrations
-    const { stdout, stderr } = await execAsync('supabase db push', { 
+    const { stdout } = await execAsync('supabase db push', { 
       cwd: process.cwd(),
       env: { ...process.env, SUPABASE_ACCESS_TOKEN: process.env.SUPABASE_ACCESS_TOKEN }
     });
@@ -175,11 +174,11 @@ async function applyPendingMigrations(
       migrationApplied: true
     };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
       error: 'Failed to apply migrations',
-      details: error.message || 'Unknown error occurred'
+      details: error instanceof Error ? error.message : 'Unknown error occurred'
     };
   }
 }

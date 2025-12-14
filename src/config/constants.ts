@@ -41,14 +41,8 @@ export const USER_ROLES = {
   ADMIN: 'admin'
 } as const;
 
-// Payment Providers
-export const PAYMENT_PROVIDERS = {
-  STRIPE: 'stripe',
-  PAYPAL: 'paypal',
-  RAZORPAY: 'razorpay',
-  SQUARE: 'square',
-  CUSTOM: 'custom'
-} as const;
+// Payment Providers - Removed duplicate definition
+// Using PAYMENT_PROVIDERS from @/shared/types/index.ts instead
 
 // PayPal Configuration
 export const PAYPAL_CONFIG = {

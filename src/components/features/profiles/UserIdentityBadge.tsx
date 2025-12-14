@@ -99,7 +99,7 @@ export default function UserIdentityBadge({
     );
   }
 
-  const config = TIER_CONFIG[profile.tier || 'free'];
+  const config = TIER_CONFIG[(profile.tier || 'free') as keyof typeof TIER_CONFIG];
   const IconComponent = config.icon;
 
   const sizeClasses = {
@@ -218,6 +218,6 @@ export function useUserIdentity(userId?: string) {
   return {
     profile,
     loading,
-    tierConfig: profile ? TIER_CONFIG[profile.tier || 'free'] : null
+    tierConfig: profile ? TIER_CONFIG[(profile.tier || 'free') as keyof typeof TIER_CONFIG] : null
   };
 }

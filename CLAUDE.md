@@ -1,7 +1,7 @@
 # Promptopotamus AI - Claude Configuration
 
 ## Project Overview
-Promptopotamus is an AI-powered prompt engineering platform built with Next.js, Supabase, and deployed on Vercel. The platform features a PromptCoin economy, Smart Recipes marketplace, and comprehensive prompt analysis tools.
+Promptopotamus is an AI-powered prompt engineering platform built with Next.js, Supabase, and deployed on Vercel. The platform features a Smart Recipes marketplace and comprehensive prompt analysis tools.
 
 ## Architecture
 
@@ -15,7 +15,7 @@ Promptopotamus is an AI-powered prompt engineering platform built with Next.js, 
 ### Backend
 - **Database**: Supabase (PostgreSQL) with Row Level Security
 - **Authentication**: Supabase Auth with social providers
-- **Payment Processing**: Universal Payment Adapter (Stripe, PayPal, PromptCoins)
+- **Payment Processing**: Universal Payment Adapter (Stripe, PayPal)
 - **API Routes**: Next.js API routes with enterprise security
 
 ### Deployment
@@ -27,15 +27,13 @@ Promptopotamus is an AI-powered prompt engineering platform built with Next.js, 
 ## Database Schema
 
 ### Core Tables
-- `profiles` - User profiles with PromptCoin balances
+- `profiles` - User profiles and subscription information
 - `saved_prompts` - Prompt templates and Smart Recipes
 - `smart_prompt_purchases` - Marketplace transactions
-- `promptcoin_transactions` - Audit trail for PromptCoin economy
 - `payment_security_events` - Security monitoring and fraud detection
 
 ### Key Features
-- **PromptCoin Economy**: 100 PC = $1 USD conversion rate
-- **Smart Recipes Marketplace**: User-generated prompt templates
+- **Smart Recipes Marketplace**: User-generated prompt templates with direct USD pricing
 - **Security Monitoring**: Comprehensive audit trails and fraud detection
 - **Webhook Integration**: Secure Stripe and PayPal webhook handling
 
@@ -109,7 +107,7 @@ export default function ComponentName({ }: ComponentProps) {
 
 ### Data Protection
 - Row Level Security enabled on all user data
-- Audit trails for PromptCoin transactions
+- Audit trails for payment transactions
 - Secure error handling without information leakage
 - HTTPS-only in production
 
@@ -178,7 +176,7 @@ export default function ComponentName({ }: ComponentProps) {
 ## AI Assistant Guidelines
 
 ### Helpful Context
-- Focus on PromptCoin economy and marketplace features
+- Focus on marketplace features and direct USD payments
 - Maintain enterprise-grade security standards
 - Follow existing code patterns and conventions
 - Consider performance implications of database queries

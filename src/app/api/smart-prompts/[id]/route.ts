@@ -3,13 +3,14 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   req: Request, 
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   try {
-    const promptId = parseInt(params.id);
+    const resolvedParams = await params;
+    const promptId = parseInt(resolvedParams.id);
 
     // Get prompt details with creator info - allow owners to access their own prompts
     let prompt, promptError;
@@ -118,7 +119,7 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -128,7 +129,8 @@ export async function PUT(
   }
 
   try {
-    const promptId = parseInt(params.id);
+    const resolvedParams = await params;
+    const promptId = parseInt(resolvedParams.id);
     const updateData = await req.json();
 
     // First verify the user owns this prompt

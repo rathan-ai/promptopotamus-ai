@@ -74,7 +74,7 @@ export function validateEnvironmentVariables(): void {
   }
   
   if ((hasStripeSecret || hasStripePublishable) && !hasStripeWebhook) {
-    console.warn('STRIPE_WEBHOOK_SECRET is not set. Webhook verification will fail.');
+
   }
 
   // Check PayPal configuration consistency (optional)
@@ -85,11 +85,11 @@ export function validateEnvironmentVariables(): void {
   // Only validate PayPal if BOTH client ID and secret are properly set
   if (hasPayPalClientId && hasPayPalClientSecret) {
     if (!hasPayPalWebhook) {
-      console.warn('PAYPAL_WEBHOOK_ID is not set. PayPal webhook verification will fail.');
+
     }
   } else if (hasPayPalClientId || hasPayPalClientSecret) {
     // Only warn, don't error, if PayPal is partially configured during build
-    console.warn('PayPal is partially configured. Both PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are needed for PayPal payments.');
+
   }
   
   // Throw error if any validation failed
@@ -108,7 +108,7 @@ export function getRequiredEnv(key: keyof RequiredEnvVars): string {
     if (typeof window === 'undefined') {
       throw new EnvironmentValidationError(`Missing required environment variable: ${key}`);
     } else {
-      console.warn(`Missing environment variable on client: ${key}`);
+
       return '';
     }
   }
@@ -128,7 +128,7 @@ if (typeof window === 'undefined' &&
   try {
     validateEnvironmentVariables();
   } catch (error) {
-    console.error('Environment validation failed:', error);
+
     // In production, fail fast (but not during build)
     if (process.env.NODE_ENV === 'production') {
       process.exit(1);

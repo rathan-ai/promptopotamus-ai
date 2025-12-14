@@ -14,18 +14,6 @@ export function formatCurrency(amount: number, currency: string = 'USD'): string
 }
 
 /**
- * Format PromptCoin amounts
- */
-export function formatPromptCoins(amount: number): string {
-  if (amount >= 1000000) {
-    return `${(amount / 1000000).toFixed(1)}M PC`;
-  } else if (amount >= 1000) {
-    return `${(amount / 1000).toFixed(1)}K PC`;
-  }
-  return `${amount} PC`;
-}
-
-/**
  * Format numbers with proper thousand separators
  */
 export function formatNumber(num: number): string {
@@ -58,7 +46,7 @@ export function formatFileSize(bytes: number): string {
 export function formatDate(date: string | Date, style: 'full' | 'medium' | 'short' = 'medium'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   
-  const options: Intl.DateTimeFormatOptions = {
+  const options: Record<string, Intl.DateTimeFormatOptions> = {
     full: { 
       year: 'numeric', 
       month: 'long', 
@@ -154,7 +142,7 @@ export function generateId(): string {
 /**
  * Debounce function calls
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -168,7 +156,7 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * Throttle function calls
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {

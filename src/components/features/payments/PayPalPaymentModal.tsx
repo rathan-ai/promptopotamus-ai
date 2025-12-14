@@ -50,9 +50,9 @@ export default function PayPalPaymentModal({
   if (!isOpen) return null;
 
   const paypalOptions = {
-    "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+    clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
     currency: "USD",
-    intent: "capture",
+    intent: "capture" as const,
   };
 
   return (
@@ -192,7 +192,7 @@ export default function PayPalPaymentModal({
                     toast.error('Payment failed. Please try again.');
                   }}
                   onCancel={() => {
-                    toast.info('Payment cancelled');
+                    toast('Payment cancelled');
                   }}
                 />
               </PayPalScriptProvider>

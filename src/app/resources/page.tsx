@@ -97,7 +97,7 @@ export default function ResourcesPage() {
           </h2>
         </div>
         <p className="text-indigo-800 dark:text-indigo-300 mb-6">
-          Master Microsoft's Prompt Orchestration Markup Language with these essential resources and documentation.
+          Master Microsoft&apos;s Prompt Orchestration Markup Language with these essential resources and documentation.
         </p>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -198,7 +198,7 @@ export default function ResourcesPage() {
               <h3 className="font-semibold text-gray-900 dark:text-white">Semantic Kernel</h3>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Microsoft's AI orchestration framework that uses POML
+              Microsoft&apos;s AI orchestration framework that uses POML
             </p>
             <div className="flex items-center mt-2 text-indigo-600 dark:text-indigo-400">
               <ExternalLink className="w-4 h-4 mr-1" />

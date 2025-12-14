@@ -234,7 +234,7 @@ export default function SmartPromptsBuilder({
       ...prev,
       title: template.name,
       description: template.description,
-      category: TEMPLATE_CATEGORIES[template.category]?.name || template.category,
+      category: TEMPLATE_CATEGORIES[template.category as keyof typeof TEMPLATE_CATEGORIES]?.name || template.category,
       difficulty_level: template.difficulty,
       tags: template.tags || [],
       complexity_level: template.sections.length > 1 ? 'smart' : 'simple',
@@ -614,7 +614,7 @@ export default function SmartPromptsBuilder({
                         </div>
                         <p className="text-neutral-600 dark:text-neutral-400 mb-3">{template.description}</p>
                         <div className="flex items-center gap-4 text-sm text-neutral-500">
-                          <span>📂 {TEMPLATE_CATEGORIES[template.category]?.name}</span>
+                          <span>📂 {TEMPLATE_CATEGORIES[template.category as keyof typeof TEMPLATE_CATEGORIES]?.name}</span>
                           <span>⏱️ {template.estimatedTime}</span>
                           <span>🎯 {template.useCase}</span>
                         </div>
@@ -1072,7 +1072,7 @@ export default function SmartPromptsBuilder({
                     <>
                       {/* Pricing */}
                       <div>
-                        <label className="block text-sm font-medium mb-2 dark:text-white">Price (PromptCoins)</label>
+                        <label className="block text-sm font-medium mb-2 dark:text-white">Price (USD)</label>
                         <div className="relative">
                           <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-amber-500" />
                           <input

@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { User, MapPin, Link, Twitter, Linkedin, Users, UserPlus, UserMinus, Edit3, Trophy, Star } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { UserProfile, followUser, unfollowUser, checkFollowStatus, userProfileManager } from '@/lib/user-profiles';
-import { UserIdentityBadge } from './UserIdentityBadge';
-import { useUser } from '@/lib/auth';
+import UserIdentityBadge from './UserIdentityBadge';
+import { useUser } from '@/lib/hooks/useUser';
 import toast from 'react-hot-toast';
 
 interface UserProfileProps {
@@ -43,7 +43,7 @@ export default function UserProfileComponent({
       const profileData = await userProfileManager.getUserProfile(userId);
       setProfile(profileData);
     } catch (error) {
-      console.error('Error loading profile:', error);
+      // Error('Error loading profile:', error);
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,7 @@ export default function UserProfileComponent({
       const following = await checkFollowStatus(currentUser.id, userId);
       setIsFollowing(following);
     } catch (error) {
-      console.error('Error checking follow status:', error);
+      // Error('Error checking follow status:', error);
     }
   };
 
@@ -101,7 +101,7 @@ export default function UserProfileComponent({
         toast.error('Something went wrong');
       }
     } catch (error) {
-      console.error('Error toggling follow:', error);
+      // Error('Error toggling follow:', error);
       toast.error('Failed to update follow status');
     } finally {
       setFollowLoading(false);
@@ -150,7 +150,7 @@ export default function UserProfileComponent({
             <p className="font-medium text-neutral-900 dark:text-white truncate">
               {profile.profiles?.name || 'Unknown User'}
             </p>
-            <UserIdentityBadge tier={userTier} size="sm" showTier={false} />
+            <UserIdentityBadge user={{ tier: userTier }} size="sm" showTierName={false} />
           </div>
           <p className="text-sm text-neutral-600 dark:text-neutral-400 truncate">
             {profile.bio || 'Prompt enthusiast'}
@@ -159,7 +159,7 @@ export default function UserProfileComponent({
         {showFollowButton && currentUser && currentUser.id !== userId && (
           <Button
             size="sm"
-            variant={isFollowing ? "outline" : "primary"}
+            variant={isFollowing ? "outline" : "default"}
             onClick={handleFollowToggle}
             disabled={followLoading}
             className="flex-shrink-0"
@@ -195,7 +195,7 @@ export default function UserProfileComponent({
               <h3 className="text-xl font-bold text-neutral-900 dark:text-white">
                 {profile.profiles?.name || 'Unknown User'}
               </h3>
-              <UserIdentityBadge tier={userTier} />
+              <UserIdentityBadge user={{ tier: userTier }} />
             </div>
             <div className="flex items-center gap-4 text-sm text-neutral-600 dark:text-neutral-400 mb-2">
               <div className="flex items-center gap-1">
@@ -230,7 +230,7 @@ export default function UserProfileComponent({
           {showFollowButton && currentUser && currentUser.id !== userId && (
             <Button
               size="sm"
-              variant={isFollowing ? "outline" : "primary"}
+              variant={isFollowing ? "outline" : "default"}
               onClick={handleFollowToggle}
               disabled={followLoading}
             >

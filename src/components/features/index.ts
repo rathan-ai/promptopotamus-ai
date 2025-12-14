@@ -24,7 +24,7 @@ export * from './layout';
 export * from './shared';
 
 // Admin components (already organized)
-export * from '../admin';
+// export * from '../admin';
 
 // Guide components (already organized)
-export * from '../guides';
+// export * from '../guides';

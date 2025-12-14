@@ -16,7 +16,7 @@ This guide covers the complete automated database management system for Promptop
    - ✅ All existing migrations consolidated into `supabase/migrations/20250726120000_consolidated_schema.sql`
    - ✅ Complete schema including payment system, social features, and security enhancements
    - ✅ Row Level Security (RLS) policies implemented
-   - ✅ Database functions for PromptCoin management and security logging
+   - ✅ Database functions for payment management and security logging
 
 3. **Claude AI Integration**
    - ✅ Natural language to SQL migration generator (`/api/claude/generate-migration`)
@@ -157,7 +157,7 @@ Claude can:
 
 ### 3. Database Performance Analysis
 
-**Example:** "Why are my PromptCoin queries slow?"
+**Example:** "Why are my marketplace queries slow?"
 
 Claude will:
 - Analyze database metrics
@@ -232,7 +232,7 @@ curl -X POST "http://localhost:3000/api/claude/generate-migration" \
 - Security events are automatically logged
 
 ### Audit Trail
-- All PromptCoin transactions tracked
+- All marketplace purchases tracked
 - Payment security events logged
 - Migration deployments recorded
 - User actions monitored

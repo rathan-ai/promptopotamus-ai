@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { MessageCircle, Send, Edit3, Trash2, Reply, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { UserIdentityBadge } from '../profiles/UserIdentityBadge';
+import UserIdentityBadge from '../profiles/UserIdentityBadge';
 import { CompactUserProfile } from '../profiles/UserProfile';
 import { PromptComment, promptComments } from '@/lib/prompt-comments';
-import { useUser } from '@/lib/auth';
+import { useUser } from '@/lib/hooks/useUser';
 import toast from 'react-hot-toast';
 
 interface PromptCommentsProps {
@@ -63,7 +63,7 @@ function CommentItem({
                 <span className="font-medium text-neutral-900 dark:text-white">
                   {comment.profiles?.name || 'Unknown User'}
                 </span>
-                <UserIdentityBadge tier={userTier} size="sm" showTier={false} />
+                <UserIdentityBadge user={{ tier: userTier }} size="sm" showTierName={false} />
               </div>
               <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
                 <span>{formatDate(comment.created_at)}</span>
@@ -167,7 +167,7 @@ export default function PromptComments({
       );
       setComments(commentsData);
     } catch (error) {
-      console.error('Error loading comments:', error);
+      // Error('Error loading comments:', error);
     } finally {
       setLoading(false);
     }
@@ -178,7 +178,7 @@ export default function PromptComments({
       const count = await promptComments.getCommentCount(promptId);
       setCommentCount(count);
     } catch (error) {
-      console.error('Error loading comment count:', error);
+      // Error('Error loading comment count:', error);
     }
   };
 
@@ -216,7 +216,7 @@ export default function PromptComments({
         const newComment = await promptComments.addComment(user.id, {
           prompt_id: promptId,
           comment_text: commentText,
-          parent_comment_id: replyToId
+          parent_comment_id: replyToId || undefined
         });
 
         if (newComment) {
@@ -237,7 +237,7 @@ export default function PromptComments({
 
       setCommentText('');
     } catch (error) {
-      console.error('Error submitting comment:', error);
+      // Error('Error submitting comment:', error);
       toast.error('Something went wrong');
     } finally {
       setSubmitting(false);
@@ -274,7 +274,7 @@ export default function PromptComments({
         toast.error('Failed to delete comment');
       }
     } catch (error) {
-      console.error('Error deleting comment:', error);
+      // Error('Error deleting comment:', error);
       toast.error('Something went wrong');
     }
   };

@@ -7,6 +7,7 @@ const QUIZ_LENGTH = 25;
 const TIME_LIMIT_IN_MINUTES = 25;
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ level: QuizLevel }> }) {
+    const resolvedParams = await params;
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ leve
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { level } = await params;
+    const { level } = resolvedParams;
     
     const { data: allQuestions, error } = await supabase
         .from('quizzes')

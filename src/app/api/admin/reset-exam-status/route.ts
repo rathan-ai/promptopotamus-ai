@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
         }
 
         const targetUserId = targetUser.id;
-        console.log(`Resetting exam status for user ${email} (ID: ${targetUserId})`);
+        // TODO: Consider structured logging for admin actions with audit trail
 
         // Delete quiz attempts
         const { error: quizError } = await supabase

@@ -2,13 +2,11 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2, CheckCircle, XCircle, History, FileText, Award, Eye, User as UserIcon, ShoppingCart, Brain, Plus, DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/Loading';
+import { Loader2, CheckCircle, History, FileText, Award, ShoppingCart, Brain, DollarSign, TrendingUp } from 'lucide-react';
+import { LoadingSkeleton } from '@/components/ui/Loading';
 import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ui/ErrorBoundary';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import { certificates as certDetails } from '@/lib/data';
 import { createClient } from '@/lib/supabase/client';
 
 // Lazy load heavy components that are not immediately visible
@@ -17,10 +15,6 @@ const UserSmartPromptsManager = dynamic(() => import('@/components/features/prom
   ssr: false
 });
 
-const UserIdentityBadge = dynamic(() => import('@/components/features/profiles/UserIdentityBadge'), {
-  loading: () => <LoadingSpinner size="sm" />,
-  ssr: false
-});
 
 // Define interfaces for our data
 interface Profile {
@@ -62,15 +56,13 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [sellerData, setSellerData] = useState<SellerData | null>(null);
   const [sellerLoading, setSellerLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const supabase = createClient();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Get current user
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
         if (userError) {
           console.error('Auth error:', userError);
           toast.error('Authentication error. Please refresh the page.');
@@ -78,7 +70,6 @@ export default function DashboardPage() {
           setSellerLoading(false);
           return;
         }
-        setUser(user);
         
         // Fetch dashboard data
         const res = await fetch('/api/profiles/dashboard');
@@ -104,7 +95,7 @@ export default function DashboardPage() {
               setSellerData({
                 totalRevenue: smartPromptsData.salesStats.totalRevenue || 0,
                 totalSales: smartPromptsData.salesStats.totalSales || 0,
-                hasActiveListings: smartPromptsData.created?.some((p: any) => p.is_marketplace) || false,
+                hasActiveListings: smartPromptsData.created?.some((p: { is_marketplace?: boolean }) => p.is_marketplace) || false,
                 recentSales: smartPromptsData.salesStats.recentSales || []
               });
             }

@@ -97,8 +97,8 @@ export default function AchievementBadge({
   const achievementData = 'achievement' in achievement ? achievement.achievement : achievement;
   if (!achievementData) return null;
 
-  const Icon = IconMap[achievementData.icon as keyof typeof IconMap] || Star;
-  const categoryStyle = CategoryColors[achievementData.category];
+  const Icon = IconMap[(achievementData as any).icon as keyof typeof IconMap] || Star;
+  const categoryStyle = CategoryColors[(achievementData as any).category as keyof typeof CategoryColors];
   const sizeClasses = SizeClasses[size];
 
   const formatDate = (dateString: string) => {
@@ -137,9 +137,9 @@ export default function AchievementBadge({
       )}
       
       {/* XP indicator */}
-      {showXP && achievementData.xp_points > 0 && (
+      {showXP && (achievementData as any).xp_points > 0 && (
         <div className="absolute -bottom-1 -right-1 bg-slate-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-          {achievementData.xp_points}
+          {(achievementData as any).xp_points}
         </div>
       )}
     </div>
@@ -165,27 +165,27 @@ export default function AchievementBadge({
               </div>
               <div>
                 <h4 className="font-semibold text-neutral-900 dark:text-white">
-                  {achievementData.name}
+                  {(achievementData as any).name}
                 </h4>
                 <span className={`
                   text-xs px-2 py-1 rounded-full font-medium
                   ${categoryStyle.bg} ${categoryStyle.text}
                 `}>
-                  {achievementData.category}
+                  {(achievementData as any).category}
                 </span>
               </div>
             </div>
             
             <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
-              {achievementData.description}
+              {(achievementData as any).description}
             </p>
             
             <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
               <div className="flex items-center gap-2">
-                {achievementData.xp_points > 0 && (
+                {(achievementData as any).xp_points > 0 && (
                   <span className="flex items-center gap-1">
                     <Zap className="w-3 h-3" />
-                    {achievementData.xp_points} XP
+                    {(achievementData as any).xp_points} XP
                   </span>
                 )}
               </div>

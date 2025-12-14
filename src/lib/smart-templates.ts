@@ -207,6 +207,7 @@ Call-to-action: {cta}`,
             name: 'primary_goal',
             type: 'select',
             label: 'Primary Campaign Goal',
+            placeholder: 'Select your primary goal',
             required: true,
             options: [
               'Generate pre-orders/sales',
@@ -383,6 +384,7 @@ Raw Feedback Data:
             name: 'feedback_source',
             type: 'select',
             label: 'Feedback Source',
+            placeholder: 'Select feedback source',
             required: true,
             options: [
               'Customer surveys',
@@ -480,6 +482,7 @@ Please provide:
             name: 'analysis_focus',
             type: 'select',
             label: 'Analysis Focus',
+            placeholder: 'Select analysis focus',
             required: true,
             options: [
               'Product improvement opportunities',
@@ -632,6 +635,7 @@ Tone/Mood: {tone_mood}`,
             name: 'genre',
             type: 'select',
             label: 'Primary Genre',
+            placeholder: 'Select primary genre',
             required: true,
             options: [
               'Science Fiction',
@@ -660,6 +664,7 @@ Tone/Mood: {tone_mood}`,
             name: 'story_length',
             type: 'select',
             label: 'Story Length',
+            placeholder: 'Select story length',
             required: true,
             options: [
               'Short story (1,000-7,500 words)',
@@ -766,6 +771,7 @@ Make sure the outline includes specific details, compelling conflicts, and a sat
             name: 'structure_type',
             type: 'select',
             label: 'Story Structure Type',
+            placeholder: 'Select structure type',
             required: true,
             options: [
               'Three-Act Structure (Classic)',
@@ -782,6 +788,7 @@ Make sure the outline includes specific details, compelling conflicts, and a sat
             name: 'character_focus',
             type: 'select',
             label: 'Character Development Focus',
+            placeholder: 'Select character focus',
             required: true,
             options: [
               'Character-driven (internal conflicts)',
@@ -798,6 +805,7 @@ Make sure the outline includes specific details, compelling conflicts, and a sat
             name: 'conflict_type',
             type: 'select',
             label: 'Primary Conflict Type',
+            placeholder: 'Select conflict type',
             required: true,
             options: [
               'Person vs. Person',
@@ -814,6 +822,7 @@ Make sure the outline includes specific details, compelling conflicts, and a sat
             name: 'plot_complexity',
             type: 'select',
             label: 'Plot Complexity',
+            placeholder: 'Select complexity level',
             required: true,
             options: [
               'Simple linear plot',

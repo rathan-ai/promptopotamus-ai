@@ -5,32 +5,27 @@ import { serverPaymentService } from '@/features/payments/services/payment-servi
 
 export async function POST(req: Request) {
   let supabase;
-  let user: any = null;
+  let user: { id: string; email?: string } | null = null;
   
   try {
     supabase = await createServerClient();
     
     // Get user with more error handling
-    let authError: any = null;
+    let authError: { message?: string } | null = null;
     
     try {
       const authResult = await supabase.auth.getUser();
       user = authResult.data?.user;
       authError = authResult.error;
     } catch (e) {
-      console.error('Smart Prompts Purchase - Auth error:', e);
-      authError = e;
+      // TODO: Consider structured logging for auth errors
+      authError = e as { message?: string };
     }
 
-    console.log('Smart Prompts Purchase - Auth check:', { 
-      hasUser: !!user, 
-      userId: user?.id,
-      authError: authError?.message,
-      fullAuthError: authError
-    });
+    // TODO: Consider structured logging for auth status monitoring
 
     if (!user) {
-      console.error('Smart Prompts Purchase - Unauthorized access attempt:', authError);
+      // TODO: Consider security logging for unauthorized access attempts
       return NextResponse.json({ 
         error: 'Please log in to download Smart Prompts',
         authRequired: true,
@@ -38,7 +33,7 @@ export async function POST(req: Request) {
       }, { status: 401 });
     }
   } catch (setupError) {
-    console.error('Smart Prompts Purchase - Setup error:', setupError);
+    // TODO: Consider structured logging for setup errors
     return NextResponse.json({ 
       error: 'Authentication setup failed',
       details: setupError instanceof Error ? setupError.message : 'Unknown error'
@@ -52,7 +47,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Prompt ID is required' }, { status: 400 });
     }
 
-    console.log('Smart Prompts Purchase - Looking for prompt ID:', promptId);
+    // TODO: Consider structured logging for purchase attempts
 
     // Get prompt details - simplified query without problematic columns/joins
     const { data: prompt, error: promptError } = await supabase
@@ -67,10 +62,7 @@ export async function POST(req: Request) {
       .eq('id', promptId)
       .single();
 
-    console.log('Smart Prompts Purchase - Query result:', { 
-      found: !!prompt, 
-      error: promptError?.message 
-    });
+    // TODO: Consider structured logging for query results
 
     if (promptError || !prompt) {
       console.error('Prompt not found:', { promptId, error: promptError });
@@ -92,7 +84,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Prompt is not available for purchase' }, { status: 404 });
       }
     } catch (e) {
-      console.warn('Marketplace column check failed, proceeding without it:', e);
+      // TODO: Handle missing marketplace columns gracefully in production
     }
 
     // Check if user is trying to buy their own prompt
@@ -145,10 +137,10 @@ export async function POST(req: Request) {
           .eq('id', promptId);
         
         if (updateError) {
-          console.warn('Failed to update download count:', updateError);
+          // TODO: Consider structured logging for download count update failures
         }
       } catch (updateErr) {
-        console.warn('Download count update failed:', updateErr);
+        // TODO: Consider structured logging for download count errors
       }
 
       return NextResponse.json({ 
@@ -158,10 +150,10 @@ export async function POST(req: Request) {
       });
     }
 
-    // For paid prompts, redirect to PromptCoin purchase flow
-    return NextResponse.json({ 
-      error: 'Paid prompts must be purchased using PromptCoins. Please use the purchase modal.',
-      requiresPromptCoins: true,
+    // For paid prompts, redirect to payment flow
+    return NextResponse.json({
+      error: 'Paid prompts must be purchased using the payment modal.',
+      requiresPayment: true,
       promptPrice: prompt.price,
       promptTitle: prompt.title
     }, { status: 400 });
@@ -173,10 +165,8 @@ export async function POST(req: Request) {
 }
 
 // Legacy payment confirmation endpoint - no longer used
-// All Smart Prompt purchases now use PromptCoins via /purchase-with-pc
-export async function PUT(req: Request) {
-  return NextResponse.json({ 
-    error: 'This endpoint is deprecated. All Smart Prompt purchases now use PromptCoins.',
-    redirectTo: '/api/smart-prompts/purchase-with-pc'
+export async function PUT() {
+  return NextResponse.json({
+    error: 'This endpoint is deprecated. Please use the payment modal for purchases.',
   }, { status: 410 }); // 410 Gone
 }

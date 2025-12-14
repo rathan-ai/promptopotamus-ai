@@ -15,10 +15,16 @@ export const PROMPT_CATEGORIES = [
  * Prompt service for managing smart prompts and marketplace
  */
 export class PromptService {
-  private supabase;
+  private supabase: any;
+  private isServerSide: boolean;
 
   constructor(serverSide = false) {
+    this.isServerSide = serverSide;
     this.supabase = serverSide ? createServerClient() : createClient();
+  }
+
+  private async getSupabase() {
+    return this.isServerSide ? await this.supabase : this.supabase;
   }
 
   /**
@@ -32,7 +38,8 @@ export class PromptService {
     tags?: string[];
     limit?: number;
   } = {}): Promise<SmartPrompt[]> {
-    let query = this.supabase
+    const supabase = await this.getSupabase();
+    let query = supabase
       .from('saved_prompts')
       .select(`
         id,
@@ -121,7 +128,7 @@ export class PromptService {
    * Get a single smart prompt by ID
    */
   async getSmartPromptById(id: number): Promise<SmartPrompt | null> {
-    const { data: prompt, error } = await this.supabase
+    const { data: prompt, error } = await (await this.getSupabase())
       .from('saved_prompts')
       .select(`
         id,
@@ -176,7 +183,7 @@ export class PromptService {
 
     // Get created prompts
     if (type === 'created' || type === 'all') {
-      const { data: created } = await this.supabase
+      const { data: created } = await (await this.getSupabase())
         .from('saved_prompts')
         .select(`
           id,
@@ -211,7 +218,7 @@ export class PromptService {
 
     // Get purchased prompts
     if (type === 'purchased' || type === 'all') {
-      const { data: purchased } = await this.supabase
+      const { data: purchased } = await (await this.getSupabase())
         .from('smart_prompt_purchases')
         .select(`
           id,
@@ -240,7 +247,7 @@ export class PromptService {
         .eq('buyer_id', userId)
         .order('purchased_at', { ascending: false });
 
-      purchasedPrompts = purchased?.map(purchase => ({
+      purchasedPrompts = purchased?.map((purchase: any) => ({
         ...purchase.saved_prompts,
         purchase_info: {
           purchase_price: purchase.purchase_price,
@@ -274,7 +281,7 @@ export class PromptService {
     instructions?: string;
     example_inputs?: Record<string, string>;
   }) {
-    const { error } = await this.supabase
+    const { error } = await (await this.getSupabase())
       .from('saved_prompts')
       .insert({
         ...promptData,
@@ -290,7 +297,7 @@ export class PromptService {
    * Update an existing smart prompt
    */
   async updateSmartPrompt(userId: string, promptId: number, updates: any) {
-    const { error } = await this.supabase
+    const { error } = await (await this.getSupabase())
       .from('saved_prompts')
       .update({
         ...updates,
@@ -307,7 +314,7 @@ export class PromptService {
    */
   async deleteSmartPrompt(userId: string, promptId: number) {
     // Check if prompt has been sold - prevent deletion if it has purchases
-    const { data: purchases } = await this.supabase
+    const { data: purchases } = await (await this.getSupabase())
       .from('smart_prompt_purchases')
       .select('id')
       .eq('prompt_id', promptId)
@@ -321,7 +328,7 @@ export class PromptService {
       };
     }
 
-    const { error } = await this.supabase
+    const { error } = await (await this.getSupabase())
       .from('saved_prompts')
       .delete()
       .eq('id', promptId)
@@ -334,19 +341,27 @@ export class PromptService {
    * Purchase a smart prompt
    */
   async purchaseSmartPrompt(userId: string, promptId: number) {
-    // Get prompt details
-    const prompt = await this.getSmartPromptById(promptId);
-    if (!prompt) {
+    // Get prompt details directly from database to include user_id
+    const supabase = await this.getSupabase();
+    const { data: promptData, error: promptError } = await supabase
+      .from('saved_prompts')
+      .select('id, user_id, price, title')
+      .eq('id', promptId)
+      .eq('is_marketplace', true)
+      .eq('is_public', true)
+      .single();
+
+    if (promptError || !promptData) {
       return { error: { message: 'Prompt not found' } };
     }
 
     // Check if user is trying to buy their own prompt
-    if (prompt.user_id === userId) {
+    if (promptData.user_id === userId) {
       return { error: { message: 'You cannot purchase your own prompt' } };
     }
 
     // Check if user has already purchased this prompt
-    const { data: existingPurchase } = await this.supabase
+    const { data: existingPurchase } = await (await this.getSupabase())
       .from('smart_prompt_purchases')
       .select('id')
       .eq('prompt_id', promptId)
@@ -358,13 +373,13 @@ export class PromptService {
     }
 
     // If prompt is free, create purchase record directly
-    if (!prompt.price || prompt.price === 0) {
-      const { error: purchaseError } = await this.supabase
+    if (!promptData.price || promptData.price === 0) {
+      const { error: purchaseError } = await (await this.getSupabase())
         .from('smart_prompt_purchases')
         .insert({
           prompt_id: promptId,
           buyer_id: userId,
-          seller_id: prompt.user_id,
+          seller_id: promptData.user_id,
           purchase_price: 0,
           purchased_at: new Date().toISOString()
         });
@@ -374,9 +389,10 @@ export class PromptService {
       }
 
       // Update download count
-      await this.supabase
+      const supabase = await this.getSupabase();
+      await supabase
         .from('saved_prompts')
-        .update({ downloads_count: this.supabase.sql`downloads_count + 1` })
+        .update({ downloads_count: supabase.sql`downloads_count + 1` })
         .eq('id', promptId);
 
       return { 
@@ -391,10 +407,10 @@ export class PromptService {
       success: true,
       requiresPayment: true,
       prompt: {
-        id: prompt.id,
-        title: prompt.title,
-        price: prompt.price,
-        seller_id: prompt.user_id
+        id: promptData.id,
+        title: promptData.title,
+        price: promptData.price,
+        seller_id: promptData.user_id
       }
     };
   }
@@ -403,12 +419,12 @@ export class PromptService {
    * Get user certification status for marketplace features
    */
   async getUserCertificationStatus(userId: string): Promise<UserCertificationStatus> {
-    const { data: userCertificates } = await this.supabase
+    const { data: userCertificates } = await (await this.getSupabase())
       .from('user_certificates')
       .select('certificate_slug, expires_at, earned_at, credential_id')
       .eq('user_id', userId);
 
-    const hasValidCertificate = (userCertificates || []).some(cert => 
+    const hasValidCertificate = (userCertificates || []).some((cert: any) => 
       new Date(cert.expires_at) > new Date()
     );
 

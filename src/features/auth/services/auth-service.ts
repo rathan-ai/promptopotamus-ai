@@ -54,19 +54,21 @@ export class AuthService {
  * Server-side authentication service
  */
 export class ServerAuthService {
-  private supabase;
+  private supabasePromise;
 
   constructor() {
-    this.supabase = createServerClient();
+    this.supabasePromise = createServerClient();
   }
 
   async getCurrentUser() {
-    const { data: { user }, error } = await this.supabase.auth.getUser();
+    const supabase = await this.supabasePromise;
+    const { data: { user }, error } = await supabase.auth.getUser();
     return { user, error };
   }
 
   async validateSession() {
-    const { data: { session }, error } = await this.supabase.auth.getSession();
+    const supabase = await this.supabasePromise;
+    const { data: { session }, error } = await supabase.auth.getSession();
     return { session, error };
   }
 }
@@ -75,51 +77,37 @@ export class ServerAuthService {
  * User profile management service
  */
 export class UserProfileService {
-  private supabase;
+  private supabase: any;
+  private isServerSide: boolean;
 
   constructor(serverSide = false) {
+    this.isServerSide = serverSide;
     this.supabase = serverSide ? createServerClient() : createClient();
   }
 
   async getUserProfile(userId: string): Promise<UserProfile> {
-    const { data: profile, error } = await this.supabase
+    const supabase = this.isServerSide ? await this.supabase : this.supabase;
+    const { data: profile, error } = await supabase
       .from('profiles')
-      .select('credits_analysis, credits_enhancement, credits_exam, credits_export, payment_status')
+      .select('payment_status, subscription_tier')
       .eq('id', userId)
       .single();
 
     if (error || !profile) {
-      // Default profile for new users with free PromptCoins
+      // Default profile for new users
       return {
         type: 'free',
-        paymentStatus: 'none',
-        totalPromptCoins: {
-          analysis: 50,   // 5 analyses
-          enhancement: 45, // 3 enhancements  
-          exam: 150,      // 3 exam attempts
-          export: 0       // No exports for free
-        }
+        paymentStatus: 'none'
       };
     }
 
-    // Determine user type based on total credits
-    const totalCredits = (profile.credits_analysis || 0) + 
-                        (profile.credits_enhancement || 0) + 
-                        (profile.credits_exam || 0) + 
-                        (profile.credits_export || 0);
-    
-    const userType: UserType = totalCredits > 250 ? 'paid' : 'free';
+    // Determine user type based on subscription tier or payment status
+    const userType: UserType = profile.subscription_tier === 'pro' || profile.subscription_tier === 'premium' ? 'paid' : 'free';
     const paymentStatus: PaymentStatus = profile.payment_status || 'none';
 
     return {
       type: userType,
-      paymentStatus,
-      totalPromptCoins: {
-        analysis: profile.credits_analysis || 0,
-        enhancement: profile.credits_enhancement || 0,
-        exam: profile.credits_exam || 0,
-        export: profile.credits_export || 0
-      }
+      paymentStatus
     };
   }
 
@@ -127,10 +115,6 @@ export class UserProfileService {
     return await this.supabase
       .from('profiles')
       .update({
-        credits_analysis: updates.totalPromptCoins?.analysis,
-        credits_enhancement: updates.totalPromptCoins?.enhancement,
-        credits_exam: updates.totalPromptCoins?.exam,
-        credits_export: updates.totalPromptCoins?.export,
         payment_status: updates.paymentStatus
       })
       .eq('id', userId);
@@ -142,10 +126,6 @@ export class UserProfileService {
       .insert({
         id: userId,
         email,
-        credits_analysis: 50,
-        credits_enhancement: 45,
-        credits_exam: 150,
-        credits_export: 0,
         payment_status: 'none'
       });
   }

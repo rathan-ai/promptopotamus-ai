@@ -13,7 +13,7 @@ const values = [
   {
     icon: Brain,
     title: 'Innovation First',
-    description: 'We continuously push the boundaries of what\'s possible with AI prompting and education.'
+    description: 'We continuously push the boundaries of what&apos;s possible with AI prompting and education.'
   },
   {
     icon: Heart,
@@ -43,7 +43,7 @@ export default function AboutPage() {
             About Promptopotamus
           </h1>
           <p className="text-body-large text-neutral-600 dark:text-neutral-400 leading-relaxed mb-8">
-            We're on a mission to democratize AI prompt engineering education and create the world's largest 
+            We&apos;re on a mission to democratize AI prompt engineering education and create the world&apos;s largest 
             marketplace for high-quality Smart Prompts. Our platform empowers individuals and organizations 
             to harness the full potential of artificial intelligence.
           </p>

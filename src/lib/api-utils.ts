@@ -73,8 +73,7 @@ export const ApiResponses = {
  * Database error handler utility
  */
 export function handleDatabaseError(error: any, operation: string = 'Database operation') {
-  console.error(`${operation} failed:`, error);
-  
+
   // Common Supabase/PostgreSQL error codes
   if (error.code === '23505') {
     return ApiResponses.ALREADY_EXISTS('Record');

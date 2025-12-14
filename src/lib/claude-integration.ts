@@ -37,7 +37,7 @@ export class ClaudeIntegrationService {
         4. Query optimization opportunities
         5. Security considerations
         
-        Focus on the PromptCoin economy tables and payment system performance.
+        Focus on the marketplace tables and payment system performance.
       `;
 
       const response = await this.anthropic.messages.create({
@@ -57,7 +57,7 @@ export class ClaudeIntegrationService {
         metrics
       };
     } catch (error) {
-      console.error('Database analysis error:', error);
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -113,7 +113,7 @@ export class ClaudeIntegrationService {
         timeRange
       };
     } catch (error) {
-      console.error('Security analysis error:', error);
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -122,40 +122,40 @@ export class ClaudeIntegrationService {
   }
 
   /**
-   * Analyze PromptCoin transaction patterns
+   * Analyze marketplace purchase patterns
    */
-  async analyzePromptCoinPatterns(timeRange: string = '7 days') {
+  async analyzeMarketplacePatterns(timeRange: string = '7 days') {
     try {
-      // Get transaction data
-      const { data: transactions, error } = await this.supabase
-        .from('promptcoin_transactions')
+      // Get purchase data
+      const { data: purchases, error } = await this.supabase
+        .from('smart_prompt_purchases')
         .select('*')
-        .gte('created_at', new Date(Date.now() - this.parseTimeRange(timeRange)).toISOString())
-        .order('created_at', { ascending: false })
+        .gte('purchased_at', new Date(Date.now() - this.parseTimeRange(timeRange)).toISOString())
+        .order('purchased_at', { ascending: false })
         .limit(1000);
 
       if (error) throw error;
 
       // Calculate basic statistics
-      const stats = this.calculateTransactionStats(transactions || []);
+      const stats = this.calculateTransactionStats(purchases || []);
 
       const prompt = `
-        Analyze these PromptCoin transaction patterns for the Promptopotamus platform:
-        
-        Transaction Data:
-        ${JSON.stringify(transactions?.slice(0, 20), null, 2)}
-        
+        Analyze these marketplace purchase patterns for the Promptopotamus platform:
+
+        Purchase Data:
+        ${JSON.stringify(purchases?.slice(0, 20), null, 2)}
+
         Statistics:
         ${JSON.stringify(stats, null, 2)}
-        
+
         Please provide:
-        1. Transaction pattern analysis
+        1. Purchase pattern analysis
         2. User behavior insights
-        3. Economy health assessment
+        3. Marketplace health assessment
         4. Revenue optimization suggestions
         5. Potential issues or anomalies
-        6. Recommendations for improving the PromptCoin economy
-        
+        6. Recommendations for improving the marketplace
+
         Focus on marketplace dynamics and user engagement.
       `;
 
@@ -174,10 +174,10 @@ export class ClaudeIntegrationService {
         success: true,
         analysis: response.content[0].type === 'text' ? response.content[0].text : 'Analysis completed',
         statistics: stats,
-        transactionCount: transactions?.length || 0
+        purchaseCount: purchases?.length || 0
       };
     } catch (error) {
-      console.error('Transaction analysis error:', error);
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -229,7 +229,7 @@ export class ClaudeIntegrationService {
         filePath
       };
     } catch (error) {
-      console.error('Code optimization error:', error);
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -241,7 +241,7 @@ export class ClaudeIntegrationService {
    * Get database metrics for analysis
    */
   private async getDatabaseMetrics(tableFilter?: string) {
-    const tables = ['profiles', 'smart_prompt_purchases', 'promptcoin_transactions', 'payment_security_events'];
+    const tables = ['profiles', 'smart_prompt_purchases', 'payment_security_events'];
     const metrics: any = {};
 
     for (const table of tables) {
@@ -354,7 +354,7 @@ export class ClaudeIntegrationService {
         - user_certificates (certification and credential system)
         - affiliate_partners, affiliate_clicks, affiliate_conversions (affiliate tracking)
         - email_campaigns, email_sends, user_email_preferences (email marketing)
-        - promptcoin_transactions (PromptCoin economy audit trail)
+        - subscription_transactions (payment audit trail)
         - payment_security_events (security monitoring and logging)
         - subscription_transactions (payment processing)
         - user_follows, user_profiles_extended (social networking features)
@@ -394,7 +394,7 @@ export class ClaudeIntegrationService {
         warnings
       };
     } catch (error) {
-      console.error('Migration generation error:', error);
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -413,7 +413,7 @@ export class ClaudeIntegrationService {
         'user_achievements', 'achievement_definitions', 'user_experience', 'user_certificates',
         'affiliate_partners', 'affiliate_clicks', 'affiliate_conversions', 'affiliate_resources',
         'email_campaigns', 'email_sends', 'user_email_preferences', 'newsletter_subscribers',
-        'promptcoin_transactions', 'payment_security_events', 'subscription_transactions',
+        'payment_security_events', 'subscription_transactions',
         'user_follows', 'user_profiles_extended', 'user_prompt_collections', 'user_streaks',
         'prompt_comments', 'quiz_attempts', 'quizzes', 'admin_settings', 'admin_users'
       ];
@@ -579,7 +579,7 @@ export class ClaudeIntegrationService {
         timeRange
       };
     } catch (error) {
-      console.error('User engagement analysis error:', error);
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -655,7 +655,7 @@ export class ClaudeIntegrationService {
         timeRange
       };
     } catch (error) {
-      console.error('Business metrics analysis error:', error);
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'

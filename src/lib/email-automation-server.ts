@@ -66,7 +66,7 @@ export class ServerEmailAutomation {
         .single();
 
       if (campaignError || !campaign) {
-        console.error('Campaign not found:', campaignKey, campaignError);
+        // TODO: Consider structured logging for campaign lookup failures
         return false;
       }
 
@@ -78,14 +78,14 @@ export class ServerEmailAutomation {
         .single();
 
       if (profileError || !profile) {
-        console.error('User profile not found:', userId, profileError);
+        // TODO: Consider structured logging for profile lookup failures
         return false;
       }
 
       // Check email preferences
       const canSendEmail = await this.canSendEmailToUser(userId, campaign.campaign_type);
       if (!canSendEmail) {
-        console.log('User has opted out of this email type:', userId, campaign.campaign_type);
+        // TODO: Consider logging for email preference compliance
         return false;
       }
 
@@ -95,7 +95,7 @@ export class ServerEmailAutomation {
       if (campaign.campaign_type !== 'one_time') {
         const recentSend = await this.hasRecentSend(userId, campaign.id, campaign.campaign_type);
         if (recentSend) {
-          console.log('Email already sent recently:', userId, campaignKey);
+          // TODO: Consider logging for rate limiting compliance
           return false;
         }
       }
@@ -144,7 +144,7 @@ export class ServerEmailAutomation {
         return false;
       }
     } catch (error) {
-      console.error('Error sending campaign email:', error);
+      // TODO: Consider structured logging for campaign email errors
       return false;
     }
   }
@@ -167,7 +167,7 @@ export class ServerEmailAutomation {
         .eq('user_email_preferences.weekly_digest', true);
 
       if (error || !eligibleUsers) {
-        console.error('Error fetching eligible users:', error);
+        // TODO: Consider structured logging for eligible user fetch errors
         return { sent: 0, failed: 0 };
       }
 
@@ -196,7 +196,7 @@ export class ServerEmailAutomation {
 
       return { sent, failed };
     } catch (error) {
-      console.error('Error sending weekly digest:', error);
+      // TODO: Consider structured logging for weekly digest errors
       return { sent: 0, failed: 0 };
     }
   }
@@ -240,13 +240,13 @@ export class ServerEmailAutomation {
         }]);
 
       if (error) {
-        console.error('Error updating email preferences:', error);
+        // TODO: Consider structured logging for email preference update errors
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error updating email preferences:', error);
+      // TODO: Consider structured logging for email preference update failures
       return false;
     }
   }
@@ -272,13 +272,13 @@ export class ServerEmailAutomation {
         }]);
 
       if (error) {
-        console.error('Error unsubscribing user:', error);
+        // TODO: Consider structured logging for unsubscribe errors
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error unsubscribing user:', error);
+      // TODO: Consider structured logging for unsubscribe failures
       return false;
     }
   }
@@ -297,13 +297,13 @@ export class ServerEmailAutomation {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching email preferences:', error);
+        // TODO: Consider structured logging for email preference fetch errors
         return null;
       }
 
       return data || this.createDefaultEmailPreferences(userId);
     } catch (error) {
-      console.error('Error getting email preferences:', error);
+      // TODO: Consider structured logging for email preference retrieval failures
       return null;
     }
   }
@@ -360,7 +360,7 @@ export class ServerEmailAutomation {
         week_end: new Date().toLocaleDateString()
       };
     } catch (error) {
-      console.error('Error generating weekly digest data:', error);
+      // TODO: Consider structured logging for digest data generation errors
       return {};
     }
   }
@@ -412,7 +412,7 @@ export class ServerEmailAutomation {
           return preferences.marketing_emails;
       }
     } catch (error) {
-      console.error('Error checking email permissions:', error);
+      // TODO: Consider structured logging for email permission check errors
       return false;
     }
   }
@@ -446,13 +446,13 @@ export class ServerEmailAutomation {
         .limit(1);
 
       if (error) {
-        console.error('Error checking recent sends:', error);
+        // TODO: Consider structured logging for recent send check errors
         return false;
       }
 
       return (data && data.length > 0);
     } catch (error) {
-      console.error('Error checking recent sends:', error);
+      // TODO: Consider structured logging for recent send check failures
       return false;
     }
   }
@@ -468,7 +468,7 @@ export class ServerEmailAutomation {
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     // TODO: Implement actual email sending
     try {
-      console.log('Sending email to:', to, 'Subject:', subject);
+      // TODO: Implement actual email sending service integration
       
       // For now, simulate successful send
       return {
@@ -498,10 +498,10 @@ export class ServerEmailAutomation {
         }]);
 
       if (error) {
-        console.error('Error logging email send:', error);
+        // TODO: Consider structured logging for email send logging errors
       }
     } catch (error) {
-      console.error('Error logging email send:', error);
+      // TODO: Consider structured logging for email send logging failures
     }
   }
 
@@ -528,12 +528,12 @@ export class ServerEmailAutomation {
         .single();
 
       if (error) {
-        console.error('Error creating default email preferences:', error);
+        // TODO: Consider structured logging for default preference creation errors
       }
 
       return data as UserEmailPreferences;
     } catch (error) {
-      console.error('Error creating default email preferences:', error);
+      // TODO: Consider structured logging for default preference creation failures
       return defaultPrefs as UserEmailPreferences;
     }
   }

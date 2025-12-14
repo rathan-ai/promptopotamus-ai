@@ -263,7 +263,7 @@ export default function PromptTypesGuide({ onTypeSelect, selectedType }: PromptT
                             <div className="space-y-3">
                               {type.example.steps.map((step, index) => (
                                 <div key={index} className="border-l-2 border-purple-200 dark:border-purple-700 pl-4">
-                                  <h7 className="text-sm font-medium text-purple-700 dark:text-purple-300">{step.title}</h7>
+                                  <div className="text-sm font-medium text-purple-700 dark:text-purple-300">{step.title}</div>
                                   <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">{step.prompt}</p>
                                   <div className="mt-2 text-xs text-neutral-500">
                                     <ArrowRight className="w-3 h-3 inline mr-1" />

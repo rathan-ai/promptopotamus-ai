@@ -122,13 +122,7 @@ export default function SmartPromptsPage() {
         const data = await response.json();
         // Normalize the data to ensure all fields are in the expected format
         const normalizedPrompts = (data.prompts || []).map((prompt: any, index: number) => {
-          console.log(`Frontend - Prompt ${index}:`, { 
-            id: prompt.id, 
-            title: prompt.title, 
-            price: prompt.price,
-            hasId: !!prompt.id,
-            idType: typeof prompt.id
-          });
+          // TODO: Consider structured logging for prompt data validation in development mode
           
           return {
             ...prompt,
@@ -145,7 +139,7 @@ export default function SmartPromptsPage() {
           };
         });
         
-        console.log('Frontend - Total prompts loaded:', normalizedPrompts.length);
+        // TODO: Consider structured logging for prompt loading metrics
         setPrompts(normalizedPrompts);
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
@@ -184,7 +178,7 @@ export default function SmartPromptsPage() {
       const purchasedResponse = await fetch('/api/smart-prompts/my-prompts?type=purchased');
       if (purchasedResponse.ok) {
         const purchasedData = await purchasedResponse.json();
-        console.log('Fetched purchased prompts:', purchasedData.purchasedPrompts || []);
+        // TODO: Consider structured logging for purchased prompts data
         setUserPurchasedPrompts(purchasedData.purchasedPrompts || []);
       } else {
         console.error('Failed to fetch purchased prompts:', {
@@ -193,7 +187,7 @@ export default function SmartPromptsPage() {
         });
         if (purchasedResponse.status === 401) {
           // User not authenticated, clear purchased prompts
-          console.log('User not authenticated, clearing purchased prompts');
+          // TODO: Consider structured logging for authentication status
           setUserPurchasedPrompts([]);
         }
       }
@@ -202,7 +196,7 @@ export default function SmartPromptsPage() {
       const idsResponse = await fetch('/api/smart-prompts/purchased-ids');
       if (idsResponse.ok) {
         const idsData = await idsResponse.json();
-        console.log('Fetched purchased prompt IDs:', idsData.purchasedIds || []);
+        // TODO: Consider structured logging for purchased prompt IDs
         setPurchasedPromptIds(idsData.purchasedIds || []);
       }
     } catch (error) {
@@ -306,11 +300,11 @@ export default function SmartPromptsPage() {
   }, [prompts, searchQuery, sortBy]);
 
   const handlePurchase = async (promptId: number) => {
-    console.log('Frontend - Attempting to purchase prompt:', { promptId, type: typeof promptId });
+    // TODO: Consider structured logging for purchase attempts
     
     try {
       const requestBody = { promptId };
-      console.log('Frontend - Sending request:', requestBody);
+      // TODO: Consider structured logging for purchase requests
       
       const response = await fetch('/api/smart-prompts/purchase', {
         method: 'POST',
@@ -319,11 +313,7 @@ export default function SmartPromptsPage() {
       });
 
       const data = await response.json();
-      console.log('Frontend - Purchase response:', { 
-        status: response.status, 
-        ok: response.ok, 
-        data 
-      });
+      // TODO: Consider structured logging for purchase responses
       
       if (response.ok) {
         if (data.free) {
@@ -495,19 +485,9 @@ export default function SmartPromptsPage() {
     const isPurchased = purchasedPromptIds.includes(Number(prompt.id)) || 
                        userPurchasedPrompts.some(p => Number(p.id) === Number(prompt.id));
     // Check if user created this prompt
-    const isOwned = currentUser && prompt.user_id === currentUser.id;
+    const isOwned = currentUser && (prompt as any).user_id === currentUser.id;
     
-    // Debug logging (remove this in production)
-    if (prompt.title === 'The Ultimate Blog Post Writer') {
-      console.log('PromptCard Debug for "The Ultimate Blog Post Writer":', {
-        promptId: prompt.id,
-        promptTitle: prompt.title,
-        isPurchased,
-        isOwned,
-        userPurchasedPrompts: userPurchasedPrompts.map(p => ({ id: p.id, title: p.title })),
-        currentUser: currentUser?.id
-      });
-    }
+    // TODO: Consider structured logging for prompt card debugging in development mode
     
     return (
       <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700 p-6 hover:shadow-lg transition-shadow">
@@ -715,13 +695,13 @@ export default function SmartPromptsPage() {
               use_cases: editingPrompt.use_cases || [],
               ai_model_compatibility: editingPrompt.ai_model_compatibility || [],
               variables: editingPrompt.variables || [],
-              recipe_steps: editingPrompt.recipe_steps || [],
-              instructions: editingPrompt.instructions || '',
+              recipe_steps: (editingPrompt as any).recipe_steps || [],
+              instructions: (editingPrompt as any).instructions || '',
               example_inputs: editingPrompt.example_inputs || {},
-              example_outputs: editingPrompt.example_outputs || [],
+              example_outputs: (editingPrompt as any).example_outputs || [],
               price: editingPrompt.price,
-              is_marketplace: editingPrompt.is_marketplace || false,
-              is_public: editingPrompt.is_public || false
+              is_marketplace: (editingPrompt as any).is_marketplace || false,
+              is_public: (editingPrompt as any).is_public || false
             } : undefined}
             onSave={() => {
               if (editingPrompt) {

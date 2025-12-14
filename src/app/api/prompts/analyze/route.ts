@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    // Check user's PromptCoin balance
+    // Check user's credit balance
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select(`

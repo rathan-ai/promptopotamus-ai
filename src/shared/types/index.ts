@@ -7,12 +7,6 @@ export type PaymentStatus = 'none' | 'active' | 'cancelled';
 export interface UserProfile {
   type: UserType;
   paymentStatus: PaymentStatus;
-  totalPromptCoins: {
-    analysis: number;
-    enhancement: number;
-    exam: number;
-    export: number;
-  };
 }
 
 // Prompt and Smart Prompts Types
@@ -47,18 +41,6 @@ export interface SmartPrompt {
 }
 
 // Payment Types
-export interface PromptCoinPackage {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  promptCoins: string;
-  features: string[];
-  popular?: boolean;
-  color: string;
-  bgColor: string;
-}
-
 export interface PaymentTransaction {
   id: string;
   user_id: string;
@@ -87,7 +69,7 @@ export interface UserCertificationStatus {
 }
 
 // API Response Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -128,7 +110,7 @@ export interface FormField {
 export interface NavigationItem {
   name: string;
   href: string;
-  icon?: React.ComponentType<any>;
+  icon?: React.ComponentType<{ className?: string }>;
   description?: string;
   external?: boolean;
 }
@@ -151,7 +133,7 @@ export interface AdminStats {
 export interface AppError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 // Constants

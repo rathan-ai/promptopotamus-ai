@@ -44,8 +44,7 @@ export interface PaymentMetadata {
   returnUrl?: string;
   cancelUrl?: string;
   idempotencyKey?: string;
-  promptcoins?: string; // JSON string of PromptCoin allocation
-  [key: string]: any; // Allow additional metadata fields
+  [key: string]: unknown; // Allow additional metadata fields
 }
 
 export interface PaymentResponse {
@@ -59,7 +58,7 @@ export interface PaymentResponse {
 
 export interface PaymentStatus {
   status: string;
-  details?: any;
+  details?: unknown;
 }
 
 // Payment Adapter Interface
@@ -81,5 +80,5 @@ export interface PaymentConfiguration {
   custom_api_endpoint?: string;
   custom_api_key?: string;
   currency?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }

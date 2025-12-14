@@ -16,19 +16,19 @@ interface User {
     payment_status?: string;
 }
 
-interface UserPromptCoinManagerProps {
+interface UserCreditManagerProps {
     user: User;
     isOpen: boolean;
     onClose: () => void;
     onUpdate: () => void;
 }
 
-export default function UserPromptCoinManager({ 
+export default function UserCreditManager({ 
     user, 
     isOpen, 
     onClose, 
     onUpdate 
-}: UserPromptCoinManagerProps) {
+}: UserCreditManagerProps) {
     const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState({
         credits_analysis: user.credits_analysis || 0,
@@ -43,7 +43,7 @@ export default function UserPromptCoinManager({
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            const response = await fetch('/api/admin/promptcoins', {
+            const response = await fetch('/api/admin/credits', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -54,14 +54,14 @@ export default function UserPromptCoinManager({
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to update PromptCoins');
+                throw new Error(errorData.error || 'Failed to update credits');
             }
 
-            toast.success('PromptCoins updated successfully');
+            toast.success('Credits updated successfully');
             onUpdate();
             onClose();
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : 'Failed to update PromptCoins');
+            toast.error(error instanceof Error ? error.message : 'Failed to update credits');
         } finally {
             setIsSaving(false);
         }
@@ -89,7 +89,7 @@ export default function UserPromptCoinManager({
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
-                                Manage PromptCoins
+                                Manage Credits
                             </h2>
                             <p className="text-neutral-600 dark:text-neutral-400 mt-1">
                                 {user.full_name || 'N/A'} ({user.email})
@@ -112,7 +112,7 @@ export default function UserPromptCoinManager({
                             <span className="px-3 py-1 rounded-full text-sm font-medium border border-blue-500 bg-blue-50 dark:bg-blue-900/20">
                                 <div className="flex items-center gap-2">
                                     <Coins className="w-4 h-4" />
-                                    {getTotalCredits()} PC Total
+                                    {getTotalCredits()} Credits Total
                                 </div>
                             </span>
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -124,15 +124,15 @@ export default function UserPromptCoinManager({
                         </div>
                     </div>
 
-                    {/* PromptCoin Credits */}
+                    {/* Feature Credits */}
                     <div className="space-y-4">
-                        <h3 className="font-medium text-neutral-900 dark:text-white">PromptCoin Balances</h3>
+                        <h3 className="font-medium text-neutral-900 dark:text-white">Credit Balances</h3>
                         
                         {/* Analysis Credits */}
                         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
                             <div className="flex items-center justify-between mb-2">
                                 <label className="text-sm font-medium text-emerald-700 dark:text-green-300">
-                                    Analysis Credits (10 PC per use)
+                                    Analysis Credits
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <button
@@ -163,7 +163,7 @@ export default function UserPromptCoinManager({
                         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                             <div className="flex items-center justify-between mb-2">
                                 <label className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                                    Enhancement Credits (15 PC per use)
+                                    Enhancement Credits
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <button
@@ -194,7 +194,7 @@ export default function UserPromptCoinManager({
                         <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
                             <div className="flex items-center justify-between mb-2">
                                 <label className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
-                                    Exam Credits (50 PC per attempt)
+                                    Exam Credits
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <button
@@ -225,7 +225,7 @@ export default function UserPromptCoinManager({
                         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
                             <div className="flex items-center justify-between mb-2">
                                 <label className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                                    Export Credits (5 PC per export)
+                                    Export Credits
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <button
@@ -286,7 +286,7 @@ export default function UserPromptCoinManager({
                                 }}
                                 className="px-3 py-1 bg-emerald-600 text-white text-xs rounded-full hover:bg-green-700 transition-colors"
                             >
-                                Add Starter Pack (500 PC each)
+                                Add Starter Pack (500 each)
                             </button>
                             <button
                                 onClick={() => {
@@ -301,7 +301,7 @@ export default function UserPromptCoinManager({
                                 }}
                                 className="px-3 py-1 bg-blue-600 text-white text-xs rounded-full hover:bg-blue-700 transition-colors"
                             >
-                                Add Pro Pack (2000 PC each)
+                                Add Pro Pack (2000 each)
                             </button>
                             <button
                                 onClick={() => {
@@ -335,7 +335,7 @@ export default function UserPromptCoinManager({
                         ) : (
                             <>
                                 <Save className="w-4 h-4 mr-2" />
-                                Update PromptCoins
+                                Update Credits
                             </>
                         )}
                     </Button>

@@ -51,7 +51,7 @@ VERTEX_AI_PROJECT_ID=your-project-id
 1. Create a new issue in your repository
 2. In the issue description, mention `@claude` and ask a question like:
    ```markdown
-   @claude Can you help me optimize the database queries in the PromptCoin transaction system?
+   @claude Can you help me optimize the database queries in the marketplace transaction system?
    ```
 3. The GitHub Action should trigger and Claude will respond with analysis and suggestions
 
@@ -124,14 +124,14 @@ The integration service is now available at these API endpoints:
 ```bash
 # Analyze database performance
 POST /api/claude/analyze-database
-Body: { "tableFilter": "promptcoin" }
+Body: { "tableFilter": "purchases" }
 
 # Get security insights
-POST /api/claude/security-insights  
+POST /api/claude/security-insights
 Body: { "timeRange": "24 hours" }
 
-# Analyze PromptCoin patterns
-POST /api/claude/promptcoin-analysis
+# Analyze marketplace patterns
+POST /api/claude/marketplace-analysis
 Body: { "timeRange": "7 days" }
 ```
 
@@ -160,7 +160,7 @@ const claude = new ClaudeCode({
 
 export async function analyzeDatabasePerformance() {
   const analysis = await claude.ask(
-    "Analyze the current database performance and suggest optimizations for the PromptCoin transaction system",
+    "Analyze the current database performance and suggest optimizations for the marketplace transaction system",
     {
       context: {
         files: ['src/lib/subscription.ts', 'migrations/007_secure_payment_system.sql'],
@@ -236,7 +236,7 @@ asyncio.run(monitor_system_health())
 @claude Please review this payment webhook handler for security vulnerabilities
 
 # Architecture questions
-@claude What's the best way to implement real-time PromptCoin balance updates?
+@claude What's the best way to implement real-time credit balance updates?
 
 # Performance optimization
 @claude Can you optimize this database query for better performance?

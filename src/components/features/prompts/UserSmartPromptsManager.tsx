@@ -91,9 +91,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
       const response = await fetch('/api/smart-prompts/my-prompts');
       if (response.ok) {
         const result = await response.json();
-        console.log('Smart Prompts Manager - API Response:', result);
-        console.log('Purchased prompts count:', result.purchased?.length || 0);
-        console.log('Created prompts count:', result.created?.length || 0);
+        // TODO: Consider structured logging for user prompts data analysis
         setData(result);
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
@@ -363,7 +361,7 @@ export default function UserSmartPromptsManager({ certificates }: UserSmartPromp
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => toast.info('Edit functionality coming soon!')}
+                          onClick={() => toast('Edit functionality coming soon!')}
                         >
                           <Edit3 className="w-4 h-4" />
                         </Button>

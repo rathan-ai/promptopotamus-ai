@@ -43,7 +43,7 @@ export function randomizeQuestionOptions(question: QuizQuestion): RandomizedQues
   
   // Validate that we have 4 options
   if (!options || options.length !== 4) {
-    console.warn(`Question ${question.id} does not have exactly 4 options:`, options);
+
     return {
       id: question.id,
       question: question.question,
@@ -62,7 +62,7 @@ export function randomizeQuestionOptions(question: QuizQuestion): RandomizedQues
   }
   
   if (originalCorrectIndex === -1) {
-    console.warn(`Question ${question.id}: Could not find correct answer "${answer}" in options:`, options);
+
     // Return unrandomized if we can't identify correct answer
     return {
       id: question.id,
@@ -83,7 +83,7 @@ export function randomizeQuestionOptions(question: QuizQuestion): RandomizedQues
   // Validate that all options are unique
   const uniqueValues = new Set(options.map(opt => opt.trim().toLowerCase()));
   if (uniqueValues.size !== options.length) {
-    console.warn(`Question ${question.id} has duplicate options:`, options);
+
   }
   
   // Shuffle the options while preserving the correct answer tracking

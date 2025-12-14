@@ -24,7 +24,7 @@ export class ClientAuthService {
   }
 
   /**
-   * Get user profile with PromptCoin balances
+   * Get user profile
    */
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     const { data: profile, error } = await this.supabase
@@ -34,10 +34,6 @@ export class ClientAuthService {
         full_name,
         email,
         avatar_url,
-        credits_analysis,
-        credits_enhancement,
-        credits_exam,
-        credits_export,
         payment_status,
         subscription_tier,
         subscription_expires_at,
@@ -54,22 +50,8 @@ export class ClientAuthService {
 
     // Transform to UserProfile format
     return {
-      id: profile.id,
-      fullName: profile.full_name || '',
-      email: profile.email || '',
-      avatarUrl: profile.avatar_url,
-      type: profile.payment_status === 'active' ? 'paid' : 'free',
-      paymentStatus: profile.payment_status || 'inactive',
-      subscriptionTier: profile.subscription_tier || 'free',
-      subscriptionExpiresAt: profile.subscription_expires_at,
-      totalPromptCoins: {
-        analysis: profile.credits_analysis || 0,
-        enhancement: profile.credits_enhancement || 0,
-        exam: profile.credits_exam || 0,
-        export: profile.credits_export || 0
-      },
-      createdAt: profile.created_at,
-      updatedAt: profile.updated_at
+      type: profile.subscription_tier === 'pro' || profile.subscription_tier === 'premium' ? 'paid' : 'free',
+      paymentStatus: profile.payment_status === 'active' ? 'active' : 'none'
     };
   }
 
@@ -79,14 +61,10 @@ export class ClientAuthService {
   async updateProfile(userId: string, updates: Partial<UserProfile>) {
     const profileUpdates: any = {};
 
-    if (updates.fullName !== undefined) {
-      profileUpdates.full_name = updates.fullName;
-    }
-    if (updates.email !== undefined) {
-      profileUpdates.email = updates.email;
-    }
-    if (updates.avatarUrl !== undefined) {
-      profileUpdates.avatar_url = updates.avatarUrl;
+    // UserProfile only contains type and paymentStatus
+    // These are typically managed by the system, not directly updatable by users
+    if (updates.paymentStatus !== undefined) {
+      profileUpdates.payment_status = updates.paymentStatus;
     }
 
     const { error } = await this.supabase

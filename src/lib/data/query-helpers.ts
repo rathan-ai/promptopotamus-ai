@@ -4,19 +4,24 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { createServerClient } from '@/lib/supabase/server';
-import { Database } from '@/types/supabase';
 
-type Tables = Database['public']['Tables'];
-type TableName = keyof Tables;
+// Type definitions would normally come from generated Supabase types
+type TableName = string;
 
 /**
  * Generic query builder for common database operations
  */
 export class QueryBuilder {
-  private supabase;
+  private supabase: any;
+  private isServerSide: boolean;
 
   constructor(serverSide = false) {
+    this.isServerSide = serverSide;
     this.supabase = serverSide ? createServerClient() : createClient();
+  }
+
+  private async getSupabase() {
+    return this.isServerSide ? await this.supabase : this.supabase;
   }
 
   /**
@@ -31,7 +36,8 @@ export class QueryBuilder {
       limit?: number;
     } = {}
   ) {
-    let query = this.supabase.from(table).select(options.select || '*');
+    const supabase = await this.getSupabase();
+    let query = supabase.from(table).select(options.select || '*');
 
     // Apply filters
     if (options.filters) {
@@ -65,7 +71,7 @@ export class QueryBuilder {
     id: string | number,
     select?: string
   ) {
-    return this.supabase
+    return (await this.getSupabase())
       .from(table)
       .select(select || '*')
       .eq('id', id)
@@ -77,9 +83,9 @@ export class QueryBuilder {
    */
   async create<T extends TableName>(
     table: T,
-    data: Partial<Tables[T]['Insert']>
+    data: any
   ) {
-    return this.supabase
+    return (await this.getSupabase())
       .from(table)
       .insert(data)
       .select()
@@ -92,9 +98,9 @@ export class QueryBuilder {
   async update<T extends TableName>(
     table: T,
     id: string | number,
-    data: Partial<Tables[T]['Update']>
+    data: any
   ) {
-    return this.supabase
+    return (await this.getSupabase())
       .from(table)
       .update(data)
       .eq('id', id)
@@ -109,7 +115,7 @@ export class QueryBuilder {
     table: T,
     id: string | number
   ) {
-    return this.supabase
+    return (await this.getSupabase())
       .from(table)
       .delete()
       .eq('id', id);
@@ -122,7 +128,7 @@ export class QueryBuilder {
     table: T,
     filters?: Record<string, any>
   ) {
-    let query = this.supabase
+    let query = (await this.getSupabase())
       .from(table)
       .select('*', { count: 'exact', head: true });
 
@@ -153,9 +159,9 @@ export class QueryBuilder {
    */
   async batchInsert<T extends TableName>(
     table: T,
-    data: Partial<Tables[T]['Insert']>[]
+    data: any[]
   ) {
-    return this.supabase
+    return (await this.getSupabase())
       .from(table)
       .insert(data)
       .select();
@@ -166,10 +172,10 @@ export class QueryBuilder {
    */
   async upsert<T extends TableName>(
     table: T,
-    data: Partial<Tables[T]['Insert']>,
+    data: any,
     conflictColumns?: string[]
   ) {
-    let query = this.supabase
+    let query = (await this.getSupabase())
       .from(table)
       .upsert(data)
       .select();
@@ -267,37 +273,36 @@ export class CachedQueries {
  * Database analytics and reporting helpers
  */
 export class AnalyticsQueries {
-  private supabase;
+  private supabase: any;
+  private isServerSide: boolean;
 
   constructor(serverSide = false) {
+    this.isServerSide = serverSide;
     this.supabase = serverSide ? createServerClient() : createClient();
+  }
+
+  private async getSupabase() {
+    return this.isServerSide ? await this.supabase : this.supabase;
   }
 
   /**
    * Get user analytics data
    */
   async getUserAnalytics(userId: string) {
-    const [profile, transactions, prompts, purchases] = await Promise.all([
-      this.supabase
+    const [profile, prompts, purchases] = await Promise.all([
+      (await this.getSupabase())
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single(),
-      
-      this.supabase
-        .from('promptcoin_transactions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(10),
-      
-      this.supabase
+
+      (await this.getSupabase())
         .from('saved_prompts')
         .select('id, title, created_at, downloads_count, rating_average')
         .eq('user_id', userId)
         .eq('is_marketplace', true),
-      
-      this.supabase
+
+      (await this.getSupabase())
         .from('smart_prompt_purchases')
         .select('*, saved_prompts(title)')
         .eq('buyer_id', userId)
@@ -307,7 +312,6 @@ export class AnalyticsQueries {
 
     return {
       profile: profile.data,
-      recentTransactions: transactions.data || [],
       publishedPrompts: prompts.data || [],
       recentPurchases: purchases.data || []
     };
@@ -317,30 +321,29 @@ export class AnalyticsQueries {
    * Get platform analytics (admin only)
    */
   async getPlatformAnalytics() {
-    const [userStats, promptStats, transactionStats] = await Promise.all([
-      this.supabase
+    const [userStats, promptStats, purchaseStats] = await Promise.all([
+      (await this.getSupabase())
         .from('profiles')
         .select('id, created_at, payment_status')
         .order('created_at', { ascending: false }),
-      
-      this.supabase
+
+      (await this.getSupabase())
         .from('saved_prompts')
         .select('id, created_at, category, price, downloads_count')
         .eq('is_marketplace', true),
-      
-      this.supabase
-        .from('promptcoin_transactions')
-        .select('amount, type, created_at, payment_provider')
-        .order('created_at', { ascending: false })
+
+      (await this.getSupabase())
+        .from('smart_prompt_purchases')
+        .select('purchase_price, payment_provider, purchased_at')
+        .order('purchased_at', { ascending: false })
         .limit(100)
     ]);
 
     const totalUsers = userStats.data?.length || 0;
-    const payingUsers = userStats.data?.filter(u => u.payment_status === 'active').length || 0;
+    const payingUsers = userStats.data?.filter((u: any) => u.payment_status === 'active').length || 0;
     const totalPrompts = promptStats.data?.length || 0;
-    const totalRevenue = transactionStats.data
-      ?.filter(t => t.type === 'purchase')
-      .reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
+    const totalRevenue = purchaseStats.data
+      ?.reduce((sum: number, p: any) => sum + (Number(p.purchase_price) || 0), 0) || 0;
 
     return {
       users: {
@@ -350,13 +353,13 @@ export class AnalyticsQueries {
       },
       prompts: {
         total: totalPrompts,
-        avgDownloads: totalPrompts > 0 
-          ? (promptStats.data?.reduce((sum, p) => sum + (p.downloads_count || 0), 0) || 0) / totalPrompts 
+        avgDownloads: totalPrompts > 0
+          ? (promptStats.data?.reduce((sum: number, p: any) => sum + (p.downloads_count || 0), 0) || 0) / totalPrompts
           : 0
       },
       revenue: {
         total: totalRevenue,
-        recentTransactions: transactionStats.data || []
+        recentPurchases: purchaseStats.data || []
       }
     };
   }
@@ -367,7 +370,7 @@ export class AnalyticsQueries {
   async getTrendingPrompts(days: number = 7) {
     const sinceDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
     
-    return this.supabase
+    return (await this.getSupabase())
       .from('saved_prompts')
       .select(`
         id,
@@ -390,17 +393,23 @@ export class AnalyticsQueries {
  * Real-time subscription helpers
  */
 export class RealtimeQueries {
-  private supabase;
+  private supabase: any;
+  private isServerSide: boolean;
 
   constructor(serverSide = false) {
+    this.isServerSide = serverSide;
     this.supabase = serverSide ? createServerClient() : createClient();
+  }
+
+  private async getSupabase() {
+    return this.isServerSide ? await this.supabase : this.supabase;
   }
 
   /**
    * Subscribe to user profile changes
    */
-  subscribeToUserProfile(userId: string, callback: (payload: any) => void) {
-    return this.supabase
+  async subscribeToUserProfile(userId: string, callback: (payload: any) => void) {
+    return (await this.getSupabase())
       .channel(`profile-${userId}`)
       .on(
         'postgres_changes',
@@ -418,8 +427,8 @@ export class RealtimeQueries {
   /**
    * Subscribe to new smart prompts
    */
-  subscribeToSmartPrompts(callback: (payload: any) => void) {
-    return this.supabase
+  async subscribeToSmartPrompts(callback: (payload: any) => void) {
+    return (await this.getSupabase())
       .channel('smart-prompts')
       .on(
         'postgres_changes',
@@ -435,18 +444,18 @@ export class RealtimeQueries {
   }
 
   /**
-   * Subscribe to user transactions
+   * Subscribe to user purchases
    */
-  subscribeToTransactions(userId: string, callback: (payload: any) => void) {
-    return this.supabase
-      .channel(`transactions-${userId}`)
+  async subscribeToPurchases(userId: string, callback: (payload: any) => void) {
+    return (await this.getSupabase())
+      .channel(`purchases-${userId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'promptcoin_transactions',
-          filter: `user_id=eq.${userId}`
+          table: 'smart_prompt_purchases',
+          filter: `buyer_id=eq.${userId}`
         },
         callback
       )

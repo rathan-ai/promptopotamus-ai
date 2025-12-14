@@ -10,21 +10,21 @@ export interface ValidationResult {
 }
 
 export interface FieldValidation {
-  value: any;
+  value: unknown;
   rules: ValidationRule[];
 }
 
 export interface ValidationRule {
   type: 'required' | 'email' | 'password' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
-  value?: any;
+  value?: unknown;
   message: string;
-  validator?: (value: any) => boolean;
+  validator?: (value: unknown) => boolean;
 }
 
 /**
  * Validate a single field with multiple rules
  */
-export function validateField(value: any, rules: ValidationRule[]): ValidationResult {
+export function validateField(value: unknown, rules: ValidationRule[]): ValidationResult {
   const errors: string[] = [];
 
   for (const rule of rules) {
@@ -36,31 +36,31 @@ export function validateField(value: any, rules: ValidationRule[]): ValidationRe
         break;
 
       case 'email':
-        if (value && !VALIDATION_RULES.email.pattern.test(value)) {
+        if (value && !VALIDATION_RULES.email.pattern.test(String(value))) {
           errors.push(rule.message);
         }
         break;
 
       case 'password':
-        if (value && !VALIDATION_RULES.password.pattern.test(value)) {
+        if (value && !VALIDATION_RULES.password.pattern.test(String(value))) {
           errors.push(rule.message);
         }
         break;
 
       case 'minLength':
-        if (value && value.length < rule.value) {
+        if (value && String(value).length < Number(rule.value)) {
           errors.push(rule.message);
         }
         break;
 
       case 'maxLength':
-        if (value && value.length > rule.value) {
+        if (value && String(value).length > Number(rule.value)) {
           errors.push(rule.message);
         }
         break;
 
       case 'pattern':
-        if (value && !rule.value.test(value)) {
+        if (value && !(rule.value as RegExp).test(String(value))) {
           errors.push(rule.message);
         }
         break;
@@ -261,26 +261,6 @@ export function validatePromptContent(content: string): ValidationResult {
       errors.push('Prompt content contains potentially unsafe content');
       break;
     }
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
-}
-
-/**
- * Validate PromptCoin amount
- */
-export function validatePromptCoinAmount(amount: number): ValidationResult {
-  const errors: string[] = [];
-  
-  if (!Number.isInteger(amount) || amount < 0) {
-    errors.push('PromptCoin amount must be a positive integer');
-  }
-  
-  if (amount > 1000000) {
-    errors.push('PromptCoin amount cannot exceed 1,000,000');
   }
   
   return {

@@ -304,8 +304,7 @@ export function withErrorHandling<T extends any[]>(
     try {
       return await handler(...args);
     } catch (error) {
-      console.error('API Error:', error);
-      
+
       // Handle known error types
       if (error instanceof z.ZodError) {
         return validationErrorResponse(error);

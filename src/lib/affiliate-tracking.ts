@@ -42,12 +42,16 @@ export interface AffiliateConversion {
  * Affiliate Tracking Utility Class
  */
 export class AffiliateTracker {
-  private supabase;
+  private supabase: any;
   private isServer: boolean;
 
   constructor(isServer = false) {
     this.supabase = isServer ? createServerClient() : createClient();
     this.isServer = isServer;
+  }
+
+  private async getSupabase() {
+    return this.isServer ? await this.supabase : this.supabase;
   }
 
   /**
@@ -61,7 +65,7 @@ export class AffiliateTracker {
   ): Promise<string | null> {
     try {
       // Get partner details
-      const { data: partner } = await this.supabase
+      const { data: partner } = await (await this.getSupabase())
         .from('affiliate_partners')
         .select('*')
         .eq('partner_key', partnerKey)
@@ -69,7 +73,7 @@ export class AffiliateTracker {
         .single();
 
       if (!partner) {
-        console.warn(`Affiliate partner '${partnerKey}' not found or inactive`);
+
         return null;
       }
 
@@ -105,7 +109,7 @@ export class AffiliateTracker {
 
       return `${partner.base_url}?${trackingParams.toString()}`;
     } catch (error) {
-      console.error('Error generating affiliate URL:', error);
+
       return null;
     }
   }
@@ -115,7 +119,7 @@ export class AffiliateTracker {
    */
   async trackClick(clickData: AffiliateClick): Promise<string | null> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await (await this.getSupabase())
         .from('affiliate_clicks')
         .insert([{
           user_id: clickData.user_id,
@@ -135,13 +139,13 @@ export class AffiliateTracker {
         .single();
 
       if (error) {
-        console.error('Error tracking affiliate click:', error);
+
         return null;
       }
 
       return data.id;
     } catch (error) {
-      console.error('Error tracking affiliate click:', error);
+
       return null;
     }
   }
@@ -151,7 +155,7 @@ export class AffiliateTracker {
    */
   async recordConversion(conversionData: AffiliateConversion): Promise<boolean> {
     try {
-      const { error } = await this.supabase
+      const { error } = await (await this.getSupabase())
         .from('affiliate_conversions')
         .insert([{
           click_id: conversionData.click_id,
@@ -164,13 +168,13 @@ export class AffiliateTracker {
         }]);
 
       if (error) {
-        console.error('Error recording affiliate conversion:', error);
+
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error recording affiliate conversion:', error);
+
       return false;
     }
   }
@@ -185,18 +189,18 @@ export class AffiliateTracker {
   ): Promise<AffiliatePartner[]> {
     try {
       // Get active partners
-      const { data: partners, error } = await this.supabase
+      const { data: partners, error } = await (await this.getSupabase())
         .from('affiliate_partners')
         .select('*')
         .eq('is_active', true);
 
       if (error || !partners) {
-        console.error('Error fetching affiliate partners:', error);
+
         return [];
       }
 
       // Filter and sort based on context
-      return partners.filter(partner => {
+      return partners.filter((partner: any) => {
         switch (context) {
           case 'prompt_creation':
             return ['openai', 'anthropic', 'jasper'].includes(partner.partner_key);
@@ -207,12 +211,12 @@ export class AffiliateTracker {
           default:
             return true;
         }
-      }).sort((a, b) => {
+      }).sort((a: any, b: any) => {
         // Prioritize by commission rate and context relevance
         return (b.commission_rate - a.commission_rate);
       });
     } catch (error) {
-      console.error('Error getting contextual recommendations:', error);
+
       return [];
     }
   }
@@ -240,17 +244,17 @@ export class AffiliateTracker {
       const { data: conversions, error } = await query;
 
       if (error) {
-        console.error('Error fetching affiliate analytics:', error);
+
         return null;
       }
 
       // Calculate metrics
       const totalConversions = conversions?.length || 0;
-      const totalRevenue = conversions?.reduce((sum, conv) => sum + (conv.conversion_value || 0), 0) || 0;
-      const totalCommission = conversions?.reduce((sum, conv) => sum + (conv.commission_earned || 0), 0) || 0;
+      const totalRevenue = conversions?.reduce((sum: number, conv: any) => sum + (conv.conversion_value || 0), 0) || 0;
+      const totalCommission = conversions?.reduce((sum: number, conv: any) => sum + (conv.commission_earned || 0), 0) || 0;
 
       // Group by source
-      const sourceAnalytics = conversions?.reduce((acc, conv) => {
+      const sourceAnalytics = conversions?.reduce((acc: any, conv: any) => {
         const source = conv.affiliate_clicks?.click_source || 'unknown';
         if (!acc[source]) {
           acc[source] = { conversions: 0, revenue: 0, commission: 0 };
@@ -269,7 +273,7 @@ export class AffiliateTracker {
         sourceAnalytics: sourceAnalytics || {}
       };
     } catch (error) {
-      console.error('Error getting affiliate analytics:', error);
+
       return null;
     }
   }
@@ -357,9 +361,9 @@ export async function trackAffiliateClickServer(
   const ipAddress = forwardedFor?.split(',')[0] || realIp || undefined;
 
   return tracker.generateAffiliateUrl(partnerKey, source, userId, {
-    user_agent: userAgent,
-    referrer_url: referrer,
-    ip_address: ipAddress
+    user_agent: userAgent || '',
+    referrer_url: referrer || '',
+    ip_address: ipAddress || ''
   });
 }
 

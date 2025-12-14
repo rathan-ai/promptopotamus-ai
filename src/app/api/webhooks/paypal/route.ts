@@ -22,7 +22,7 @@ import { isEventProcessed, markEventProcessed } from '@/lib/webhooks/idempotency
 async function verifyPayPalWebhook(
   headers: Headers,
   body: string,
-  webhookEvent: any
+  webhookEvent: unknown
 ): Promise<boolean> {
   try {
     const authAlgo = headers.get('paypal-auth-algo');
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
   // Handle PayPal webhook validation challenge
   const challengeQuery = new URL(req.url).searchParams.get('challenge');
   if (challengeQuery) {
-    console.log('PayPal webhook validation challenge received');
+    // TODO: Consider structured logging for webhook validation challenges
     return NextResponse.json({ challenge: challengeQuery });
   }
 
@@ -126,7 +126,7 @@ export async function POST(req: Request) {
   } catch (error) {
     // If no JSON body and no challenge, this might be PayPal's validation request
     if (!body || body.trim() === '') {
-      console.log('Empty body received - might be PayPal validation');
+      // TODO: Consider structured logging for PayPal validation requests
       return NextResponse.json({ status: 'ok' });
     }
     
@@ -144,7 +144,7 @@ export async function POST(req: Request) {
   try {
     isValid = await verifyPayPalWebhook(headersList, body, webhookEvent);
   } catch (error) {
-    console.warn('PayPal webhook verification skipped - configuration incomplete:', error);
+    // PayPal webhook verification skipped - configuration incomplete
     // Log but don't fail if PayPal is not fully configured yet
     await supabase.rpc('log_payment_security_event', {
       p_event_type: 'paypal_webhook_config_incomplete',
@@ -169,7 +169,7 @@ export async function POST(req: Request) {
   
   // Check for duplicate events using idempotency
   if (isEventProcessed(eventId)) {
-    console.log(`Duplicate PayPal event ${eventId} ignored`);
+    // TODO: Consider structured logging for duplicate events
     return NextResponse.json({ status: 'duplicate_ignored' });
   }
 
@@ -208,7 +208,8 @@ export async function POST(req: Request) {
       }
 
       default:
-        console.log(`Unhandled PayPal event type: ${webhookEvent.event_type}`);
+        // TODO: Consider logging unhandled event types to monitoring system
+        break;
     }
 
     // Mark event as successfully processed
@@ -240,7 +241,7 @@ export async function GET(req: Request) {
   const challenge = url.searchParams.get('challenge');
   
   if (challenge) {
-    console.log('PayPal webhook GET validation challenge received:', challenge);
+    // TODO: Consider structured logging for GET validation challenges
     return NextResponse.json({ challenge: challenge });
   }
   
@@ -252,16 +253,18 @@ export async function GET(req: Request) {
   });
 }
 
-async function handlePaymentCaptureCompleted(resource: any, supabase: any) {
-  const customId = resource.custom_id; // This contains user_id
-  const orderId = resource.supplementary_data?.related_ids?.order_id;
+async function handlePaymentCaptureCompleted(resource: unknown, supabase: unknown) {
+  const res = resource as any;
+  const customId = res.custom_id; // This contains user_id
+  const orderId = res.supplementary_data?.related_ids?.order_id;
   
   if (!customId) {
     throw new Error('Missing custom_id (user_id) in payment capture');
   }
 
   // Find the purchase record by PayPal order ID
-  const { data: purchase, error: purchaseError } = await supabase
+  const db = supabase as any;
+  const { data: purchase, error: purchaseError } = await db
     .from('smart_prompt_purchases')
     .select('*')
     .eq('paypal_order_id', orderId)
@@ -272,10 +275,10 @@ async function handlePaymentCaptureCompleted(resource: any, supabase: any) {
   }
 
   // Update purchase status
-  const { error: updateError } = await supabase
+  const { error: updateError } = await db
     .from('smart_prompt_purchases')
     .update({ 
-      transaction_id: resource.id,
+      transaction_id: res.id,
       payment_provider: 'paypal'
     })
     .eq('id', purchase.id);
@@ -285,60 +288,66 @@ async function handlePaymentCaptureCompleted(resource: any, supabase: any) {
   }
 
   // Log successful payment
-  await supabase.rpc('log_payment_security_event', {
+  await db.rpc('log_payment_security_event', {
     p_user_id: customId,
     p_event_type: 'paypal_payment_success',
     p_severity: 'low',
     p_response_data: { 
-      capture_id: resource.id,
+      capture_id: res.id,
       order_id: orderId,
-      amount: resource.amount.value,
-      currency: resource.amount.currency_code
+      amount: res.amount?.value,
+      currency: res.amount?.currency_code
     }
   });
 }
 
-async function handlePaymentCaptureDenied(resource: any, supabase: any) {
-  const customId = resource.custom_id;
+async function handlePaymentCaptureDenied(resource: unknown, supabase: unknown) {
+  const res = resource as any;
+  const db = supabase as any;
+  const customId = res.custom_id;
   
-  await supabase.rpc('log_payment_security_event', {
+  await db.rpc('log_payment_security_event', {
     p_user_id: customId,
     p_event_type: 'paypal_payment_denied',
     p_severity: 'medium',
     p_error_message: `PayPal payment capture denied`,
     p_request_data: { 
-      capture_id: resource.id,
-      amount: resource.amount?.value,
-      status_details: resource.status_details
+      capture_id: res.id,
+      amount: res.amount?.value,
+      status_details: res.status_details
     }
   });
 }
 
-async function handlePaymentCaptureRefunded(resource: any, supabase: any) {
-  const customId = resource.custom_id;
+async function handlePaymentCaptureRefunded(resource: unknown, supabase: unknown) {
+  const res = resource as any;
+  const db = supabase as any;
+  const customId = res.custom_id;
   
-  await supabase.rpc('log_payment_security_event', {
+  await db.rpc('log_payment_security_event', {
     p_user_id: customId,
     p_event_type: 'paypal_payment_refunded',
     p_severity: 'medium',
     p_request_data: { 
-      capture_id: resource.id,
-      refund_amount: resource.amount?.value,
-      refund_id: resource.id
+      capture_id: res.id,
+      refund_amount: res.amount?.value,
+      refund_id: res.id
     }
   });
 }
 
-async function handleOrderApproved(resource: any, supabase: any) {
-  const customId = resource.purchase_units?.[0]?.custom_id;
+async function handleOrderApproved(resource: unknown, supabase: unknown) {
+  const res = resource as any;
+  const db = supabase as any;
+  const customId = res.purchase_units?.[0]?.custom_id;
   
-  await supabase.rpc('log_payment_security_event', {
+  await db.rpc('log_payment_security_event', {
     p_user_id: customId,
     p_event_type: 'paypal_order_approved',
     p_severity: 'low',
     p_request_data: { 
-      order_id: resource.id,
-      amount: resource.purchase_units?.[0]?.amount?.value
+      order_id: res.id,
+      amount: res.purchase_units?.[0]?.amount?.value
     }
   });
 }

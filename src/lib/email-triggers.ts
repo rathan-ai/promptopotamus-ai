@@ -25,10 +25,10 @@ export class EmailTriggerSystem {
       
       // Schedule follow-up onboarding email for day 3
       // This would be handled by a scheduled job system in production
-      console.log(`Scheduled day-3 onboarding email for user ${userId}`);
+      // TODO: Consider structured logging for scheduled email events
       
     } catch (error) {
-      console.error('Error triggering welcome email:', error);
+      // TODO: Consider structured logging for welcome email trigger errors
     }
   }
 
@@ -48,10 +48,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`Password reset email sent to user ${userId}`);
+      // TODO: Consider structured logging for password reset email events
       
     } catch (error) {
-      console.error('Error triggering password reset email:', error);
+      // TODO: Consider structured logging for password reset email trigger errors
     }
   }
 
@@ -77,10 +77,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`Certification completion email sent for ${certificationLevel} to user ${userId}`);
+      // TODO: Consider structured logging for certification completion email events
       
     } catch (error) {
-      console.error('Error triggering certification completion email:', error);
+      // TODO: Consider structured logging for certification completion email trigger errors
     }
   }
 
@@ -108,10 +108,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`Certification failed email sent for ${certificationLevel} to user ${userId}`);
+      // TODO: Consider structured logging for certification failed email events
       
     } catch (error) {
-      console.error('Error triggering certification failed email:', error);
+      // TODO: Consider structured logging for certification failed email trigger errors
     }
   }
 
@@ -141,10 +141,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`Purchase confirmation email sent for prompt ${promptId} to user ${userId}`);
+      // TODO: Consider structured logging for purchase confirmation email events
       
     } catch (error) {
-      console.error('Error triggering purchase confirmation email:', error);
+      // TODO: Consider structured logging for purchase confirmation email trigger errors
     }
   }
 
@@ -173,10 +173,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`First sale celebration email sent to seller ${sellerId}`);
+      // TODO: Consider structured logging for first sale celebration email events
       
     } catch (error) {
-      console.error('Error triggering first sale email:', error);
+      // TODO: Consider structured logging for first sale email trigger errors
     }
   }
 
@@ -205,10 +205,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`Achievement email sent for "${achievementName}" to user ${userId}`);
+      // TODO: Consider structured logging for achievement email events
       
     } catch (error) {
-      console.error('Error triggering achievement email:', error);
+      // TODO: Consider structured logging for achievement email trigger errors
     }
   }
 
@@ -237,10 +237,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`New follower email sent to user ${userId}`);
+      // TODO: Consider structured logging for new follower email events
       
     } catch (error) {
-      console.error('Error triggering new follower email:', error);
+      // TODO: Consider structured logging for new follower email trigger errors
     }
   }
 
@@ -269,10 +269,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`Comment notification email sent to prompt owner ${promptOwnerId}`);
+      // TODO: Consider structured logging for comment notification email events
       
     } catch (error) {
-      console.error('Error triggering comment notification email:', error);
+      // TODO: Consider structured logging for comment notification email trigger errors
     }
   }
 
@@ -299,10 +299,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`Re-engagement email sent to inactive user ${userId}`);
+      // TODO: Consider structured logging for re-engagement email events
       
     } catch (error) {
-      console.error('Error triggering re-engagement email:', error);
+      // TODO: Consider structured logging for re-engagement email trigger errors
     }
   }
 
@@ -321,10 +321,10 @@ export class EmailTriggerSystem {
         }
       );
       
-      console.log(`Day 3 onboarding email sent to user ${userId}`);
+      // TODO: Consider structured logging for onboarding email events
       
     } catch (error) {
-      console.error('Error triggering day 3 onboarding email:', error);
+      // TODO: Consider structured logging for onboarding email trigger errors
     }
   }
 }

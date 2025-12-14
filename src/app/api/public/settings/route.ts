@@ -62,9 +62,10 @@ const DEFAULT_SETTINGS = {
 
 // GET - Fetch public settings (no authentication required for basic settings)
 export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const category = searchParams.get('category');
+  
   try {
-    const { searchParams } = new URL(req.url);
-    const category = searchParams.get('category');
 
     const supabase = await createServerClient();
     
@@ -88,7 +89,7 @@ export async function GET(req: Request) {
     }
 
     // Group settings by category
-    const groupedSettings: Record<string, any> = {};
+    const groupedSettings: Record<string, Record<string, unknown>> = {};
     settings?.forEach(setting => {
       if (!groupedSettings[setting.category]) {
         groupedSettings[setting.category] = {};
@@ -114,7 +115,7 @@ export async function GET(req: Request) {
       }
       Object.keys(DEFAULT_SETTINGS[cat as keyof typeof DEFAULT_SETTINGS]).forEach(key => {
         if (groupedSettings[cat][key] === undefined) {
-          groupedSettings[cat][key] = (DEFAULT_SETTINGS[cat as keyof typeof DEFAULT_SETTINGS] as any)[key];
+          groupedSettings[cat][key] = (DEFAULT_SETTINGS[cat as keyof typeof DEFAULT_SETTINGS] as Record<string, unknown>)[key];
         }
       });
     });

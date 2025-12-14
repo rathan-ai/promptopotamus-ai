@@ -5,7 +5,7 @@ import { BarChart, Users, Zap, Calendar, Clock, Link2, Settings, Mail, Brain, Fi
 import toast from 'react-hot-toast';
 import { certificates as certDetails } from '@/lib/data';
 import AffiliateManager from '@/components/admin/AffiliateManager';
-import UserPromptCoinManager from '@/components/admin/UserSubscriptionManager';
+import UserCreditManager from '@/components/admin/UserSubscriptionManager';
 import SettingsManager from '@/components/admin/SettingsManager';
 
 interface Stat {
@@ -290,7 +290,7 @@ export default function AdminDashboardPage() {
       )}
       
       {selectedUser && (
-        <UserPromptCoinManager
+        <UserCreditManager
           user={selectedUser}
           isOpen={showSubscriptionModal}
           onClose={() => {

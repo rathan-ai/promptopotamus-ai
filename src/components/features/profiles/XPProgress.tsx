@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Zap, TrendingUp, Star } from 'lucide-react';
 import { UserExperience, achievementEngine } from '@/lib/achievements';
-import { useUser } from '@/lib/auth';
+import { useUser } from '@/lib/hooks/useUser';
 
 interface XPProgressProps {
   userId?: string;
@@ -37,7 +37,7 @@ export default function XPProgress({
       const xpData = await achievementEngine.getUserExperience(targetUserId);
       setUserXP(xpData);
     } catch (error) {
-      console.error('Error loading user XP:', error);
+      // Error loading user XP
     } finally {
       setLoading(false);
     }

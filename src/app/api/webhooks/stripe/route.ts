@@ -10,7 +10,7 @@ const getStripe = () => {
     throw new Error('STRIPE_SECRET_KEY is not configured');
   }
   return new Stripe(secretKey, {
-    apiVersion: '2024-11-20.acacia'
+    apiVersion: '2025-06-30.basil'
   });
 };
 
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
   // Check for duplicate/replay events using idempotency
   if (isEventProcessed(event.id)) {
-    console.log(`Duplicate Stripe event ${event.id} ignored`);
+    // TODO: Consider adding structured logging for duplicate events in production
     return NextResponse.json({ status: 'duplicate_ignored' });
   }
 
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       p_request_data: { 
         event_type: event.type, 
         event_id: event.id,
-        object_id: event.data.object.id
+        object_id: (event.data.object as any).id
       }
     });
 
@@ -114,7 +114,8 @@ export async function POST(req: Request) {
       }
 
       default:
-        console.log(`Unhandled Stripe event type: ${event.type}`);
+        // TODO: Consider logging unhandled event types to monitoring system
+        break;
     }
 
     // Mark event as successfully processed
@@ -140,60 +141,56 @@ export async function POST(req: Request) {
   }
 }
 
-async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent, supabase: any) {
+async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent, supabase: unknown) {
+  const db = supabase as any;
   const userId = paymentIntent.metadata?.user_id;
-  const promptCoinsData = paymentIntent.metadata?.promptcoins;
-  
-  if (!userId || !promptCoinsData) {
-    throw new Error('Missing user_id or promptcoins metadata');
+  const promptId = paymentIntent.metadata?.prompt_id;
+  const purchaseType = paymentIntent.metadata?.purchase_type || 'smart_prompt';
+
+  if (!userId) {
+    throw new Error('Missing user_id metadata');
   }
 
-  const promptCoins = JSON.parse(promptCoinsData);
-  
-  // Log PromptCoin credit transaction
-  await supabase.rpc('log_promptcoin_transaction', {
-    p_user_id: userId,
-    p_amount: Object.values(promptCoins).reduce((sum: number, val: number) => sum + val, 0),
-    p_transaction_type: 'purchase',
-    p_reference_type: 'stripe_payment',
-    p_reference_id: paymentIntent.id,
-    p_description: `PromptCoins purchased via Stripe payment ${paymentIntent.id}`,
-    p_metadata: { stripe_payment_intent_id: paymentIntent.id }
-  });
+  // Handle smart prompt purchases
+  if (purchaseType === 'smart_prompt' && promptId) {
+    // Create purchase record
+    const { error: purchaseError } = await db
+      .from('smart_prompt_purchases')
+      .insert({
+        prompt_id: promptId,
+        buyer_id: userId,
+        amount_paid: paymentIntent.amount / 100, // Convert from cents to dollars
+        payment_provider: 'stripe',
+        transaction_id: paymentIntent.id
+      });
 
-  // Credit the user's account
-  const updateData: any = {};
-  if (promptCoins.analysis) updateData.credits_analysis = supabase.rpc('coalesce', [supabase.raw('credits_analysis'), 0]) + promptCoins.analysis;
-  if (promptCoins.enhancement) updateData.credits_enhancement = supabase.rpc('coalesce', [supabase.raw('credits_enhancement'), 0]) + promptCoins.enhancement;
-  if (promptCoins.exam) updateData.credits_exam = supabase.rpc('coalesce', [supabase.raw('credits_exam'), 0]) + promptCoins.exam;
-  if (promptCoins.export) updateData.credits_export = supabase.rpc('coalesce', [supabase.raw('credits_export'), 0]) + promptCoins.export;
+    if (purchaseError) {
+      throw new Error(`Failed to record smart prompt purchase: ${purchaseError.message}`);
+    }
 
-  const { error } = await supabase
-    .from('profiles')
-    .update(updateData)
-    .eq('id', userId);
-
-  if (error) {
-    throw new Error(`Failed to update user credits: ${error.message}`);
+    // Update download count
+    await db.rpc('increment_download_count', { p_prompt_id: promptId });
   }
 
-  // Log successful credit
-  await supabase.rpc('log_payment_security_event', {
+  // Log successful payment
+  await db.rpc('log_payment_security_event', {
     p_user_id: userId,
     p_event_type: 'stripe_payment_success',
     p_severity: 'low',
-    p_response_data: { 
+    p_response_data: {
       payment_intent_id: paymentIntent.id,
-      promptcoins_credited: promptCoins,
+      purchase_type: purchaseType,
+      prompt_id: promptId,
       amount: paymentIntent.amount / 100
     }
   });
 }
 
-async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent, supabase: any) {
+async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent, supabase: unknown) {
+  const db = supabase as any;
   const userId = paymentIntent.metadata?.user_id;
   
-  await supabase.rpc('log_payment_security_event', {
+  await db.rpc('log_payment_security_event', {
     p_user_id: userId,
     p_event_type: 'stripe_payment_failed',
     p_severity: 'medium',
@@ -206,22 +203,23 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent, supabas
   });
 }
 
-async function handleInvoicePaymentSuccess(invoice: Stripe.Invoice, supabase: any) {
+async function handleInvoicePaymentSuccess(invoice: Stripe.Invoice, supabase: unknown) {
   // Handle subscription-based payments if needed
-  console.log('Invoice payment succeeded:', invoice.id);
+  // TODO: Implement invoice payment handling logic
 }
 
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription, supabase: any) {
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription, supabase: unknown) {
+  const db = supabase as any;
   const userId = subscription.metadata?.user_id;
   
   if (userId) {
     // Update user payment status
-    await supabase
+    await db
       .from('profiles')
       .update({ payment_status: 'cancelled' })
       .eq('id', userId);
       
-    await supabase.rpc('log_payment_security_event', {
+    await db.rpc('log_payment_security_event', {
       p_user_id: userId,
       p_event_type: 'subscription_cancelled',
       p_severity: 'low',
@@ -230,9 +228,10 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription, supa
   }
 }
 
-async function handleDisputeCreated(dispute: Stripe.Dispute, supabase: any) {
+async function handleDisputeCreated(dispute: Stripe.Dispute, supabase: unknown) {
+  const db = supabase as any;
   // Handle chargebacks/disputes
-  await supabase.rpc('log_payment_security_event', {
+  await db.rpc('log_payment_security_event', {
     p_event_type: 'stripe_dispute_created',
     p_severity: 'high',
     p_error_message: `Dispute created for charge ${dispute.charge}`,

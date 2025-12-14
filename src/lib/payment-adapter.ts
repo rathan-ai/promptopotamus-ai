@@ -81,7 +81,7 @@ class PayPalAdapter implements PaymentAdapter {
       };
 
     } catch (error) {
-      console.error('PayPal payment creation error:', error);
+
       return { success: false, error: 'PayPal payment creation failed' };
     }
   }
@@ -117,7 +117,7 @@ class PayPalAdapter implements PaymentAdapter {
       };
 
     } catch (error) {
-      console.error('PayPal payment confirmation error:', error);
+
       return { success: false, error: 'PayPal payment confirmation failed' };
     }
   }
@@ -163,7 +163,7 @@ class PayPalAdapter implements PaymentAdapter {
       };
 
     } catch (error) {
-      console.error('PayPal refund error:', error);
+
       return { success: false, error: 'PayPal refund failed' };
     }
   }
@@ -190,7 +190,7 @@ class PayPalAdapter implements PaymentAdapter {
       return { status: order.status?.toLowerCase() || 'unknown', details: order };
 
     } catch (error) {
-      console.error('PayPal status check error:', error);
+
       return { status: 'error', details: error };
     }
   }
@@ -214,14 +214,14 @@ class PayPalAdapter implements PaymentAdapter {
       const data = await response.json();
       
       if (!response.ok) {
-        console.error('PayPal token error:', data);
+
         return { success: false };
       }
 
       return { success: true, accessToken: data.access_token };
 
     } catch (error) {
-      console.error('PayPal token request error:', error);
+
       return { success: false };
     }
   }
@@ -234,7 +234,7 @@ class StripeAdapter implements PaymentAdapter {
 
   constructor(credentials: StripeCredentials) {
     this.stripe = new Stripe(credentials.secret_key, {
-      apiVersion: '2024-11-20.acacia'
+      apiVersion: '2025-06-30.basil'
     });
     this.publishableKey = credentials.publishable_key;
   }
@@ -262,12 +262,12 @@ class StripeAdapter implements PaymentAdapter {
       return {
         success: true,
         transactionId: paymentIntent.id,
-        clientSecret: paymentIntent.client_secret,
+        clientSecret: paymentIntent.client_secret || undefined,
         idempotencyKey: idempotencyKey
       };
 
     } catch (error: any) {
-      console.error('Stripe payment creation error:', error);
+
       return { success: false, error: error.message || 'Stripe payment creation failed' };
     }
   }
@@ -284,7 +284,7 @@ class StripeAdapter implements PaymentAdapter {
       };
 
     } catch (error: any) {
-      console.error('Stripe payment confirmation error:', error);
+
       return { success: false, error: error.message || 'Stripe payment confirmation failed' };
     }
   }
@@ -304,7 +304,7 @@ class StripeAdapter implements PaymentAdapter {
       };
 
     } catch (error: any) {
-      console.error('Stripe refund error:', error);
+
       return { success: false, error: error.message || 'Stripe refund failed' };
     }
   }
@@ -316,7 +316,7 @@ class StripeAdapter implements PaymentAdapter {
       return { status: paymentIntent.status, details: paymentIntent };
 
     } catch (error: any) {
-      console.error('Stripe status check error:', error);
+
       return { status: 'error', details: error.message };
     }
   }
@@ -366,7 +366,7 @@ class CustomAPIAdapter implements PaymentAdapter {
       };
 
     } catch (error: any) {
-      console.error('Custom API payment creation error:', error);
+
       return { success: false, error: error.message || 'Custom API payment creation failed' };
     }
   }
@@ -393,7 +393,7 @@ class CustomAPIAdapter implements PaymentAdapter {
       };
 
     } catch (error: any) {
-      console.error('Custom API payment confirmation error:', error);
+
       return { success: false, error: error.message || 'Custom API payment confirmation failed' };
     }
   }
@@ -421,7 +421,7 @@ class CustomAPIAdapter implements PaymentAdapter {
       };
 
     } catch (error: any) {
-      console.error('Custom API refund error:', error);
+
       return { success: false, error: error.message || 'Custom API refund failed' };
     }
   }
@@ -437,7 +437,7 @@ class CustomAPIAdapter implements PaymentAdapter {
       return { status: data.status || 'unknown', details: data };
 
     } catch (error: any) {
-      console.error('Custom API status check error:', error);
+
       return { status: 'error', details: error.message };
     }
   }
@@ -500,7 +500,7 @@ export class UniversalPaymentAdapter {
 
         default:
           // Default to Stripe if provider not recognized
-          console.warn(`Unknown payment provider: ${primaryProvider}. Defaulting to Stripe.`);
+
           providerCredentials = {
             secret_key: process.env.STRIPE_SECRET_KEY || '',
             publishable_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
@@ -516,7 +516,7 @@ export class UniversalPaymentAdapter {
       };
 
     } catch (error) {
-      console.error('Failed to initialize payment adapter:', error);
+
       // Fallback to environment-configured Stripe
       this.adapter = new StripeAdapter({
         secret_key: process.env.STRIPE_SECRET_KEY || '',
@@ -526,7 +526,7 @@ export class UniversalPaymentAdapter {
         id: 'stripe',
         name: 'Stripe',
         enabled: true,
-        credentials: {}
+        credentials: {} as any
       };
     }
   }
@@ -574,6 +574,7 @@ export class UniversalPaymentAdapter {
           enabled: paymentSettings.payment_provider === 'paypal',
           credentials: {
             client_id: paymentSettings.paypal_client_id,
+            client_secret: paymentSettings.paypal_client_secret || '',
             environment: paymentSettings.paypal_environment
           }
         });
@@ -585,6 +586,7 @@ export class UniversalPaymentAdapter {
           name: 'Stripe',
           enabled: paymentSettings.payment_provider === 'stripe',
           credentials: {
+            secret_key: paymentSettings.stripe_secret_key,
             publishable_key: paymentSettings.stripe_publishable_key
           }
         });
@@ -596,7 +598,8 @@ export class UniversalPaymentAdapter {
           name: 'Custom API',
           enabled: paymentSettings.payment_provider === 'custom',
           credentials: {
-            api_endpoint: paymentSettings.custom_api_endpoint
+            api_endpoint: paymentSettings.custom_api_endpoint,
+            api_key: paymentSettings.custom_api_key
           }
         });
       }
@@ -604,7 +607,7 @@ export class UniversalPaymentAdapter {
       return providers;
 
     } catch (error) {
-      console.error('Failed to get available providers:', error);
+
       return [];
     }
   }

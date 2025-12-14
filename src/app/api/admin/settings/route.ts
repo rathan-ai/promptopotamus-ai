@@ -101,7 +101,7 @@ export async function GET(req: Request) {
     }
 
     // Group settings by category for easier frontend handling
-    const groupedSettings: Record<string, any> = {};
+    const groupedSettings: Record<string, Record<string, unknown>> = {};
     settings?.forEach(setting => {
       if (!groupedSettings[setting.category]) {
         groupedSettings[setting.category] = {};
@@ -128,7 +128,7 @@ export async function GET(req: Request) {
       }
       Object.keys(DEFAULT_SETTINGS[cat as keyof typeof DEFAULT_SETTINGS]).forEach(key => {
         if (groupedSettings[cat][key] === undefined) {
-          groupedSettings[cat][key] = (DEFAULT_SETTINGS[cat as keyof typeof DEFAULT_SETTINGS] as any)[key];
+          groupedSettings[cat][key] = (DEFAULT_SETTINGS[cat as keyof typeof DEFAULT_SETTINGS] as Record<string, unknown>)[key];
         }
       });
     });
@@ -174,7 +174,7 @@ export async function PUT(req: Request) {
       }, { status: 400 });
     }
 
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       value: typeof value === 'object' ? value : JSON.parse(JSON.stringify(value)),
       updated_at: new Date().toISOString(),
       updated_by: user.id

@@ -88,22 +88,22 @@ export default function TermsOfService() {
           
           <div className="space-y-4">
             <div>
-              <h3 className="text-h4 text-neutral-900 dark:text-white mb-3">PromptCoins</h3>
+              <h3 className="text-h4 text-neutral-900 dark:text-white mb-3">Digital Products</h3>
               <p className="text-body text-neutral-600 dark:text-neutral-400">
-                Our platform uses a credit-based system called PromptCoins. By purchasing PromptCoins, you agree that:
+                Our platform offers digital products including Smart Recipes, templates, and certification exams. By purchasing, you agree that:
               </p>
               <ul className="list-disc list-inside space-y-2 text-neutral-600 dark:text-neutral-400 mt-2">
                 <li>All purchases are final and non-refundable</li>
-                <li>PromptCoins have no cash value and cannot be transferred</li>
+                <li>Digital products are for personal use and cannot be transferred</li>
                 <li>We may change pricing with notice</li>
-                <li>Unused credits do not expire</li>
+                <li>Purchased products remain accessible indefinitely</li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-h4 text-neutral-900 dark:text-white mb-3">Refund Policy</h3>
               <p className="text-body text-neutral-600 dark:text-neutral-400">
-                All PromptCoin purchases are final. We do not offer refunds under any circumstances. 
+                All digital product purchases are final. We do not offer refunds under any circumstances.
                 Please carefully consider your needs before making a purchase.
               </p>
             </div>

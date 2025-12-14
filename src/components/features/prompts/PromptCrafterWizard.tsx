@@ -75,8 +75,6 @@ type OutputFormat =
 interface PromptCrafterWizardProps {
   onComplete?: (prompt: string, metadata: any) => void;
   onCancel?: () => void;
-  promptCoins: number;
-  onUseCoins: (amount: number) => void;
 }
 
 interface WizardState {
@@ -294,9 +292,7 @@ const OUTPUT_FORMATS: Record<OutputFormat, {
 
 export default function PromptCrafterWizard({
   onComplete,
-  onCancel,
-  promptCoins,
-  onUseCoins
+  onCancel
 }: PromptCrafterWizardProps) {
   const [wizardState, setWizardState] = useState<WizardState>({
     stage: 0,
@@ -324,13 +320,7 @@ export default function PromptCrafterWizard({
   };
 
   const analyzeAndRecommend = async () => {
-    if (promptCoins < 10) {
-      toast.error('Not enough PromptCoins for framework analysis (10 PC required)');
-      return;
-    }
-    
     setIsAnalyzing(true);
-    onUseCoins(10);
     
     // Simulate AI analysis - in production, this would call an API
     setTimeout(() => {
@@ -346,8 +336,8 @@ export default function PromptCrafterWizard({
       setIsAnalyzing(false);
       
       track('prompt_crafter_stage1_analysis', {
-        framework: recommendedFramework,
-        model: recommendedModel.id
+        framework: recommendedFramework || 'none',
+        model: recommendedModel?.id || 'none'
       });
     }, 2000);
   };
@@ -399,13 +389,6 @@ export default function PromptCrafterWizard({
   };
 
   const generateFinalPrompt = () => {
-    if (promptCoins < 15) {
-      toast.error('Not enough PromptCoins for final generation (15 PC required)');
-      return;
-    }
-    
-    onUseCoins(15);
-    
     const { idea, preferences, framework, model, outputFormat, customFormat } = wizardState;
     
     // Build the final prompt following Prompt Crafter requirements
@@ -460,9 +443,9 @@ export default function PromptCrafterWizard({
     setWizardState(prev => ({ ...prev, finalPrompt: prompt, stage: 3 }));
     
     track('prompt_crafter_complete', {
-      framework: framework,
-      model: model?.id,
-      output_format: outputFormat,
+      framework: framework || 'none',
+      model: model?.id || 'none',
+      output_format: outputFormat || 'none',
       prompt_length: prompt.length
     });
   };
@@ -920,7 +903,7 @@ export default function PromptCrafterWizard({
             className="bg-gradient-to-r from-emerald-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
           >
             <Wand2 className="w-4 h-4 mr-2" />
-            Generate Prompt (15 PC)
+            Generate Prompt
           </Button>
         </div>
       </div>
@@ -952,8 +935,8 @@ export default function PromptCrafterWizard({
                 navigator.clipboard.writeText(wizardState.finalPrompt!);
                 toast.success('Prompt copied to clipboard!');
                 track('prompt_crafter_copy', {
-                  framework: wizardState.framework,
-                  model: wizardState.model?.id
+                  framework: wizardState.framework || 'none',
+                  model: wizardState.model?.id || 'none'
                 });
               }}
             >
@@ -1083,18 +1066,6 @@ export default function PromptCrafterWizard({
       
       {/* Stage Content */}
       {renderCurrentStage()}
-      
-      {/* PromptCoin Status */}
-      <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
-        <div className="flex items-center justify-between text-sm">
-          <div className="text-neutral-600 dark:text-neutral-400">
-            PromptCoins Available: {promptCoins}
-          </div>
-          <div className="text-neutral-500 dark:text-neutral-500">
-            Cost: Stage 1 (10 PC) • Stage 3 (15 PC)
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

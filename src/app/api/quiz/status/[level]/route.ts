@@ -6,9 +6,8 @@ import { canTakeLevel, countConsecutiveFailures, getRecommendedLevelAfterFailure
 const ATTEMPTS_PER_BLOCK = 3;
 const COOLDOWN_DAYS = 9;
 
-// The change is in the function signature below
-export async function GET(req: NextRequest, { params: paramsPromise }: { params: Promise<{ level: QuizLevel }> }) {
-    const params = await paramsPromise; // Await the promise to get the params object
+export async function GET(req: NextRequest, { params }: { params: Promise<{ level: QuizLevel }> }) {
+    const resolvedParams = await params;
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -16,7 +15,7 @@ export async function GET(req: NextRequest, { params: paramsPromise }: { params:
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { level } = params; // Use the resolved params
+    const { level } = resolvedParams;
     const certSlug = levelSlugs[level];
 
     // Get all user certificates and attempts for prerequisite checking

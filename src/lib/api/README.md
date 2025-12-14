@@ -284,7 +284,7 @@ import { ErrorCodes } from '@/lib/api/response';
 if (!hasCredits) {
   return errorResponse({
     code: ErrorCodes.INSUFFICIENT_CREDITS,
-    message: 'Not enough PromptCoins',
+    message: 'Not enough credits',
     statusCode: 402
   });
 }

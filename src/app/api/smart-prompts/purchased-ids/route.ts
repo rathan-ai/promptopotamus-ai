@@ -22,7 +22,7 @@ export async function GET() {
     }
 
     const ids = purchasedIds?.map(p => p.prompt_id) || [];
-    console.log('User purchased prompt IDs:', ids);
+    // TODO: Consider structured logging for purchased prompt metrics
     
     return NextResponse.json({ purchasedIds: ids });
   } catch (error) {
