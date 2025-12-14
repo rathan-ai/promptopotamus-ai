@@ -5,23 +5,19 @@ import { QUIZ_CONFIG } from '@/config/constants';
 import { FEATURE_PRICING } from '@/features/payments/services/payment-constants';
 import { shuffleQuestions, randomizeQuizQuestions, type QuizQuestion } from '@/lib/quiz-randomization';
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ level: QuizLevel }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ level: string }> }) {
     try {
         const resolvedParams = await params;
-        // TODO: Consider structured logging for quiz API requests
-        // TODO: Consider structured logging for quiz parameters
-        
+        const level = resolvedParams.level as QuizLevel;
+
         const supabase = await createServerClient();
         const { data: { user } } = await supabase.auth.getUser();
-        // TODO: Consider structured logging for user authentication status
 
         if (!user) {
-            // TODO: Consider security logging for unauthorized quiz attempts
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         // Check user's exam credits
-        // TODO: Consider structured logging for profile checks
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select(`
@@ -34,24 +30,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ leve
             .single();
 
         if (profileError) {
-            // TODO: Consider structured logging for profile errors
             return NextResponse.json({ error: 'Failed to check your balance' }, { status: 500 });
         }
 
-        const currentBalance = (profile?.credits_analysis || 0) + 
-                              (profile?.credits_enhancement || 0) + 
-                              (profile?.credits_exam || 0) + 
+        const currentBalance = (profile?.credits_analysis || 0) +
+                              (profile?.credits_enhancement || 0) +
+                              (profile?.credits_exam || 0) +
                               (profile?.credits_export || 0);
 
         // Exam credit deduction is handled by the payment system
         // Free exam attempts are allowed for testing
-        // TODO: Consider structured logging for exam start events with user metrics
-        
-        // TODO: Consider structured logging for quiz question fetching
+
         const { data: allQuestions, error } = await supabase
             .from('quizzes')
             .select('id, question, options, answer')
-            .eq('difficulty', resolvedParams.level);
+            .eq('difficulty', level);
 
         // TODO: Consider structured logging for quiz query results
 

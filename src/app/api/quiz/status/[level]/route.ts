@@ -6,16 +6,16 @@ import { canTakeLevel, countConsecutiveFailures, getRecommendedLevelAfterFailure
 const ATTEMPTS_PER_BLOCK = 3;
 const COOLDOWN_DAYS = 9;
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ level: QuizLevel }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ level: string }> }) {
     const resolvedParams = await params;
+    const level = resolvedParams.level as QuizLevel;
+
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const { level } = resolvedParams;
     const certSlug = levelSlugs[level];
 
     // Get all user certificates and attempts for prerequisite checking

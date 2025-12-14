@@ -6,16 +6,16 @@ import { shuffleQuestions, randomizeQuizQuestions, type QuizQuestion } from '@/l
 const QUIZ_LENGTH = 25;
 const TIME_LIMIT_IN_MINUTES = 25;
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ level: QuizLevel }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ level: string }> }) {
     const resolvedParams = await params;
+    const level = resolvedParams.level as QuizLevel;
+
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
-    const { level } = resolvedParams;
     
     const { data: allQuestions, error } = await supabase
         .from('quizzes')
