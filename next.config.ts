@@ -28,75 +28,9 @@ const nextConfig: NextConfig = {
     ]
   },
   
-  // Bundle optimization
-  webpack: (config, { dev, isServer }) => {
-    // Optimize bundle splitting for better caching
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        maxAsyncRequests: 30,
-        maxInitialRequests: 30,
-        cacheGroups: {
-          // Core React libraries - highest priority
-          react: {
-            test: /[\\/]node_modules[\\/](react|react-dom|react-hot-toast|jotai)[\\/]/,
-            name: 'react-core',
-            chunks: 'all',
-            priority: 40,
-            enforce: true,
-          },
-          // Supabase SDK - separate chunk for auth/db
-          supabase: {
-            test: /[\\/]node_modules[\\/](@supabase)[\\/]/,
-            name: 'supabase',
-            chunks: 'all',
-            priority: 30,
-            enforce: true,
-          },
-          // Payment SDKs - load on demand
-          stripe: {
-            test: /[\\/]node_modules[\\/](@stripe|stripe)[\\/]/,
-            name: 'stripe',
-            chunks: 'async',
-            priority: 25,
-            enforce: true,
-          },
-          paypal: {
-            test: /[\\/]node_modules[\\/](@paypal)[\\/]/,
-            name: 'paypal',
-            chunks: 'async',
-            priority: 25,
-            enforce: true,
-          },
-          // AI SDKs - load on demand
-          ai: {
-            test: /[\\/]node_modules[\\/](@anthropic-ai|@vercel[\\/]ai)[\\/]/,
-            name: 'ai-sdk',
-            chunks: 'async',
-            priority: 20,
-            enforce: true,
-          },
-          // UI libraries
-          ui: {
-            test: /[\\/]node_modules[\\/](lucide-react|@radix-ui|class-variance-authority|clsx|tailwind-merge)[\\/]/,
-            name: 'ui-libs',
-            chunks: 'all',
-            priority: 15,
-            enforce: true,
-          },
-          // Other vendor libraries
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
-            enforce: true,
-          }
-        }
-      };
-    }
-
-    // Optimize imports
+  // Bundle optimization - use Next.js defaults for reliable chunk splitting
+  webpack: (config, { isServer }) => {
+    // Only add path alias, let Next.js handle chunk splitting
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': require('path').resolve(__dirname, 'src'),
