@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { Home, BookOpen, ShoppingCart, Award, Settings, User, LogOut, BarChart3, Wand2, Search, FileText, DollarSign, Globe, Shield } from 'lucide-react';
-import { isAdmin } from '@/lib/auth';
+import { useAuth } from '@/contexts/AuthContext';
+import { Home, BookOpen, ShoppingCart, Award, User, LogOut, BarChart3, Wand2, FileText, Globe, Shield } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -17,39 +15,7 @@ interface NavItem {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
-  const [isAdminUser, setIsAdminUser] = useState(false);
-  const supabase = createClient();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      // Check if user is admin
-      if (user) {
-        const adminStatus = await isAdmin(supabase);
-        setIsAdminUser(adminStatus);
-      } else {
-        setIsAdminUser(false);
-      }
-    };
-    fetchUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
-      
-      // Check admin status on auth state change
-      if (session?.user) {
-        const adminStatus = await isAdmin(supabase);
-        setIsAdminUser(adminStatus);
-      } else {
-        setIsAdminUser(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+  const { user, isAdmin, signOut } = useAuth();
 
   const navItems: NavItem[] = [
     {
@@ -96,9 +62,9 @@ export default function Sidebar() {
       icon: <BarChart3 className="w-4 h-4" />
     }
   ];
-  
+
   // Add admin dashboard after personal dashboard if user is admin
-  if (isAdminUser) {
+  if (isAdmin) {
     navItems.splice(2, 0, {
       label: 'Admin Panel',
       href: '/admin',
@@ -109,11 +75,6 @@ export default function Sidebar() {
 
   // Filter nav items based on authentication status
   const visibleNavItems = navItems.filter(item => !item.requiresAuth || user);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/';
-  };
 
   return (
     <>
@@ -154,7 +115,7 @@ export default function Sidebar() {
               </div>
             </div>
             <button
-              onClick={handleSignOut}
+              onClick={signOut}
               className="btn btn-secondary w-full"
             >
               <LogOut className="w-4 h-4 mr-2" />
