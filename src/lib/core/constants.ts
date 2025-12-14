@@ -31,11 +31,6 @@ export const ROUTES = {
   CERTIFICATES: '/certificates',
   RESOURCES: '/resources',
   
-  // Purchase routes
-  PURCHASE: '/purchase',
-  PURCHASE_SUCCESS: '/purchase/success',
-  PURCHASE_CANCEL: '/purchase/cancel',
-  
   // Help routes
   REFUND_POLICY: '/refund-policy',
   

@@ -16,7 +16,7 @@ const CRITICAL_ROUTES: PreloadConfig[] = [
   { route: '/smart-prompts', priority: 'high' },
   { route: '/certificates', priority: 'medium' },
   { route: '/login', priority: 'medium', condition: () => !document.cookie.includes('supabase-auth-token') },
-  { route: '/purchase', priority: 'low' }
+  { route: '/resources', priority: 'low' }
 ];
 
 /**
