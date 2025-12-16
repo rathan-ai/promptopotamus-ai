@@ -4,7 +4,52 @@ import { BookOpen, Wand2 } from "lucide-react";
 import Introduction from "@/components/guides/Introduction";
 import HowItWorks from "@/components/features/shared/HowItWorks";
 import FeaturedPromptsShowcase from "@/components/features/prompts/FeaturedPromptsShowcase";
+import PromptOfTheDay from "@/components/features/prompts/PromptOfTheDay";
 import { createServerClient } from '@/lib/supabase/server';
+
+// Fetch Prompt of the Day server-side
+async function getPromptOfTheDay() {
+  const supabase = await createServerClient();
+
+  // Get today's date info
+  const today = new Date();
+  const dateString = today.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+
+  // Fetch quality prompts
+  const { data: qualityPrompts } = await supabase
+    .from('saved_prompts')
+    .select(`
+      id,
+      title,
+      description,
+      category,
+      complexity_level,
+      difficulty_level,
+      price,
+      downloads_count,
+      rating_average,
+      rating_count
+    `)
+    .eq('is_marketplace', true)
+    .eq('is_public', true)
+    .order('rating_average', { ascending: false, nullsFirst: false })
+    .order('downloads_count', { ascending: false, nullsFirst: false })
+    .limit(100);
+
+  if (!qualityPrompts || qualityPrompts.length === 0) {
+    return { prompt: null, dateString };
+  }
+
+  // Deterministically select based on day of year
+  const selectedIndex = dayOfYear % qualityPrompts.length;
+  return { prompt: qualityPrompts[selectedIndex], dateString };
+}
 
 // Fetch featured prompts data server-side
 async function getFeaturedPromptsData() {
@@ -121,8 +166,11 @@ async function getFeaturedPromptsData() {
 }
 
 export default async function HomePage() {
-  // Fetch data server-side - no loading state needed, renders instantly
-  const featuredData = await getFeaturedPromptsData();
+  // Fetch data server-side in parallel - no loading state needed, renders instantly
+  const [featuredData, promptOfTheDay] = await Promise.all([
+    getFeaturedPromptsData(),
+    getPromptOfTheDay()
+  ]);
 
   return (
     <div className="space-y-12">
@@ -140,6 +188,16 @@ export default async function HomePage() {
           </Link>
         </div>
       </div>
+
+      {/* Prompt of the Day - Featured prominently */}
+      {promptOfTheDay.prompt && (
+        <div className="max-w-5xl mx-auto px-4">
+          <PromptOfTheDay
+            prompt={promptOfTheDay.prompt}
+            dateString={promptOfTheDay.dateString}
+          />
+        </div>
+      )}
 
       {/* Featured Prompts Marketplace - data passed as prop */}
       <FeaturedPromptsShowcase initialData={featuredData} />

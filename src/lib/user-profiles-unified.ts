@@ -3,7 +3,11 @@ import { createServerClient } from '@/lib/supabase/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logger } from '@/lib/logger';
 
-export interface UserProfile {
+/**
+ * User social profile - extended profile for social features
+ * Maps to user_profiles_extended table
+ */
+export interface UserSocialProfile {
   id: string;
   user_id: string;
   bio?: string;
@@ -22,6 +26,9 @@ export interface UserProfile {
     role: string;
   };
 }
+
+/** @deprecated Use UserSocialProfile instead */
+export type UserProfile = UserSocialProfile;
 
 export interface UserFollow {
   id: string;

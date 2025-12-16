@@ -320,11 +320,38 @@ export class EmailTriggerSystem {
           dashboard_link: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
         }
       );
-      
+
       // TODO: Consider structured logging for onboarding email events
-      
+
     } catch (error) {
       // TODO: Consider structured logging for onboarding email trigger errors
+    }
+  }
+
+  /**
+   * Trigger onboarding day 7 email (for users who haven't created a prompt yet)
+   */
+  static async triggerOnboardingDay7Email(userId: string, userName: string, hasPrompts: boolean) {
+    try {
+      // Skip if user has already created prompts
+      if (hasPrompts) {
+        return;
+      }
+
+      await serverEmailAutomation.sendCampaignEmail(
+        userId,
+        'onboarding_day_7',
+        {
+          user_name: userName,
+          create_prompt_link: `${process.env.NEXT_PUBLIC_SITE_URL}/smart-prompts/builder`,
+          marketplace_link: `${process.env.NEXT_PUBLIC_SITE_URL}/smart-prompts`,
+          dashboard_link: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
+          success_stories_link: `${process.env.NEXT_PUBLIC_SITE_URL}/resources`
+        }
+      );
+
+    } catch (error) {
+      // TODO: Consider structured logging for onboarding day 7 email trigger errors
     }
   }
 }
@@ -355,3 +382,4 @@ export const triggerAchievementEarnedEmail = EmailTriggerSystem.triggerAchieveme
 // Re-engagement triggers
 export const triggerReEngagementEmail = EmailTriggerSystem.triggerReEngagementEmail;
 export const triggerOnboardingDay3Email = EmailTriggerSystem.triggerOnboardingDay3Email;
+export const triggerOnboardingDay7Email = EmailTriggerSystem.triggerOnboardingDay7Email;

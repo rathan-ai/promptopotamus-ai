@@ -3,11 +3,17 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import type { DatabaseProfile } from '@/shared/types';
 
-interface UserProfile {
+/**
+ * User auth profile - basic profile info from profiles table
+ * Used by useUser hook for auth context
+ */
+interface UserAuthProfile {
   id: string;
   email: string;
   name: string;
+  full_name?: string;
   role: string;
   created_at: string;
   updated_at: string;
@@ -15,7 +21,7 @@ interface UserProfile {
 
 interface UseUserReturn {
   user: User | null;
-  profile: UserProfile | null;
+  profile: UserAuthProfile | null;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -23,7 +29,7 @@ interface UseUserReturn {
 
 export function useUser(): UseUserReturn {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<UserAuthProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 

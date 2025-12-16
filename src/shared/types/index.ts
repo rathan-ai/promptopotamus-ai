@@ -3,10 +3,41 @@
 // User and Authentication Types
 export type UserType = 'free' | 'paid';
 export type PaymentStatus = 'none' | 'active' | 'cancelled';
+export type UserRole = 'user' | 'admin' | 'pro' | 'premium';
 
-export interface UserProfile {
+/**
+ * User subscription/payment status - used for billing state
+ */
+export interface UserSubscriptionStatus {
   type: UserType;
   paymentStatus: PaymentStatus;
+}
+
+/** @deprecated Use UserSubscriptionStatus instead */
+export type UserProfile = UserSubscriptionStatus;
+
+/**
+ * Database profile - comprehensive type for profiles table
+ */
+export interface DatabaseProfile {
+  id: string;
+  email: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  role: UserRole;
+  age?: number;
+  gender?: string;
+  region?: string;
+  education?: string;
+  payment_status?: PaymentStatus;
+  subscription_tier?: 'free' | 'pro' | 'premium';
+  subscription_status?: 'active' | 'cancelled' | 'expired' | 'inactive';
+  subscription_start_date?: string;
+  subscription_end_date?: string;
+  purchased_attempts?: number;
+  created_at: string;
+  updated_at?: string;
 }
 
 // Prompt and Smart Prompts Types
@@ -21,6 +52,7 @@ export interface Variable {
 
 export interface SmartPrompt {
   id: number;
+  user_id: string;
   title: string;
   description: string;
   prompt_text: string;
@@ -36,7 +68,10 @@ export interface SmartPrompt {
   ai_model_compatibility: string[];
   variables: Variable[];
   example_inputs: Record<string, string>;
+  is_marketplace: boolean;
+  is_public: boolean;
   created_at: string;
+  updated_at?: string;
   profiles?: { full_name: string };
 }
 
