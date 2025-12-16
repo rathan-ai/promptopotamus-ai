@@ -46,6 +46,9 @@ export default function DashboardPage() {
   const supabase = createClient();
 
   useEffect(() => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
     const fetchData = async () => {
       try {
         // Get current user
@@ -56,9 +59,18 @@ export default function DashboardPage() {
           setLoading(false);
           return;
         }
-        
+
+        if (!authUser) {
+          console.log('No authenticated user found');
+          setLoading(false);
+          return;
+        }
+
         // Fetch dashboard data
-        const res = await fetch('/api/profiles/dashboard');
+        const res = await fetch('/api/profiles/dashboard', {
+          signal: controller.signal
+        });
+
         if (res.ok) {
           const response = await res.json();
           // Handle new API response format
@@ -67,20 +79,32 @@ export default function DashboardPage() {
           setProfile(dashboardData.profile);
         } else {
           const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('Dashboard API error:', res.status, errorData);
           toast.error(errorData.error || 'Could not load your dashboard data.');
         }
 
         // Note: Seller data is now fetched by UserSmartPromptsManager component
         // to avoid duplicate API calls
       } catch (error) {
-        console.error('Dashboard fetch error:', error);
-        toast.error('Network error loading dashboard. Please check your connection.');
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.error('Dashboard request timed out');
+          toast.error('Request timed out. Please refresh the page.');
+        } else {
+          console.error('Dashboard fetch error:', error);
+          toast.error('Network error loading dashboard. Please check your connection.');
+        }
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
     };
 
     fetchData();
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [supabase.auth]);
 
   const getProfileCompletion = () => {
