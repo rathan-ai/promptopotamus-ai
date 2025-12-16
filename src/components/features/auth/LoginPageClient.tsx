@@ -7,7 +7,6 @@ import { toast } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import ForgotPasswordModal from './ForgotPasswordModal';
-import { triggerWelcomeEmail } from '@/lib/email-triggers';
 
 export function LoginPageClient() {
   const supabase = createClient();
