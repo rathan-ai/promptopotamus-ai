@@ -16,7 +16,8 @@ interface CertificationProgressProps {
 
 const CERTIFICATION_LEVELS = [
   {
-    slug: 'beginner',
+    slug: 'promptling',
+    quizSlug: 'beginner',
     name: 'Promptling',
     description: 'Foundation in prompt engineering',
     icon: '🌱',
@@ -24,7 +25,8 @@ const CERTIFICATION_LEVELS = [
     bgGradient: 'from-emerald-500 to-teal-500',
   },
   {
-    slug: 'intermediate',
+    slug: 'promptosaur',
+    quizSlug: 'intermediate',
     name: 'Promptosaur',
     description: 'Advanced prompt techniques',
     icon: '🦕',
@@ -32,7 +34,8 @@ const CERTIFICATION_LEVELS = [
     bgGradient: 'from-blue-500 to-indigo-500',
   },
   {
-    slug: 'master',
+    slug: 'promptopotamus',
+    quizSlug: 'master',
     name: 'Promptopotamus',
     description: 'Master prompt engineer',
     icon: '🦛',
@@ -155,7 +158,7 @@ export default function CertificationProgress({ certificates }: CertificationPro
                         Complete previous first
                       </span>
                     ) : (
-                      <Link href={`/certificates/${level.slug}`}>
+                      <Link href={`/certificates/${level.quizSlug}`}>
                         <button className="btn btn-sm btn-primary flex items-center gap-1">
                           Start Quiz
                           <ArrowRight className="w-4 h-4" />
