@@ -2,7 +2,6 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { triggerWelcomeEmail } from '@/lib/email-triggers';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -28,26 +27,8 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (!error && data.user) {
-      // Check if this is a new user (created within the last 5 minutes)
-      const userCreatedAt = new Date(data.user.created_at);
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-      const isNewUser = userCreatedAt > fiveMinutesAgo;
-
-      if (isNewUser) {
-        // Trigger welcome email for new users (fire and forget)
-        const userName = data.user.user_metadata?.full_name ||
-                        data.user.user_metadata?.name ||
-                        data.user.email?.split('@')[0] ||
-                        'there';
-
-        triggerWelcomeEmail(data.user.id, userName).catch(() => {
-          // Silently fail - don't block auth flow for email issues
-        });
-      }
-
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
       return NextResponse.redirect(origin);
     }
   }
