@@ -49,50 +49,72 @@ export default function DashboardPage() {
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
     const fetchData = async () => {
+      console.log('[Dashboard Debug] Step 1: fetchData started');
       try {
         // Get current user
+        console.log('[Dashboard Debug] Step 2: Calling supabase.auth.getUser()');
         const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
+        console.log('[Dashboard Debug] Step 3: getUser result:', {
+          hasUser: !!authUser,
+          userId: authUser?.id,
+          userError: userError?.message
+        });
+
         if (userError) {
-          console.error('Auth error:', userError);
+          console.error('[Dashboard Debug] Auth error:', userError);
           toast.error('Authentication error. Please refresh the page.');
           setLoading(false);
           return;
         }
 
         if (!authUser) {
-          console.log('No authenticated user found');
+          console.log('[Dashboard Debug] No authenticated user - stopping');
           setLoading(false);
           return;
         }
 
         // Fetch dashboard data
+        console.log('[Dashboard Debug] Step 4: Fetching /api/profiles/dashboard');
         const res = await fetch('/api/profiles/dashboard', {
           signal: controller.signal
         });
+        console.log('[Dashboard Debug] Step 5: API response status:', res.status);
 
         if (res.ok) {
+          console.log('[Dashboard Debug] Step 6: Parsing JSON response');
           const response = await res.json();
+          console.log('[Dashboard Debug] Step 7: API response data:', {
+            success: response.success,
+            hasData: !!response.data,
+            hasProfile: !!response.data?.profile,
+            promptsCount: response.data?.prompts?.length,
+            attemptsCount: response.data?.attempts?.length,
+            certificatesCount: response.data?.certificates?.length
+          });
           // Handle new API response format
           const dashboardData = response.success ? response.data : response;
           setData(dashboardData);
           setProfile(dashboardData.profile);
+          console.log('[Dashboard Debug] Step 8: State updated with data');
         } else {
           const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
-          console.error('Dashboard API error:', res.status, errorData);
+          console.error('[Dashboard Debug] API error:', res.status, errorData);
           toast.error(errorData.error || 'Could not load your dashboard data.');
         }
 
         // Note: Seller data is now fetched by UserSmartPromptsManager component
         // to avoid duplicate API calls
       } catch (error) {
+        console.error('[Dashboard Debug] Catch block error:', error);
         if (error instanceof Error && error.name === 'AbortError') {
-          console.error('Dashboard request timed out');
+          console.error('[Dashboard Debug] Request timed out');
           toast.error('Request timed out. Please refresh the page.');
         } else {
-          console.error('Dashboard fetch error:', error);
+          console.error('[Dashboard Debug] Network/fetch error:', error);
           toast.error('Network error loading dashboard. Please check your connection.');
         }
       } finally {
+        console.log('[Dashboard Debug] Step 9: Finally block - setting loading to false');
         clearTimeout(timeoutId);
         setLoading(false);
       }
